@@ -1,7 +1,6 @@
 using System;
 using Godot;
 using Godot.Collections;
-using LDtkImport.Utils;
 
 namespace LDtkImport.Importers
 {
@@ -45,7 +44,7 @@ namespace LDtkImport.Importers
 
             foreach (Node child in sceneNode.GetChildren())
             {
-                child.SetOwnerRecursive(sceneNode);
+                SetOwnerRecursive(child, sceneNode);
             }
 
             var packedScene = new PackedScene();
@@ -57,6 +56,16 @@ namespace LDtkImport.Importers
             }
 
             return ResourceSaver.Save($"{ImportContext.SavePath}.{GetSaveExtension()}", packedScene);
+        }
+
+        private static void SetOwnerRecursive(Node node, Node owner)
+        {
+            node.Owner = owner;
+
+            foreach (Node child in node.GetChildren())
+            {
+                SetOwnerRecursive(child, owner);
+            }
         }
     }
 }
