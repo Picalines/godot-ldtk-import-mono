@@ -1,0 +1,8 @@
+.vscode/
+
+.import/
+*.import
+.mono/
+
+default_env.tres
+icon.png

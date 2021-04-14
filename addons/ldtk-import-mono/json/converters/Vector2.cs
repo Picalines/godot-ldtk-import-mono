@@ -1,0 +1,30 @@
+using System;
+using Godot;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace LDtkImport.Json.Converters
+{
+    public class Vector2Converter : JsonConverter<Vector2>
+    {
+        public override Vector2 ReadJson(JsonReader reader, Type objectType, Vector2 existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            var jArray = JArray.Load(reader);
+
+            if (jArray.Count != 2)
+            {
+                throw new Exception($"{nameof(Vector2)} json array contains {jArray.Count} elements ({reader.Path})");
+            }
+
+            return new Vector2(
+                jArray[0].ToObject<float>(),
+                jArray[1].ToObject<float>()
+            );
+        }
+
+        public override void WriteJson(JsonWriter writer, Vector2 value, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
