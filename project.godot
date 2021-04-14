@@ -16,5 +16,13 @@ _global_script_class_icons={
 [application]
 
 config/name="godot-ldtk-import-mono"
-run/main_scene="reconfig/icon="res://icon.png"
-t/default_environment="res://default_env.tres"
+run/main_scene="res://test/Main.tscn"
+config/icon="res://icon.png"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "ldtk-import-mono" )
+
+[rendering]
+
+environment/default_environment="res://default_env.tres"

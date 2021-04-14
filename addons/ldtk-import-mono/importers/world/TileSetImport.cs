@@ -63,7 +63,7 @@ namespace LDtkImport.Importers
 
         private static Rect2 GetTileRegion(int tileId, WorldJson.TileSetDef tileSetJson)
         {
-            var pixelTile = CoordUtils.TileIdToPxCoords(tileId, tileSetJson);
+            var pixelTile = TileCoord.IdToPx(tileId, tileSetJson);
             return new Rect2(pixelTile, tileSetJson.TileGridSizeV);
         }
     }

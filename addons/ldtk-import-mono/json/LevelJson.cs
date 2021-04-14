@@ -68,15 +68,6 @@ namespace LDtkImport.Json
             public string Dir { get; private set; }
         }
 
-        public class IntGridValue
-        {
-            [JsonProperty("coordId")]
-            public int CoordId { get; private set; }
-
-            [JsonProperty("v")]
-            public int GridValue { get; private set; }
-        }
-
         public class EntityTile
         {
             [JsonProperty("tilesetUid")]
@@ -87,7 +78,7 @@ namespace LDtkImport.Json
             public Rect2 SrcRect { get; private set; }
         }
 
-        public class AutoLayerTile
+        public class TileInstance
         {
             [JsonProperty("px")]
             [JsonConverter(typeof(Vector2Converter))]
@@ -101,7 +92,7 @@ namespace LDtkImport.Json
             public int FlipBits { get; private set; }
 
             [JsonProperty("t")]
-            public int TileId { get; private set; }
+            public int Id { get; private set; }
 
             [JsonProperty("d")]
             public IReadOnlyList<int> InternalEditorData { get; private set; }
@@ -200,20 +191,20 @@ namespace LDtkImport.Json
 
             public Vector2 PxOffset { get; private set; }
 
-            [JsonProperty("intGrid")]
-            public IReadOnlyList<IntGridValue> IntGrid { get; private set; }
+            [JsonProperty("intGridCsv")]
+            public IReadOnlyList<int>? IntGrid { get; private set; }
 
             [JsonProperty("autoLayerTiles")]
-            public IReadOnlyList<AutoLayerTile> AutoLayerTiles { get; private set; }
+            public IReadOnlyList<TileInstance>? AutoLayerTiles { get; private set; }
 
             [JsonProperty("seed")]
             public int Seed { get; private set; }
 
             [JsonProperty("gridTiles")]
-            public IReadOnlyList<object> GridTiles { get; private set; }
+            public IReadOnlyList<TileInstance>? GridTiles { get; private set; }
 
             [JsonProperty("entityInstances")]
-            public IReadOnlyList<EntityInstance> EntityInstances { get; private set; }
+            public IReadOnlyList<EntityInstance>? EntityInstances { get; private set; }
 
             [OnDeserialized]
             private void Init(StreamingContext context)

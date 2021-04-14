@@ -26,29 +26,46 @@ namespace LDtkImport.Importers
                 Modulate = new Color(1, 1, 1, layer.Opacity),
             };
 
-            foreach (var tile in layer.AutoLayerTiles)
+            SetTiles(layer, tileMap);
+
+            if (layer.IntGrid is not null)
+            {
+                AddIntGrid(layer, tileMap);
+            }
+
+            return tileMap;
+        }
+
+        private static void SetTiles(LevelJson.LayerInstance layer, TileMap tileMap)
+        {
+            int coordIdIndex = layer.AutoLayerTiles is null ? 0 : 1;
+
+            foreach (var tile in layer.AutoLayerTiles ?? layer.GridTiles!)
             {
                 bool flipX = System.Convert.ToBoolean(tile.FlipBits & 1);
                 bool flipY = System.Convert.ToBoolean(tile.FlipBits & 2);
-                Vector2 gridCoords = CoordUtils.CoordIdToGridCoords(tile.InternalEditorData[1], layer.CellsWidth);
-                tileMap.SetCellv(gridCoords, tile.TileId, flipX, flipY);
+                Vector2 gridCoords = TileCoord.IdToGrid(tile.InternalEditorData[coordIdIndex], layer.CellsWidth);
+                tileMap.SetCellv(gridCoords, tile.Id, flipX, flipY);
             }
+        }
 
+        private static void AddIntGrid(LevelJson.LayerInstance layer, TileMap tileMap)
+        {
             TileMap intMap = new()
             {
                 Name = "IntGrid",
                 CellSize = tileMap.CellSize,
             };
 
-            foreach (var gridValue in layer.IntGrid)
+            var gridWithIds = layer.IntGrid!.Select((value, id) => new { id, value });
+
+            foreach (var p in gridWithIds.Where(p => p.value > 0))
             {
-                var gridCoords = CoordUtils.CoordIdToGridCoords(gridValue.CoordId, layer.CellsWidth);
-                intMap.SetCellv(gridCoords, gridValue.GridValue);
+                var gridCoords = TileCoord.IdToGrid(p.id, layer.CellsWidth);
+                intMap.SetCellv(gridCoords, p.value);
             }
 
             tileMap.AddChild(intMap);
-
-            return tileMap;
         }
     }
 }

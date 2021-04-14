@@ -31,12 +31,9 @@ namespace LDtkImport.Importers
 
             foreach (var layer in context.LevelJson.LayerInstances.Reverse())
             {
-                Node layerNode = layer.Type switch
-                {
-                    WorldJson.LayerType.IntGrid => TileMapLayerImporter.Import(context, layer),
-                    WorldJson.LayerType.Entities => EntitiesLayerImporter.Import(layer, UsedExtension as LevelImportExtension),
-                    _ => new Node { Name = layer.Identifier },
-                };
+                Node layerNode = layer.Type == WorldJson.LayerType.Entities
+                    ? EntitiesLayerImporter.Import(layer, UsedExtension as LevelImportExtension)
+                    : TileMapLayerImporter.Import(context, layer);
 
                 levelNode.AddChild(layerNode);
             }
