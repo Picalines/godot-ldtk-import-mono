@@ -93,9 +93,6 @@ namespace LDtkImport.Json
 
             [JsonProperty("t")]
             public int Id { get; private set; }
-
-            [JsonProperty("d")]
-            public IReadOnlyList<int> InternalEditorData { get; private set; }
         }
 
         public class EntityFieldInstance
@@ -118,9 +115,17 @@ namespace LDtkImport.Json
             [JsonProperty("__identifier")]
             public string Identifier { get; private set; }
 
+            [JsonProperty("width")]
+            public int Width { get; private set; }
+
+            [JsonProperty("height")]
+            public int Height { get; private set; }
+
+            public Vector2 Size { get; private set; }
+
             [JsonProperty("__grid")]
             [JsonConverter(typeof(Vector2Converter))]
-            public Vector2 Grid { get; private set; }
+            public Vector2 GridCoords { get; private set; }
 
             [JsonProperty("__pivot")]
             [JsonConverter(typeof(Vector2Converter))]
@@ -138,6 +143,12 @@ namespace LDtkImport.Json
 
             [JsonProperty("fieldInstances")]
             public IReadOnlyList<EntityFieldInstance> FieldInstances { get; private set; }
+
+            [OnDeserialized]
+            private void Init(StreamingContext context)
+            {
+                Size = new Vector2(Width, Height);
+            }
         }
 
         public class LayerInstance
@@ -154,6 +165,8 @@ namespace LDtkImport.Json
 
             [JsonProperty("__cHei")]
             public int CellsHeight { get; private set; }
+
+            public Vector2 CellsSize { get; private set; }
 
             [JsonProperty("__gridSize")]
             public int GridSize { get; private set; }
@@ -192,25 +205,26 @@ namespace LDtkImport.Json
             public Vector2 PxOffset { get; private set; }
 
             [JsonProperty("intGridCsv")]
-            public IReadOnlyList<int>? IntGrid { get; private set; }
-
-            [JsonProperty("autoLayerTiles")]
-            public IReadOnlyList<TileInstance>? AutoLayerTiles { get; private set; }
+            public IReadOnlyList<int> IntGrid { get; private set; }
 
             [JsonProperty("seed")]
             public int Seed { get; private set; }
 
+            [JsonProperty("autoLayerTiles")]
+            public IReadOnlyList<TileInstance> AutoLayerTiles { get; private set; }
+
             [JsonProperty("gridTiles")]
-            public IReadOnlyList<TileInstance>? GridTiles { get; private set; }
+            public IReadOnlyList<TileInstance> GridTiles { get; private set; }
 
             [JsonProperty("entityInstances")]
-            public IReadOnlyList<EntityInstance>? EntityInstances { get; private set; }
+            public IReadOnlyList<EntityInstance> EntityInstances { get; private set; }
 
             [OnDeserialized]
             private void Init(StreamingContext context)
             {
                 PxTotalOffset = new Vector2(PxTotalOffsetX, PxTotalOffsetY);
                 PxOffset = new Vector2(PxOffsetX, PxOffsetY);
+                CellsSize = new Vector2(CellsWidth, CellsHeight);
                 GridSizeV = new Vector2(GridSize, GridSize);
             }
         }

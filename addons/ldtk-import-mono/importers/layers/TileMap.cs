@@ -28,7 +28,7 @@ namespace LDtkImport.Importers
 
             SetTiles(layer, tileMap);
 
-            if (layer.IntGrid is not null)
+            if (layer.Type == WorldJson.LayerType.IntGrid)
             {
                 AddIntGrid(layer, tileMap);
             }
@@ -38,13 +38,13 @@ namespace LDtkImport.Importers
 
         private static void SetTiles(LevelJson.LayerInstance layer, TileMap tileMap)
         {
-            int coordIdIndex = layer.AutoLayerTiles is null ? 0 : 1;
+            var tiles = layer.Type == WorldJson.LayerType.Tiles ? layer.GridTiles : layer.AutoLayerTiles;
 
-            foreach (var tile in layer.AutoLayerTiles ?? layer.GridTiles!)
+            foreach (var tile in tiles)
             {
                 bool flipX = System.Convert.ToBoolean(tile.FlipBits & 1);
                 bool flipY = System.Convert.ToBoolean(tile.FlipBits & 2);
-                Vector2 gridCoords = TileCoord.IdToGrid(tile.InternalEditorData[coordIdIndex], layer.CellsWidth);
+                Vector2 gridCoords = tileMap.WorldToMap(tile.LayerPxCoords);
                 tileMap.SetCellv(gridCoords, tile.Id, flipX, flipY);
             }
         }
@@ -57,9 +57,10 @@ namespace LDtkImport.Importers
                 CellSize = tileMap.CellSize,
             };
 
-            var gridWithIds = layer.IntGrid!.Select((value, id) => new { id, value });
+            var cellsWithId = layer.IntGrid.Select((value, id) => new { id, value });
+            var nonEmptyCells = cellsWithId.Where(p => p.value > 0);
 
-            foreach (var p in gridWithIds.Where(p => p.value > 0))
+            foreach (var p in nonEmptyCells)
             {
                 var gridCoords = TileCoord.IdToGrid(p.id, layer.CellsWidth);
                 intMap.SetCellv(gridCoords, p.value);
