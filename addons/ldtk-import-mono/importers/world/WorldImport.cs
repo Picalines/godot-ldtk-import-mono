@@ -1,61 +1,99 @@
+using System;
 using Godot;
 using Godot.Collections;
 using LDtkImport.Json;
+using GDArray = Godot.Collections.Array;
 
 namespace LDtkImport.Importers
 {
     [Tool]
-    public class WorldImport : ExtendableImportPlugin<WorldImportExtension, LDtkImportExtensionAttribute>
+    public class WorldImport : SceneImport<Node2D, WorldImportContext, WorldImportExtension>
     {
         public override string GetImporterName() => "ldtk.world";
         public override string GetVisibleName() => "World Importer";
 
-        public override string GetResourceType() => nameof(Resource);
-
-        public override Array GetRecognizedExtensions() => new() { "ldtk" };
-        public override string GetSaveExtension() => "tres";
+        public override GDArray GetRecognizedExtensions() => new() { "ldtk" };
 
         public override int GetPresetCount() => 1;
         public override string GetPresetName(int preset) => "default";
 
         public override bool GetOptionVisibility(string option, Dictionary options) => true;
 
-        protected override Error Import()
+        protected override WorldImportContext GetContext() => new()
         {
-            if (ImportContext.SourceFile.EndsWith(".backup.ldtk"))
+            WorldJson = WorldJson.Load(ImportContext.SourceFile)
+        };
+
+        protected override Node2D BuildScene()
+        {
+            CreateDir();
+
+            ImportTileSets();
+
+            Node2D world = new() { Name = ImportContext.SourceFile.BaseName() };
+
+            PlaceLevels(world);
+
+            return world;
+        }
+
+        private void PlaceLevels(Node2D world)
+        {
+            Func<Node2D, LevelJson.Root, Node2D> prepareLevel = UsedExtension is not null
+                ? UsedExtension.PrepareLevel
+                : (node, _) => node;
+
+            foreach (LevelJson.Root levelJson in SceneContext.WorldJson.Levels)
             {
-                return Error.Ok;
+                if (levelJson.ExternalRelPath is null)
+                {
+                    throw new NotImplementedException($"please turn on the 'Save levels separately' project option ({ImportContext.SourceFile})");
+                }
+
+                var path = $"{ImportContext.SourceFile.GetBaseDir()}/{levelJson.ExternalRelPath}";
+                var scene = GD.Load<PackedScene>(path);
+                var instance = scene.Instance();
+
+                if (instance is not Node2D node)
+                {
+                    throw new Exception($"scene of type {nameof(Node2D)} expected at {path}");
+                }
+
+                foreach (Node child in instance.GetChildren())
+                {
+                    child.Free();
+                }
+
+                node.Position = levelJson.WorldPos;
+
+                node = prepareLevel(node, levelJson);
+
+                world.AddChild(node);
+                node.Owner = world;
             }
+        }
+
+        private void CreateDir()
+        {
+            using var dir = new Directory();
 
             string baseDir = ImportContext.SourceFile.BaseName();
-            using (var dir = new Directory())
+
+            if (!dir.DirExists(baseDir))
             {
-                if (!dir.DirExists(baseDir))
-                {
-                    return Error.FileNotFound;
-                }
+                dir.MakeDir(baseDir);
             }
+        }
 
-            var worldData = WorldJson.Load(ImportContext.SourceFile);
-
-            if (UsedExtension is not null)
-            {
-                typeof(WorldImportExtension)
-                    .GetProperty(nameof(WorldImportExtension.WorldJson))
-                    .SetValue(UsedExtension, worldData);
-            }
-
-            foreach (WorldJson.TileSetDef tileSet in worldData.Defs.Tilesets)
+        private void ImportTileSets()
+        {
+            foreach (WorldJson.TileSetDef tileSet in SceneContext.WorldJson.Defs.Tilesets)
             {
                 if (TileSetImport.Import(tileSet, ImportContext.SourceFile) != Error.Ok)
                 {
-                    return Error.Bug;
+                    throw new Exception($"failed to import tileset '{tileSet.Identifier}'");
                 }
             }
-
-            UsedExtension?.OnWorldImported();
-
-            return ResourceSaver.Save($"{ImportContext.SavePath}.{GetSaveExtension()}", new Resource());
         }
     }
 }

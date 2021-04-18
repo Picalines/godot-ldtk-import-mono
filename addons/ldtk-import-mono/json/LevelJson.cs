@@ -43,10 +43,10 @@ namespace LDtkImport.Json
             public string? BgRelPath { get; private set; }
 
             [JsonProperty("externalRelPath")]
-            public string ExternalRelPath { get; private set; }
+            public string? ExternalRelPath { get; private set; }
 
             [JsonProperty("layerInstances")]
-            public IReadOnlyList<LayerInstance> LayerInstances { get; private set; }
+            public IReadOnlyList<LayerInstance>? LayerInstances { get; private set; }
 
             [JsonProperty("__neighbours")]
             public IReadOnlyList<Neighbour> Neighbours { get; private set; }
@@ -188,7 +188,7 @@ namespace LDtkImport.Json
             public int? TilesetDefUid { get; private set; }
 
             [JsonProperty("__tilesetRelPath")]
-            public string TilesetRelPath { get; private set; }
+            public string? TilesetRelPath { get; private set; }
 
             [JsonProperty("levelId")]
             public int LevelId { get; private set; }

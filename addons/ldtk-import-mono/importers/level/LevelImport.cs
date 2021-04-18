@@ -6,7 +6,7 @@ using Godot;
 namespace LDtkImport.Importers
 {
     [Tool]
-    public class LevelImport : SceneImport<Node2D, LevelImportContext>
+    public class LevelImport : SceneImport<Node2D, LevelImportContext, LevelImportExtension>
     {
         public override string GetImporterName() => "ldtk.level";
         public override string GetVisibleName() => "Level Importer";
@@ -16,29 +16,31 @@ namespace LDtkImport.Importers
         public override int GetPresetCount() => 1;
         public override string GetPresetName(int preset) => "default";
 
-        protected override LevelImportContext GetContext() => new(ImportContext)
+        protected override LevelImportContext GetContext() => new()
         {
             WorldJson = WorldJson.Load(ImportContext.SourceFile.GetBaseDir() + ".ldtk"),
             LevelJson = LevelJson.Load(ImportContext.SourceFile),
         };
 
-        protected override Node2D BuildScene(LevelImportContext context)
+        protected override Node2D BuildScene()
         {
-            var levelNode = new Node2D()
-            {
-                Name = context.LevelJson.Identifier
-            };
+            Node2D levelNode = new() { Name = SceneContext.LevelJson.Identifier };
 
-            foreach (var layer in context.LevelJson.LayerInstances.Reverse())
+            AddLayers(levelNode);
+
+            return levelNode;
+        }
+
+        private void AddLayers(Node2D levelNode)
+        {
+            foreach (var layer in SceneContext.LevelJson.LayerInstances.Reverse())
             {
                 Node layerNode = layer.Type == WorldJson.LayerType.Entities
-                    ? EntitiesLayerImporter.Import(layer, UsedExtension as LevelImportExtension)
-                    : TileMapLayerImporter.Import(context, layer);
+                    ? EntitiesLayerImporter.Import(layer, UsedExtension)
+                    : TileMapLayerImporter.Import(ImportContext, SceneContext, layer);
 
                 levelNode.AddChild(layerNode);
             }
-
-            return levelNode;
         }
     }
 }

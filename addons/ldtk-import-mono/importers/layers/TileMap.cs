@@ -7,15 +7,20 @@ namespace LDtkImport.Importers
 {
     public static class TileMapLayerImporter
     {
-        public static string GetTileSetPath(LevelImportContext levelContext, int tileSetUid)
+        public static string GetTileSetPath(FileImportContext importContext, LevelImportContext levelContext, int tileSetUid)
         {
             WorldJson.TileSetDef tileSetJson = levelContext.WorldJson.Defs.Tilesets.First(t => t.Uid == tileSetUid);
-            return $"{levelContext.SourceFile.GetBaseDir()}/tilesets/{tileSetJson.Identifier}.tres";
+            return $"{importContext.SourceFile.GetBaseDir()}/tilesets/{tileSetJson.Identifier}.tres";
         }
 
-        public static TileMap Import(LevelImportContext levelContext, LevelJson.LayerInstance layer)
+        public static TileMap Import(FileImportContext importContext, LevelImportContext levelContext, LevelJson.LayerInstance layer)
         {
-            var tileSet = GD.Load<TileSet>(GetTileSetPath(levelContext, layer.TilesetDefUid ?? 0));
+            return Import(GetTileSetPath(importContext, levelContext, layer.TilesetDefUid ?? 0), layer);
+        }
+
+        public static TileMap Import(string path, LevelJson.LayerInstance layer)
+        {
+            var tileSet = GD.Load<TileSet>(path);
 
             TileMap tileMap = new()
             {

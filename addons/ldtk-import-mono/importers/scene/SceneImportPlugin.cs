@@ -4,9 +4,10 @@ using Godot.Collections;
 
 namespace LDtkImport.Importers
 {
-    public abstract class SceneImport<SceneBase, Context> : ExtendableImportPlugin<SceneImportExtension<SceneBase, Context>, LDtkImportExtensionAttribute>
+    public abstract class SceneImport<SceneBase, Context, Extension> : ExtendableImportPlugin<Extension, LDtkImportExtensionAttribute>
         where SceneBase : Node
         where Context : class
+        where Extension : SceneImportExtension<SceneBase, Context>
     {
         public sealed override string GetResourceType() => nameof(PackedScene);
         public sealed override string GetSaveExtension() => "tscn";
@@ -16,7 +17,7 @@ namespace LDtkImport.Importers
         protected Context SceneContext { get; private set; }
 
         protected abstract Context GetContext();
-        protected abstract SceneBase BuildScene(Context sceneContext);
+        protected abstract SceneBase BuildScene();
 
         protected override Error Import()
         {
@@ -33,7 +34,7 @@ namespace LDtkImport.Importers
 
             try
             {
-                sceneNode = BuildScene(SceneContext);
+                sceneNode = BuildScene();
                 UsedExtension?.OnSceneBuilt(sceneNode);
             }
             catch (Exception error)

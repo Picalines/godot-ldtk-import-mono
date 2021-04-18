@@ -1,11 +1,10 @@
+using Godot;
 using LDtkImport.Json;
 
 namespace LDtkImport.Importers
 {
-    public class WorldImportExtension : ImportPluginExtension
+    public abstract class WorldImportExtension : SceneImportExtension<Node2D, WorldImportContext>
     {
-        public WorldJson.Root WorldJson { get; init; }
-
-        public virtual void OnWorldImported() { }
+        public virtual Node2D PrepareLevel(Node2D levelNode, LevelJson.Root levelJson) => levelNode;
     }
 }
