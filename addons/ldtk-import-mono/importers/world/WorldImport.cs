@@ -30,7 +30,10 @@ namespace LDtkImport.Importers
 
             ImportTileSets();
 
-            Node2D world = new() { Name = ImportContext.SourceFile.BaseName() };
+            Node2D world = new()
+            {
+                Name = ImportContext.SourceFile.BaseName().Substring(ImportContext.SourceFile.GetBaseDir().Length)
+            };
 
             PlaceLevels(world);
 
