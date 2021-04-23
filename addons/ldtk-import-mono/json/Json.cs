@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using Newtonsoft.Json;
 
@@ -14,13 +15,28 @@ namespace LDtkImport.Json
                 var openError = file.Open(path, File.ModeFlags.Read);
                 if (openError != Error.Ok)
                 {
-                    throw new System.Exception($"File not found at {path}");
+                    throw new Exception($"File not found at {path}");
                 }
 
                 jsonText = file.GetAsText();
             }
 
-            return JsonConvert.DeserializeObject<Root>(jsonText);
+            Root? result;
+
+            try
+            {
+                result = JsonConvert.DeserializeObject(jsonText, typeof(Root)) as Root;
+                if (result is null)
+                {
+                    throw new NullReferenceException();
+                }
+            }
+            catch (Exception exception)
+            {
+                throw new Exception($"error on parsing json at '{path}' ({exception.GetType().FullName}): {exception.Message}", exception);
+            }
+
+            return result;
         }
     }
 }
