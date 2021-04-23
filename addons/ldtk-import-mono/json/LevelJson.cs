@@ -48,6 +48,9 @@ namespace LDtkImport.Json
             [JsonProperty("layerInstances")]
             public IReadOnlyList<LayerInstance>? LayerInstances { get; private set; }
 
+            [JsonProperty("fieldInstances")]
+            public IReadOnlyList<FieldInstance> FieldInstances { get; private set; }
+
             [JsonProperty("__neighbours")]
             public IReadOnlyList<Neighbour> Neighbours { get; private set; }
 
@@ -95,7 +98,7 @@ namespace LDtkImport.Json
             public int Id { get; private set; }
         }
 
-        public class EntityFieldInstance
+        public class FieldInstance
         {
             [JsonProperty("__identifier")]
             public string Identifier { get; private set; }
@@ -142,7 +145,7 @@ namespace LDtkImport.Json
             public Vector2 PxCoords { get; private set; }
 
             [JsonProperty("fieldInstances")]
-            public IReadOnlyList<EntityFieldInstance> FieldInstances { get; private set; }
+            public IReadOnlyList<FieldInstance> FieldInstances { get; private set; }
 
             [OnDeserialized]
             private void Init(StreamingContext context)

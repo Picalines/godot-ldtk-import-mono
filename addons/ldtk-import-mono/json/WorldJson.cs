@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using LDtkImport.Json.Converters;
 using Godot;
 using System.Runtime.Serialization;
+using System;
 
 namespace LDtkImport.Json
 {
@@ -61,10 +62,14 @@ namespace LDtkImport.Json
         public class IntGridValueDef
         {
             [JsonProperty("identifier")]
-            public object Identifier { get; private set; }
+            public string? Identifier { get; private set; }
 
             [JsonProperty("color")]
-            public string Color { get; private set; }
+            [JsonConverter(typeof(ColorConverter))]
+            public Color Color { get; private set; }
+
+            [JsonProperty("value")]
+            public int Value { get; private set; }
         }
 
         public enum LayerType
@@ -102,7 +107,7 @@ namespace LDtkImport.Json
             public Vector2 PxOffset { get; private set; }
 
             [JsonProperty("intGridValues")]
-            public IReadOnlyList<IntGridValueDef> IntGridValues { get; private set; }
+            public IReadOnlyList<IntGridValueDef>? IntGridValues { get; private set; }
 
             [JsonProperty("autoTilesetDefUid")]
             public int? AutoTilesetDefUid { get; private set; }
@@ -166,6 +171,24 @@ namespace LDtkImport.Json
 
         public class TileSetDef
         {
+            public class TileCustomData
+            {
+                [JsonProperty("tileId")]
+                public int TileId { get; private set; }
+
+                [JsonProperty("data")]
+                public string Data { get; private set; }
+            }
+
+            public class TileEnumTag
+            {
+                [JsonProperty("enumValueId")]
+                public string EnumValueId { get; private set; }
+
+                [JsonProperty("tileIds")]
+                public IReadOnlyList<int> TileIds { get; private set; }
+            }
+
             [JsonProperty("identifier")]
             public string Identifier { get; private set; }
 
@@ -178,10 +201,18 @@ namespace LDtkImport.Json
             [JsonProperty("pxWid")]
             public int PxWidth { get; private set; }
 
+            [JsonProperty("__cHei")]
+            public int GridHeight { get; private set; }
+
+            [JsonProperty("__cWid")]
+            public int GridWidth { get; private set; }
+
             [JsonProperty("pxHei")]
             public int PxHeight { get; private set; }
 
             public Vector2 PxSize { get; private set; }
+
+            public Vector2 GridSize { get; private set; }
 
             [JsonProperty("tileGridSize")]
             public int TileGridSize { get; private set; }
@@ -194,10 +225,20 @@ namespace LDtkImport.Json
             [JsonProperty("padding")]
             public int Padding { get; private set; }
 
+            [JsonProperty("customData")]
+            public IReadOnlyList<TileCustomData> CustomData { get; private set; }
+
+            [JsonProperty("enumTags")]
+            public IReadOnlyList<TileEnumTag> EnumTags { get; private set; }
+
+            [JsonProperty("tagsSourceEnumUid")]
+            public int? TagsSourceEnumUid { get; private set; }
+
             [OnDeserialized]
             private void Init(StreamingContext context)
             {
                 PxSize = new Vector2(PxWidth, PxHeight);
+                GridSize = new Vector2(GridWidth, GridHeight);
                 TileGridSizeV = new Vector2(TileGridSize, TileGridSize);
             }
         }
@@ -208,11 +249,14 @@ namespace LDtkImport.Json
             public string Id { get; private set; }
 
             [JsonProperty("tileId")]
-            public int TileId { get; private set; }
+            public int? TileId { get; private set; }
 
-            [JsonProperty("__tileSrcRect")]
+            [JsonProperty("__tileSrcRect", NullValueHandling = NullValueHandling.Ignore)]
             [JsonConverter(typeof(Rect2Converter))]
-            public Rect2 TileSrcRect { get; private set; }
+            public Rect2? TileSrcRect { get; private set; }
+
+            [JsonProperty("color")]
+            public int Color { get; private set; }
         }
 
         public class Enum
