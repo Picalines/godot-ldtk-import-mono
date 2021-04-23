@@ -33,7 +33,7 @@ namespace LDtkImport.Importers
 
         private void AddLayers(Node2D levelNode)
         {
-            foreach (var layer in SceneContext.LevelJson.LayerInstances.Reverse())
+            foreach (var layer in SceneContext.LevelJson.LayerInstances!.Reverse())
             {
                 Node layerNode = layer.Type == WorldJson.LayerType.Entities
                     ? EntitiesLayerImporter.Import(layer, UsedExtension)

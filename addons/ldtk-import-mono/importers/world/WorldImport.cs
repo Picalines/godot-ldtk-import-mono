@@ -32,7 +32,7 @@ namespace LDtkImport.Importers
 
             Node2D world = new()
             {
-                Name = ImportContext.SourceFile.BaseName().Substring(ImportContext.SourceFile.GetBaseDir().Length)
+                Name = ImportContext.SourceFile.BaseName()[ImportContext.SourceFile.GetBaseDir().Length..]
             };
 
             PlaceLevels(world);

@@ -54,10 +54,10 @@ namespace LDtkImport.Importers
                 GD.PushWarning($"More than one {typeof(Extension).Name} found. Using the first one ({extensionType.FullName})");
             }
 
-            var extensionInstance = (Extension)Activator.CreateInstance(extensionType);
+            var extensionInstance = (Extension)Activator.CreateInstance(extensionType)!;
 
             typeof(Extension)
-                .GetProperty(nameof(ImportPluginExtension.ImportContext))
+                .GetProperty(nameof(ImportPluginExtension.ImportContext))!
                 .SetValue(extensionInstance, ImportContext);
 
             return extensionInstance;

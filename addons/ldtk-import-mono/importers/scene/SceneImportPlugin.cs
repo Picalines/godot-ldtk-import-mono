@@ -26,7 +26,7 @@ namespace LDtkImport.Importers
             if (UsedExtension is not null)
             {
                 typeof(SceneImportExtension<SceneBase, Context>)
-                    .GetProperty(nameof(SceneImportExtension<SceneBase, Context>.SceneContext))
+                    .GetProperty(nameof(SceneImportExtension<SceneBase, Context>.SceneContext))!
                     .SetValue(UsedExtension, SceneContext);
             }
 
