@@ -6,11 +6,11 @@ namespace LDtkImport.Importers
 {
     public static class TileSetImporter
     {
-        public static Error Import(WorldJson.TileSetDef tileSetJson, string sourceFile)
+        public static Error Import(WorldJson.TileSetDef tileSetJson, string sourceFile, WorldImportExtension? extension)
         {
             const string tileSetsDir = "tilesets";
 
-            TileSet tileSet = CreateTileSet(tileSetJson, sourceFile);
+            TileSet tileSet = CreateTileSet(tileSetJson, sourceFile, extension);
 
             using (var dir = new Directory())
             {
@@ -32,7 +32,7 @@ namespace LDtkImport.Importers
             return worldSourceFile.GetBaseDir() + "/" + tileSetJson.TextureRelPath;
         }
 
-        private static TileSet CreateTileSet(WorldJson.TileSetDef tileSetJson, string sourceFile)
+        private static TileSet CreateTileSet(WorldJson.TileSetDef tileSetJson, string sourceFile, WorldImportExtension? extension)
         {
             var texture = GD.Load<Texture>(GetTexturePath(tileSetJson, sourceFile));
             Image textureImage = texture.GetData();
@@ -56,6 +56,11 @@ namespace LDtkImport.Importers
                     tileSet.TileSetTexture(tileId, texture);
                     tileSet.TileSetRegion(tileId, tileRegion);
                 }
+            }
+
+            if (extension is not null)
+            {
+                extension.PrepareTileSet(tileSet, tileSetJson);
             }
 
             return tileSet;

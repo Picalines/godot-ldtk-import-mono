@@ -42,9 +42,9 @@ namespace LDtkImport.Importers
 
         private void PlaceLevels(Node2D world)
         {
-            Func<Node2D, LevelJson.Root, Node2D> prepareLevel = UsedExtension is not null
+            Action<Node2D, LevelJson.Root> prepareLevel = UsedExtension is not null
                 ? UsedExtension.PrepareLevel
-                : (node, _) => node;
+                : delegate { };
 
             foreach (LevelJson.Root levelJson in SceneContext.WorldJson.Levels)
             {
@@ -69,7 +69,7 @@ namespace LDtkImport.Importers
 
                 node.Position = levelJson.WorldPos;
 
-                node = prepareLevel(node, levelJson);
+                prepareLevel(node, levelJson);
 
                 world.AddChild(node);
                 node.Owner = world;
@@ -90,11 +90,11 @@ namespace LDtkImport.Importers
 
         private void ImportTileSets()
         {
-            foreach (WorldJson.TileSetDef tileSet in SceneContext.WorldJson.Defs.Tilesets)
+            foreach (WorldJson.TileSetDef tileSetJson in SceneContext.WorldJson.Defs.Tilesets)
             {
-                if (TileSetImporter.Import(tileSet, ImportContext.SourceFile) != Error.Ok)
+                if (TileSetImporter.Import(tileSetJson, ImportContext.SourceFile, UsedExtension) != Error.Ok)
                 {
-                    throw new Exception($"failed to import tileset '{tileSet.Identifier}'");
+                    throw new Exception($"failed to import tileset '{tileSetJson.Identifier}'");
                 }
             }
         }
