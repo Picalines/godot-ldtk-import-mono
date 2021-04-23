@@ -92,7 +92,7 @@ namespace LDtkImport.Importers
         {
             foreach (WorldJson.TileSetDef tileSet in SceneContext.WorldJson.Defs.Tilesets)
             {
-                if (TileSetImport.Import(tileSet, ImportContext.SourceFile) != Error.Ok)
+                if (TileSetImporter.Import(tileSet, ImportContext.SourceFile) != Error.Ok)
                 {
                     throw new Exception($"failed to import tileset '{tileSet.Identifier}'");
                 }

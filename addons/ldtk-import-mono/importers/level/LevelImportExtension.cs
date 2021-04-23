@@ -11,6 +11,6 @@ namespace LDtkImport.Importers
             Position = entityJson.PxCoords,
         };
 
-        public virtual Node2D? CreateEntity(LevelJson.EntityInstance entityJson) => CreateEntityMarker(entityJson);
+        public virtual Node2D CreateEntity(LevelJson.EntityInstance entityJson) => CreateEntityMarker(entityJson);
     }
 }

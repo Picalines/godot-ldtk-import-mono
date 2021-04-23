@@ -4,7 +4,7 @@ using LDtkImport.Utils;
 
 namespace LDtkImport.Importers
 {
-    public static class TileSetImport
+    public static class TileSetImporter
     {
         public static Error Import(WorldJson.TileSetDef tileSetJson, string sourceFile)
         {
