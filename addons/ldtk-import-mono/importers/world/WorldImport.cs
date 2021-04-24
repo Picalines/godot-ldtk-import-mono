@@ -42,17 +42,17 @@ namespace LDtkImport.Importers
 
         private void PlaceLevels(Node2D world)
         {
+            if (!SceneContext.WorldJson.ExternalLevels)
+            {
+                throw new NotImplementedException($"please turn on the 'Save levels separately' project option ({ImportContext.SourceFile})");
+            }
+
             Action<Node2D, LevelJson.Root> prepareLevel = UsedExtension is not null
                 ? UsedExtension.PrepareLevel
                 : delegate { };
 
             foreach (LevelJson.Root levelJson in SceneContext.WorldJson.Levels)
             {
-                if (levelJson.ExternalRelPath is null)
-                {
-                    throw new NotImplementedException($"please turn on the 'Save levels separately' project option ({ImportContext.SourceFile})");
-                }
-
                 var path = $"{ImportContext.SourceFile.GetBaseDir()}/{levelJson.ExternalRelPath}";
                 var scene = GD.Load<PackedScene>(path);
                 var instance = scene.Instance();

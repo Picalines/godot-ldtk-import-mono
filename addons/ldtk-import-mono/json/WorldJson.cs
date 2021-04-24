@@ -4,12 +4,19 @@ using Newtonsoft.Json;
 using LDtkImport.Json.Converters;
 using Godot;
 using System.Runtime.Serialization;
-using System;
 
 namespace LDtkImport.Json
 {
     public class WorldJson : BaseJson<WorldJson.Root>
     {
+        public enum WorldLayout
+        {
+            Free,
+            GridVanila,
+            LinearHorizontal,
+            LinearVertical,
+        }
+
         public class Root
         {
             [JsonProperty("jsonVersion")]
@@ -38,13 +45,16 @@ namespace LDtkImport.Json
             public bool ExternalLevels { get; private set; }
 
             [JsonProperty("worldLayout")]
-            public string WorldLayout { get; private set; }
+            [JsonConverter(typeof(StringEnumConverter))]
+            public WorldLayout WorldLayout { get; private set; }
 
             [JsonProperty("worldGridWidth")]
             public int WorldGridWidth { get; private set; }
 
             [JsonProperty("worldGridHeight")]
             public int WorldGridHeight { get; private set; }
+
+            public Vector2 WorldGridSize { get; private set; }
 
             [JsonProperty("defs")]
             public Defs Defs { get; private set; }
@@ -56,6 +66,7 @@ namespace LDtkImport.Json
             private void Init(StreamingContext context)
             {
                 DefaultPivot = new Vector2(DefaultPivotX, DefaultPivotY);
+                WorldGridSize = new Vector2(WorldGridWidth, WorldGridHeight);
             }
         }
 
