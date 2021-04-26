@@ -6,7 +6,7 @@ namespace LDtkImport.Importers
 {
     public static class TileSetImporter
     {
-        public static Error Import(WorldJson.TileSetDef tileSetJson, string sourceFile, WorldImportExtension? extension)
+        public static Error Import(WorldJson.TileSetDefinition tileSetJson, string sourceFile, WorldImportExtension? extension)
         {
             const string tileSetsDir = "tilesets";
 
@@ -27,12 +27,12 @@ namespace LDtkImport.Importers
             return ResourceSaver.Save(savePath, tileSet);
         }
 
-        public static string GetTexturePath(WorldJson.TileSetDef tileSetJson, string worldSourceFile)
+        public static string GetTexturePath(WorldJson.TileSetDefinition tileSetJson, string worldSourceFile)
         {
             return worldSourceFile.GetBaseDir() + "/" + tileSetJson.TextureRelPath;
         }
 
-        private static TileSet CreateTileSet(WorldJson.TileSetDef tileSetJson, string sourceFile, WorldImportExtension? extension)
+        private static TileSet CreateTileSet(WorldJson.TileSetDefinition tileSetJson, string sourceFile, WorldImportExtension? extension)
         {
             var texture = GD.Load<Texture>(GetTexturePath(tileSetJson, sourceFile));
             Image textureImage = texture.GetData();
@@ -66,7 +66,7 @@ namespace LDtkImport.Importers
             return tileSet;
         }
 
-        private static Rect2 GetTileRegion(int tileId, WorldJson.TileSetDef tileSetJson)
+        private static Rect2 GetTileRegion(int tileId, WorldJson.TileSetDefinition tileSetJson)
         {
             var pixelTile = TileCoord.IdToPx(tileId, tileSetJson);
             return new Rect2(pixelTile, tileSetJson.TileGridSizeV);

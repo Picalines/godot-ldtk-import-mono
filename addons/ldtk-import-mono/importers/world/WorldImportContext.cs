@@ -4,6 +4,6 @@ namespace LDtkImport.Importers
 {
     public record WorldImportContext
     {
-        public WorldJson.Root WorldJson { get; init; }
+        public WorldJson WorldJson { get; init; }
     }
 }

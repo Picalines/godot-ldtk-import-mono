@@ -47,11 +47,11 @@ namespace LDtkImport.Importers
                 throw new NotImplementedException($"please turn on the 'Save levels separately' project option ({ImportContext.SourceFile})");
             }
 
-            Action<Node2D, LevelJson.Root> prepareLevel = UsedExtension is not null
+            Action<Node2D, LevelJson> prepareLevel = UsedExtension is not null
                 ? UsedExtension.PrepareLevel
                 : delegate { };
 
-            foreach (LevelJson.Root levelJson in SceneContext.WorldJson.Levels)
+            foreach (LevelJson levelJson in SceneContext.WorldJson.Levels)
             {
                 var path = $"{ImportContext.SourceFile.GetBaseDir()}/{levelJson.ExternalRelPath}";
                 var scene = GD.Load<PackedScene>(path);
@@ -90,7 +90,7 @@ namespace LDtkImport.Importers
 
         private void ImportTileSets()
         {
-            foreach (WorldJson.TileSetDef tileSetJson in SceneContext.WorldJson.Defs.Tilesets)
+            foreach (var tileSetJson in SceneContext.WorldJson.Definitions.TileSets)
             {
                 if (TileSetImporter.Import(tileSetJson, ImportContext.SourceFile, UsedExtension) != Error.Ok)
                 {

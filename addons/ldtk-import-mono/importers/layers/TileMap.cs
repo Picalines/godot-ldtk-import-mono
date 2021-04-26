@@ -9,13 +9,13 @@ namespace LDtkImport.Importers
     {
         public static string GetTileSetPath(FileImportContext importContext, LevelImportContext levelContext, int tileSetUid)
         {
-            WorldJson.TileSetDef tileSetJson = levelContext.WorldJson.Defs.Tilesets.First(t => t.Uid == tileSetUid);
+            var tileSetJson = levelContext.WorldJson.Definitions.TileSets.First(t => t.Uid == tileSetUid);
             return $"{importContext.SourceFile.GetBaseDir()}/tilesets/{tileSetJson.Identifier}.tres";
         }
 
         public static TileMap Import(FileImportContext importContext, LevelImportContext levelContext, LevelJson.LayerInstance layer)
         {
-            return Import(GetTileSetPath(importContext, levelContext, layer.TilesetDefUid ?? 0), layer);
+            return Import(GetTileSetPath(importContext, levelContext, layer.TileSetDefUid ?? 0), layer);
         }
 
         public static TileMap Import(string path, LevelJson.LayerInstance layer)
@@ -33,7 +33,7 @@ namespace LDtkImport.Importers
 
             SetTiles(layer, tileMap);
 
-            if (layer.Type == WorldJson.LayerType.IntGrid)
+            if (layer.Type == LayerType.IntGrid)
             {
                 AddIntGrid(layer, tileMap);
             }
@@ -43,7 +43,7 @@ namespace LDtkImport.Importers
 
         private static void SetTiles(LevelJson.LayerInstance layer, TileMap tileMap)
         {
-            var tiles = layer.Type == WorldJson.LayerType.Tiles ? layer.GridTiles : layer.AutoLayerTiles;
+            var tiles = layer.Type == LayerType.Tiles ? layer.GridTiles : layer.AutoLayerTiles;
 
             foreach (var tile in tiles)
             {

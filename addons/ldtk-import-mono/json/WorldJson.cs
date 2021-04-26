@@ -7,70 +7,75 @@ using System.Runtime.Serialization;
 
 namespace LDtkImport.Json
 {
-    public class WorldJson : BaseJson<WorldJson.Root>
+    public enum WorldLayout
     {
-        public enum WorldLayout
+        Free,
+        GridVania,
+        LinearHorizontal,
+        LinearVertical,
+    }
+
+    public enum LayerType
+    {
+        Tiles,
+        IntGrid,
+        Entities,
+        AutoLayer,
+    }
+
+    public class WorldJson : JsonPOCO<WorldJson>
+    {
+        [JsonProperty("jsonVersion")]
+        public string JsonVersion { get; private set; }
+
+        [JsonProperty("defaultPivotX")]
+        public float DefaultPivotX { get; private set; }
+
+        [JsonProperty("defaultPivotY")]
+        public float DefaultPivotY { get; private set; }
+
+        public Vector2 DefaultPivot { get; private set; }
+
+        [JsonProperty("defaultGridSize")]
+        public int DefaultGridSize { get; private set; }
+
+        [JsonProperty("bgColor")]
+        [JsonConverter(typeof(ColorConverter))]
+        public Color BgColor { get; private set; }
+
+        [JsonProperty("defaultLevelBgColor")]
+        [JsonConverter(typeof(ColorConverter))]
+        public Color DefaultLevelBgColor { get; private set; }
+
+        [JsonProperty("externalLevels")]
+        public bool ExternalLevels { get; private set; }
+
+        [JsonProperty("worldLayout")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        public WorldLayout WorldLayout { get; private set; }
+
+        [JsonProperty("worldGridWidth")]
+        public int WorldGridWidth { get; private set; }
+
+        [JsonProperty("worldGridHeight")]
+        public int WorldGridHeight { get; private set; }
+
+        public Vector2 WorldGridSize { get; private set; }
+
+        [JsonProperty("defs")]
+        public DefinitionsCollection Definitions { get; private set; }
+
+        [JsonProperty("levels")]
+        public IReadOnlyList<LevelJson> Levels { get; private set; }
+
+        [OnDeserialized]
+        private void Init(StreamingContext context)
         {
-            Free,
-            GridVanila,
-            LinearHorizontal,
-            LinearVertical,
+            DefaultPivot = new Vector2(DefaultPivotX, DefaultPivotY);
+            WorldGridSize = new Vector2(WorldGridWidth, WorldGridHeight);
         }
 
-        public class Root
-        {
-            [JsonProperty("jsonVersion")]
-            public string JsonVersion { get; private set; }
-
-            [JsonProperty("defaultPivotX")]
-            public float DefaultPivotX { get; private set; }
-
-            [JsonProperty("defaultPivotY")]
-            public float DefaultPivotY { get; private set; }
-
-            public Vector2 DefaultPivot { get; private set; }
-
-            [JsonProperty("defaultGridSize")]
-            public int DefaultGridSize { get; private set; }
-
-            [JsonProperty("bgColor")]
-            [JsonConverter(typeof(ColorConverter))]
-            public Color BgColor { get; private set; }
-
-            [JsonProperty("defaultLevelBgColor")]
-            [JsonConverter(typeof(ColorConverter))]
-            public Color DefaultLevelBgColor { get; private set; }
-
-            [JsonProperty("externalLevels")]
-            public bool ExternalLevels { get; private set; }
-
-            [JsonProperty("worldLayout")]
-            [JsonConverter(typeof(StringEnumConverter))]
-            public WorldLayout WorldLayout { get; private set; }
-
-            [JsonProperty("worldGridWidth")]
-            public int WorldGridWidth { get; private set; }
-
-            [JsonProperty("worldGridHeight")]
-            public int WorldGridHeight { get; private set; }
-
-            public Vector2 WorldGridSize { get; private set; }
-
-            [JsonProperty("defs")]
-            public Defs Defs { get; private set; }
-
-            [JsonProperty("levels")]
-            public IReadOnlyList<LevelJson.Root> Levels { get; private set; }
-
-            [OnDeserialized]
-            private void Init(StreamingContext context)
-            {
-                DefaultPivot = new Vector2(DefaultPivotX, DefaultPivotY);
-                WorldGridSize = new Vector2(WorldGridWidth, WorldGridHeight);
-            }
-        }
-
-        public class IntGridValueDef
+        public class IntGridValueDefinition
         {
             [JsonProperty("identifier")]
             public string? Identifier { get; private set; }
@@ -83,15 +88,7 @@ namespace LDtkImport.Json
             public int Value { get; private set; }
         }
 
-        public enum LayerType
-        {
-            Tiles,
-            IntGrid,
-            Entities,
-            AutoLayer,
-        }
-
-        public class LayerDef
+        public class LayerDefinition
         {
             [JsonProperty("identifier")]
             public string Identifier { get; private set; }
@@ -106,6 +103,8 @@ namespace LDtkImport.Json
             [JsonProperty("gridSize")]
             public int GridSize { get; private set; }
 
+            public Vector2 GridSizeV { get; private set; }
+
             [JsonProperty("displayOpacity")]
             public int DisplayOpacity { get; private set; }
 
@@ -118,25 +117,26 @@ namespace LDtkImport.Json
             public Vector2 PxOffset { get; private set; }
 
             [JsonProperty("intGridValues")]
-            public IReadOnlyList<IntGridValueDef>? IntGridValues { get; private set; }
+            public IReadOnlyList<IntGridValueDefinition>? IntGridValues { get; private set; }
 
             [JsonProperty("autoTilesetDefUid")]
-            public int? AutoTilesetDefUid { get; private set; }
+            public int? AutoTileSetDefUid { get; private set; }
 
             [JsonProperty("autoSourceLayerDefUid")]
             public int? AutoSourceLayerDefUid { get; private set; }
 
             [JsonProperty("tilesetDefUid")]
-            public int? TilesetDefUid { get; private set; }
+            public int? TileSetDefUid { get; private set; }
 
             [OnDeserialized]
             private void Init(StreamingContext context)
             {
                 PxOffset = new Vector2(PxOffsetX, PxOffsetY);
+                GridSizeV = new Vector2(GridSize, GridSize);
             }
         }
 
-        public class EntityDef
+        public class EntityDefinition
         {
             [JsonProperty("identifier")]
             public string Identifier { get; private set; }
@@ -156,7 +156,7 @@ namespace LDtkImport.Json
             public string RenderMode { get; private set; }
 
             [JsonProperty("tilesetId")]
-            public int? TilesetId { get; private set; }
+            public int? TileSetId { get; private set; }
 
             [JsonProperty("tileId")]
             public int? TileId { get; private set; }
@@ -180,7 +180,7 @@ namespace LDtkImport.Json
             }
         }
 
-        public class TileSetDef
+        public class TileSetDefinition
         {
             public class TileCustomData
             {
@@ -282,7 +282,7 @@ namespace LDtkImport.Json
             public IReadOnlyList<EnumValue> Values { get; private set; }
 
             [JsonProperty("iconTilesetUid")]
-            public int IconTilesetUid { get; private set; }
+            public int IconTileSetUid { get; private set; }
 
             [JsonProperty("externalRelPath")]
             public string? ExternalRelPath { get; private set; }
@@ -294,16 +294,16 @@ namespace LDtkImport.Json
             public string RelPath { get; private set; }
         }
 
-        public class Defs
+        public class DefinitionsCollection
         {
             [JsonProperty("layers")]
-            public IReadOnlyList<LayerDef> Layers { get; private set; }
+            public IReadOnlyList<LayerDefinition> Layers { get; private set; }
 
             [JsonProperty("entities")]
-            public IReadOnlyList<EntityDef> Entities { get; private set; }
+            public IReadOnlyList<EntityDefinition> Entities { get; private set; }
 
             [JsonProperty("tilesets")]
-            public IReadOnlyList<TileSetDef> Tilesets { get; private set; }
+            public IReadOnlyList<TileSetDefinition> TileSets { get; private set; }
 
             [JsonProperty("enums")]
             public IReadOnlyList<Enum> Enums { get; private set; }

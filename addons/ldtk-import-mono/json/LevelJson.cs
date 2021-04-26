@@ -2,64 +2,67 @@ using Godot;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using LDtkImport.Json.Converters;
-using Newtonsoft.Json.Converters;
 using System.Runtime.Serialization;
-
-#pragma warning disable IDE0051
+using Newtonsoft.Json.Converters;
 
 namespace LDtkImport.Json
 {
-    public class LevelJson : BaseJson<LevelJson.Root>
+    public enum LevelNeighbourDirection
     {
-        public class Root
+        North,
+        South,
+        West,
+        East,
+    }
+
+    public class LevelJson : JsonPOCO<LevelJson>
+    {
+        [JsonProperty("identifier")]
+        public string Identifier { get; private set; }
+
+        [JsonProperty("uid")]
+        public int Uid { get; private set; }
+
+        [JsonProperty("worldX")]
+        public int WorldX { get; private set; }
+
+        [JsonProperty("worldY")]
+        public int WorldY { get; private set; }
+
+        public Vector2 WorldPos { get; private set; }
+
+        [JsonProperty("pxWid")]
+        public int PxWidth { get; private set; }
+
+        [JsonProperty("pxHei")]
+        public int PxHeight { get; private set; }
+
+        public Vector2 PxSize { get; private set; }
+
+        [JsonProperty("__bgColor")]
+        [JsonConverter(typeof(ColorConverter))]
+        public Color? BgColor { get; private set; }
+
+        [JsonProperty("bgRelPath")]
+        public string? BgRelPath { get; private set; }
+
+        [JsonProperty("externalRelPath")]
+        public string? ExternalRelPath { get; private set; }
+
+        [JsonProperty("layerInstances")]
+        public IReadOnlyList<LayerInstance>? LayerInstances { get; private set; }
+
+        [JsonProperty("fieldInstances")]
+        public IReadOnlyList<FieldInstance> FieldInstances { get; private set; }
+
+        [JsonProperty("__neighbours")]
+        public IReadOnlyList<Neighbour> Neighbours { get; private set; }
+
+        [OnDeserialized]
+        private void Init(StreamingContext context)
         {
-            [JsonProperty("identifier")]
-            public string Identifier { get; private set; }
-
-            [JsonProperty("uid")]
-            public int Uid { get; private set; }
-
-            [JsonProperty("worldX")]
-            public int WorldX { get; private set; }
-
-            [JsonProperty("worldY")]
-            public int WorldY { get; private set; }
-
-            public Vector2 WorldPos { get; private set; }
-
-            [JsonProperty("pxWid")]
-            public int PxWidth { get; private set; }
-
-            [JsonProperty("pxHei")]
-            public int PxHeight { get; private set; }
-
-            public Vector2 PxSize { get; private set; }
-
-            [JsonProperty("__bgColor")]
-            [JsonConverter(typeof(ColorConverter))]
-            public Color? BgColor { get; private set; }
-
-            [JsonProperty("bgRelPath")]
-            public string? BgRelPath { get; private set; }
-
-            [JsonProperty("externalRelPath")]
-            public string? ExternalRelPath { get; private set; }
-
-            [JsonProperty("layerInstances")]
-            public IReadOnlyList<LayerInstance>? LayerInstances { get; private set; }
-
-            [JsonProperty("fieldInstances")]
-            public IReadOnlyList<FieldInstance> FieldInstances { get; private set; }
-
-            [JsonProperty("__neighbours")]
-            public IReadOnlyList<Neighbour> Neighbours { get; private set; }
-
-            [OnDeserialized]
-            private void Init(StreamingContext context)
-            {
-                WorldPos = new Vector2(WorldX, WorldY);
-                PxSize = new Vector2(PxWidth, PxHeight);
-            }
+            WorldPos = new Vector2(WorldX, WorldY);
+            PxSize = new Vector2(PxWidth, PxHeight);
         }
 
         public class Neighbour
@@ -68,17 +71,8 @@ namespace LDtkImport.Json
             public int LevelUid { get; private set; }
 
             [JsonProperty("dir")]
-            public string Dir { get; private set; }
-        }
-
-        public class EntityTile
-        {
-            [JsonProperty("tilesetUid")]
-            public int TilesetUid { get; private set; }
-
-            [JsonProperty("srcRect")]
-            [JsonConverter(typeof(Rect2Converter))]
-            public Rect2 SrcRect { get; private set; }
+            [JsonConverter(typeof(LevelNeighbourDirectionConverter))]
+            public LevelNeighbourDirection Direction { get; private set; }
         }
 
         public class TileInstance
@@ -115,6 +109,16 @@ namespace LDtkImport.Json
 
         public class EntityInstance
         {
+            public class TileDisplay
+            {
+                [JsonProperty("tilesetUid")]
+                public int TileSetUid { get; private set; }
+
+                [JsonProperty("srcRect")]
+                [JsonConverter(typeof(Rect2Converter))]
+                public Rect2 SrcRect { get; private set; }
+            }
+
             [JsonProperty("__identifier")]
             public string Identifier { get; private set; }
 
@@ -135,7 +139,7 @@ namespace LDtkImport.Json
             public Vector2 Pivot { get; private set; }
 
             [JsonProperty("__tile")]
-            public EntityTile? Tile { get; private set; }
+            public TileDisplay? Tile { get; private set; }
 
             [JsonProperty("defUid")]
             public int DefUid { get; private set; }
@@ -161,7 +165,7 @@ namespace LDtkImport.Json
 
             [JsonProperty("__type")]
             [JsonConverter(typeof(StringEnumConverter))]
-            public WorldJson.LayerType Type { get; private set; }
+            public LayerType Type { get; private set; }
 
             [JsonProperty("__cWid")]
             public int CellsWidth { get; private set; }
@@ -188,10 +192,10 @@ namespace LDtkImport.Json
             public Vector2 PxTotalOffset { get; private set; }
 
             [JsonProperty("__tilesetDefUid")]
-            public int? TilesetDefUid { get; private set; }
+            public int? TileSetDefUid { get; private set; }
 
             [JsonProperty("__tilesetRelPath")]
-            public string? TilesetRelPath { get; private set; }
+            public string? TileSetRelPath { get; private set; }
 
             [JsonProperty("levelId")]
             public int LevelId { get; private set; }

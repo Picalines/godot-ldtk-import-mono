@@ -1,12 +1,13 @@
 using System;
+using System.Runtime.Serialization;
 using Godot;
 using Newtonsoft.Json;
 
 namespace LDtkImport.Json
 {
-    public abstract class BaseJson<Root> where Root : class
+    public abstract class JsonPOCO<T> where T : class
     {
-        public static Root Load(string path)
+        public static T Load(string path)
         {
             string jsonText;
 
@@ -21,19 +22,19 @@ namespace LDtkImport.Json
                 jsonText = file.GetAsText();
             }
 
-            Root? result;
+            T? result;
 
             try
             {
-                result = JsonConvert.DeserializeObject(jsonText, typeof(Root)) as Root;
+                result = JsonConvert.DeserializeObject<T>(jsonText);
                 if (result is null)
                 {
-                    throw new NullReferenceException();
+                    throw new NullReferenceException($"{nameof(JsonConvert.DeserializeObject)} returned null");
                 }
             }
             catch (Exception exception)
             {
-                throw new Exception($"error on parsing json at '{path}' ({exception.GetType().FullName}): {exception.Message}", exception);
+                throw new SerializationException($"Error on parsing json at '{path}' ({exception.GetType().FullName}): {exception.Message}", exception);
             }
 
             return result;

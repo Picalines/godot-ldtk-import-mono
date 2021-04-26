@@ -35,7 +35,7 @@ namespace LDtkImport.Importers
         {
             foreach (var layer in SceneContext.LevelJson.LayerInstances!.Reverse())
             {
-                Node layerNode = layer.Type == WorldJson.LayerType.Entities
+                Node layerNode = layer.Type == LayerType.Entities
                     ? EntitiesLayerImporter.Import(layer, UsedExtension)
                     : TileMapLayerImporter.Import(ImportContext, SceneContext, layer);
 

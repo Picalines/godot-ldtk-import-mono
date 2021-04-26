@@ -13,7 +13,7 @@ namespace LDtkImport.Utils
             return new Vector2(pixelTileX, pixelTileY);
         }
 
-        public static Vector2 IdToPx(int tileId, WorldJson.TileSetDef tileSetJson)
+        public static Vector2 IdToPx(int tileId, WorldJson.TileSetDefinition tileSetJson)
         {
             var atlasGridWidth = tileSetJson.PxWidth / tileSetJson.TileGridSize;
             return IdToPx(tileId, tileSetJson.TileGridSize, atlasGridWidth, tileSetJson.Padding, tileSetJson.Spacing);
