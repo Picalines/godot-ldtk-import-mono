@@ -30,11 +30,12 @@ namespace LDtkImport.Importers
                     .SetValue(UsedExtension, SceneContext);
             }
 
-            SceneBase sceneNode;
+            ulong buildedSceneId;
 
             try
             {
-                sceneNode = BuildScene();
+                SceneBase sceneNode = BuildScene();
+                buildedSceneId = sceneNode.GetInstanceId();
                 UsedExtension?.OnSceneBuilt(sceneNode);
             }
             catch (Exception error)
@@ -43,15 +44,17 @@ namespace LDtkImport.Importers
                 return Error.Bug;
             }
 
-            foreach (Node child in sceneNode.GetChildren())
+            SceneBase buildedScene = (GD.InstanceFromId(buildedSceneId) as SceneBase)!;
+
+            foreach (Node child in buildedScene.GetChildren())
             {
-                SetOwnerRecursive(child, sceneNode);
+                SetOwnerRecursive(child, buildedScene);
             }
 
             var packedScene = new PackedScene();
             packedScene.TakeOverPath(ImportContext.SavePath);
 
-            if (packedScene.Pack(sceneNode) != Error.Ok)
+            if (packedScene.Pack(buildedScene) != Error.Ok)
             {
                 return Error.Failed;
             }

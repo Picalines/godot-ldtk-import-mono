@@ -47,10 +47,6 @@ namespace LDtkImport.Importers
                 throw new NotImplementedException($"please turn on the 'Save levels separately' project option ({ImportContext.SourceFile})");
             }
 
-            Action<Node2D, LevelJson> prepareLevel = UsedExtension is not null
-                ? UsedExtension.PrepareLevel
-                : delegate { };
-
             foreach (LevelJson levelJson in SceneContext.WorldJson.Levels)
             {
                 var path = $"{ImportContext.SourceFile.GetBaseDir()}/{levelJson.ExternalRelPath}";
@@ -68,8 +64,6 @@ namespace LDtkImport.Importers
                 }
 
                 node.Position = levelJson.WorldPos;
-
-                prepareLevel(node, levelJson);
 
                 world.AddChild(node);
                 node.Owner = world;

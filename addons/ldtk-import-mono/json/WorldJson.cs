@@ -189,6 +189,8 @@ namespace LDtkImport.Json
 
                 [JsonProperty("data")]
                 public string Data { get; private set; }
+
+                public T? AsJson<T>() => JsonConvert.DeserializeObject<T>(Data);
             }
 
             public class TileEnumTag
