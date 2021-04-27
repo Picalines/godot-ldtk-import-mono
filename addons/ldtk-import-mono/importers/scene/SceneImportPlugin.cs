@@ -19,7 +19,7 @@ namespace LDtkImport.Importers
         protected abstract Context GetContext();
         protected abstract SceneBase BuildScene();
 
-        protected override Error Import()
+        protected sealed override Error Import()
         {
             SceneContext = GetContext();
 
