@@ -26,7 +26,7 @@ namespace LDtkImport.Importers
 
         protected override Node2D BuildScene()
         {
-            CreateDir();
+            CheckRequiredDirs();
 
             ImportTileSets();
 
@@ -70,26 +70,32 @@ namespace LDtkImport.Importers
             }
         }
 
-        private void CreateDir()
+        private void CheckRequiredDirs()
         {
             using var dir = new Directory();
-
-            string baseDir = ImportContext.SourceFile.BaseName();
-
-            if (!dir.DirExists(baseDir))
-            {
-                dir.MakeDir(baseDir);
-            }
+            var baseDir = ImportContext.SourceFile.BaseName();
+            dir.MakeDirRecursive(baseDir + "/tilesets");
         }
 
         private void ImportTileSets()
         {
+            string tileSetsDir = ImportContext.SourceFile.BaseName() + "/tilesets";
+
             foreach (var tileSetJson in SceneContext.WorldJson.Definitions.TileSets)
             {
-                if (TileSetImporter.Import(tileSetJson, ImportContext.SourceFile, UsedExtension) != Error.Ok)
+                var tileSet = TileSetImporter.Import(tileSetJson, ImportContext.SourceFile);
+
+                UsedExtension?.PrepareTileSet(tileSet, tileSetJson);
+
+                var savePath = $"{tileSetsDir}/{tileSetJson.Identifier}.tres";
+
+                var saveResult = ResourceSaver.Save(savePath, tileSet);
+                if (saveResult != Error.Ok)
                 {
                     throw new Exception($"failed to import tileset '{tileSetJson.Identifier}'");
                 }
+
+                ImportContext.GenFiles.Add(savePath);
             }
         }
     }
