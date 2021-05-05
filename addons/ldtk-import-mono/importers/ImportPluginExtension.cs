@@ -1,3 +1,5 @@
+#if TOOLS
+
 using System;
 
 namespace LDtkImport.Importers
@@ -10,3 +12,5 @@ namespace LDtkImport.Importers
     [AttributeUsage(AttributeTargets.Class)]
     public class LDtkImportExtensionAttribute : Attribute { }
 }
+
+#endif

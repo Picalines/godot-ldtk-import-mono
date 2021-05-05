@@ -10,3 +10,4 @@ project.godot
 
 default_env.tres
 icon.png
+export_presets.cfg

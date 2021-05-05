@@ -1,3 +1,5 @@
+#if TOOLS
+
 using Godot.Collections;
 
 namespace LDtkImport.Importers
@@ -11,3 +13,5 @@ namespace LDtkImport.Importers
         public Array GenFiles { get; init; }
     }
 }
+
+#endif

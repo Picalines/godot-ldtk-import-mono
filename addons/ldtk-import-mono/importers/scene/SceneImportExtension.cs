@@ -1,3 +1,5 @@
+#if TOOLS
+
 using Godot;
 
 namespace LDtkImport.Importers
@@ -11,3 +13,5 @@ namespace LDtkImport.Importers
         public virtual void OnSceneBuilt(SceneBase node) { }
     }
 }
+
+#endif

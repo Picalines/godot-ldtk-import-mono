@@ -1,3 +1,5 @@
+#if TOOLS
+
 using Godot;
 using LDtkImport.Json;
 using LDtkImport.Utils;
@@ -47,3 +49,5 @@ namespace LDtkImport.Importers
         };
     }
 }
+
+#endif

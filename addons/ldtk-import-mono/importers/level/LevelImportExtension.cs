@@ -1,3 +1,5 @@
+#if TOOLS
+
 using LDtkImport.Json;
 using Godot;
 
@@ -14,3 +16,5 @@ namespace LDtkImport.Importers
         public virtual Node2D CreateEntity(LevelJson.EntityInstance entityJson) => CreateEntityMarker(entityJson);
     }
 }
+
+#endif

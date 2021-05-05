@@ -1,3 +1,5 @@
+#if TOOLS
+
 using LDtkImport.Json;
 
 namespace LDtkImport.Importers
@@ -7,3 +9,5 @@ namespace LDtkImport.Importers
         public WorldJson WorldJson { get; init; }
     }
 }
+
+#endif

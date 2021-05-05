@@ -1,3 +1,5 @@
+#if TOOLS
+
 using System;
 using Godot;
 using Godot.Collections;
@@ -73,3 +75,5 @@ namespace LDtkImport.Importers
         }
     }
 }
+
+#endif

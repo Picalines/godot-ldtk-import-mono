@@ -1,3 +1,5 @@
+#if TOOLS
+
 using Godot;
 using System.Linq;
 using LDtkImport.Json;
@@ -75,3 +77,5 @@ namespace LDtkImport.Importers
         }
     }
 }
+
+#endif

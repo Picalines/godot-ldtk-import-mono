@@ -1,3 +1,5 @@
+#if TOOLS
+
 using Godot;
 using LDtkImport.Importers;
 
@@ -32,3 +34,5 @@ namespace LDtkImport
         }
     }
 }
+
+#endif

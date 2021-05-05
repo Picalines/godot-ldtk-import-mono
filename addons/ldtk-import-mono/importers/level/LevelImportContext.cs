@@ -1,3 +1,5 @@
+#if TOOLS
+
 using LDtkImport.Json;
 
 namespace LDtkImport.Importers
@@ -8,3 +10,5 @@ namespace LDtkImport.Importers
         public LevelJson LevelJson { get; init; }
     }
 }
+
+#endif
