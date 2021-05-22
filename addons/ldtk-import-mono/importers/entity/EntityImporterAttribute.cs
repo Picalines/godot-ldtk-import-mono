@@ -4,7 +4,7 @@ using System;
 
 namespace LDtkImport.Importers
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class)]
     public class LDtkEntityImporterAttribute : Attribute
     {
         public string EntityIdentifier { get; }
