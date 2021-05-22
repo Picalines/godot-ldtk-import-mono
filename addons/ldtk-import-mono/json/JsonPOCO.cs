@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace LDtkImport.Json
 {
-    public abstract class JsonPOCO<T> where T : class
+    public abstract class JsonPOCO<T> where T : JsonPOCO<T>
     {
         public static T Load(string path)
         {

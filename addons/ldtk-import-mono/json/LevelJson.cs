@@ -88,8 +88,18 @@ namespace LDtkImport.Json
             [JsonProperty("f")]
             public int FlipBits { get; private set; }
 
+            public bool FlipX { get; private set; }
+            public bool FlipY { get; private set; }
+
             [JsonProperty("t")]
             public int Id { get; private set; }
+
+            [OnDeserialized]
+            private void Init(StreamingContext context)
+            {
+                FlipX = System.Convert.ToBoolean(FlipBits & 1);
+                FlipY = System.Convert.ToBoolean(FlipBits & 2);
+            }
         }
 
         public class FieldInstance

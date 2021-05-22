@@ -49,10 +49,8 @@ namespace LDtkImport.Importers
 
             foreach (var tile in tiles)
             {
-                bool flipX = System.Convert.ToBoolean(tile.FlipBits & 1);
-                bool flipY = System.Convert.ToBoolean(tile.FlipBits & 2);
                 Vector2 gridCoords = tileMap.WorldToMap(tile.LayerPxCoords);
-                tileMap.SetCellv(gridCoords, tile.Id, flipX, flipY);
+                tileMap.SetCellv(gridCoords, tile.Id, tile.FlipX, tile.FlipY);
             }
         }
 
