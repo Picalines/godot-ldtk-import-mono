@@ -1,9 +1,10 @@
 #if TOOLS
 
+using Godot;
+using System;
 using System.Linq;
 using LDtkImport.Json;
-using Godot.Collections;
-using Godot;
+using GDArray = Godot.Collections.Array;
 
 namespace LDtkImport.Importers
 {
@@ -13,7 +14,7 @@ namespace LDtkImport.Importers
         public override string GetImporterName() => "ldtk.level";
         public override string GetVisibleName() => "Level Importer";
 
-        public override Array GetRecognizedExtensions() => new() { "ldtkl" };
+        public override GDArray GetRecognizedExtensions() => new() { "ldtkl" };
 
         public override int GetPresetCount() => 1;
         public override string GetPresetName(int preset) => "default";
@@ -35,19 +36,30 @@ namespace LDtkImport.Importers
 
         private void AddLayers(Node2D levelNode)
         {
-            using var entityLayerImporter = new EntityLayerImporter()
+            var tileMapImporter = new Lazy<TileMapLayerImporter>(() => new()
+            {
+                FileContext = ImportContext,
+                SceneContext = SceneContext,
+            });
+
+            var entityLayerImporter = new Lazy<EntityLayerImporter>(() => new()
             {
                 SceneContext = SceneContext,
                 UsedExtension = UsedExtension,
-            };
+            });
 
             foreach (var layer in SceneContext.LevelJson.LayerInstances!.Reverse())
             {
                 Node layerNode = layer.Type == LayerType.Entities
-                    ? entityLayerImporter.Import(layer)
-                    : TileMapLayerImporter.Import(ImportContext, SceneContext, layer);
+                    ? entityLayerImporter.Value.Import(layer)
+                    : tileMapImporter.Value.Import(layer);
 
                 levelNode.AddChild(layerNode);
+            }
+
+            if (entityLayerImporter.IsValueCreated)
+            {
+                entityLayerImporter.Value.Dispose();
             }
         }
     }

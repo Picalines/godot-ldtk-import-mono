@@ -23,11 +23,15 @@ namespace LDtkImport.Importers
 
         public Node2D Import(LevelJson.LayerInstance layer)
         {
-            var entitiesLayer = new Node2D
-            {
-                Name = layer.Identifier,
-            };
+            var entitiesLayer = new Node2D { Name = layer.Identifier };
 
+            AddEntities(layer, entitiesLayer);
+
+            return entitiesLayer;
+        }
+
+        private void AddEntities(LevelJson.LayerInstance layer, Node2D entitiesLayer)
+        {
             foreach (var entityInstance in layer.EntityInstances)
             {
                 var scenePath = UsedExtension?.GetEntityScenePath(entityInstance);
@@ -38,8 +42,6 @@ namespace LDtkImport.Importers
 
                 entitiesLayer.AddChild(entity);
             }
-
-            return entitiesLayer;
         }
 
         private Node2D InstanceEntityScene(LevelJson.EntityInstance entityJson, string scenePath)
@@ -53,11 +55,7 @@ namespace LDtkImport.Importers
 
             sceneInstance.Position = entityJson.PxCoords;
 
-            if (!CachedEntityImporters.TryGetValue(entityJson.Identifier, out var importers))
-            {
-                importers = GetEntityImporters(entityJson.Identifier);
-                CachedEntityImporters.Add(entityJson.Identifier, importers);
-            }
+            var importers = GetEntityImporters(entityJson);
 
             foreach (var importer in importers)
             {
@@ -67,16 +65,23 @@ namespace LDtkImport.Importers
             return sceneInstance;
         }
 
-        private IReadOnlyList<EntityImporterExtension> GetEntityImporters(string entityIdentifier) => GetEntityImporters()
-            .Where(type => type.GetCustomAttribute<LDtkEntityImporterAttribute>().EntityIdentifier == entityIdentifier)
-            .Select(type => CreateEntityImporter(type))
-            .ToList();
+        private IReadOnlyList<EntityImporterExtension> GetEntityImporters(LevelJson.EntityInstance entityJson)
+        {
+            if (!CachedEntityImporters.TryGetValue(entityJson.Identifier, out var importers))
+            {
+                importers = Assembly.GetExecutingAssembly().GetTypes()
+                    .Where(type => Attribute.IsDefined(type, typeof(LDtkEntityImporterAttribute)))
+                    .Where(type => typeof(EntityImporterExtension).IsAssignableFrom(type))
+                    .Where(type => !type.IsAbstract && !type.IsGenericType)
+                    .Where(type => type.GetCustomAttribute<LDtkEntityImporterAttribute>().EntityIdentifier == entityJson.Identifier)
+                    .Select(type => CreateEntityImporter(type))
+                    .ToList();
 
-        private static IEnumerable<Type> GetEntityImporters() => Assembly.GetExecutingAssembly()
-            .GetTypes()
-            .Where(type => Attribute.IsDefined(type, typeof(LDtkEntityImporterAttribute)))
-            .Where(type => typeof(EntityImporterExtension).IsAssignableFrom(type))
-            .Where(type => !type.IsAbstract && !type.IsGenericType);
+                CachedEntityImporters.Add(entityJson.Identifier, importers);
+            }
+
+            return importers;
+        }
 
         private EntityImporterExtension CreateEntityImporter(Type type)
         {

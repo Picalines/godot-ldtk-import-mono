@@ -7,22 +7,14 @@ using LDtkImport.Utils;
 
 namespace LDtkImport.Importers
 {
-    public static class TileMapLayerImporter
+    public class TileMapLayerImporter
     {
-        public static string GetTileSetPath(FileImportContext importContext, LevelImportContext levelContext, int tileSetUid)
-        {
-            var tileSetJson = levelContext.WorldJson.Definitions.TileSets.First(t => t.Uid == tileSetUid);
-            return $"{importContext.SourceFile.GetBaseDir()}/tilesets/{tileSetJson.Identifier}.tres";
-        }
+        public FileImportContext FileContext { get; init; }
+        public LevelImportContext SceneContext { get; init; }
 
-        public static TileMap Import(FileImportContext importContext, LevelImportContext levelContext, LevelJson.LayerInstance layer)
+        public TileMap Import(LevelJson.LayerInstance layer)
         {
-            return Import(GetTileSetPath(importContext, levelContext, layer.TileSetDefUid ?? 0), layer);
-        }
-
-        public static TileMap Import(string path, LevelJson.LayerInstance layer)
-        {
-            var tileSet = GD.Load<TileSet>(path);
+            var tileSet = GD.Load<TileSet>(GetTileSetPath(layer.TileSetDefUid ?? 0));
 
             TileMap tileMap = new()
             {
@@ -72,6 +64,12 @@ namespace LDtkImport.Importers
             }
 
             tileMap.AddChild(intMap);
+        }
+
+        private string GetTileSetPath(int tileSetUid)
+        {
+            var tileSetJson = SceneContext.WorldJson.Definitions.TileSets.First(t => t.Uid == tileSetUid);
+            return $"{FileContext.SourceFile.GetBaseDir()}/tilesets/{tileSetJson.Identifier}.tres";
         }
     }
 }
