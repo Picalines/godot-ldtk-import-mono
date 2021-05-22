@@ -35,10 +35,16 @@ namespace LDtkImport.Importers
 
         private void AddLayers(Node2D levelNode)
         {
+            using var entityLayerImporter = new EntityLayerImporter()
+            {
+                SceneContext = SceneContext,
+                UsedExtension = UsedExtension,
+            };
+
             foreach (var layer in SceneContext.LevelJson.LayerInstances!.Reverse())
             {
                 Node layerNode = layer.Type == LayerType.Entities
-                    ? EntitiesLayerImporter.Import(layer, UsedExtension)
+                    ? entityLayerImporter.Import(layer)
                     : TileMapLayerImporter.Import(ImportContext, SceneContext, layer);
 
                 levelNode.AddChild(layerNode);
