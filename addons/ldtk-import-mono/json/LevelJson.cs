@@ -15,7 +15,7 @@ namespace LDtkImport.Json
         East,
     }
 
-    public class LevelJson : JsonPOCO<LevelJson>
+    public class LevelJson
     {
         [JsonProperty("identifier")]
         public string Identifier { get; private set; }

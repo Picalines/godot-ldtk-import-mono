@@ -20,8 +20,8 @@ namespace LDtkImport.Importers
 
         protected override LevelImportContext GetContext() => new()
         {
-            WorldJson = WorldJson.Load(ImportContext.SourceFile.GetBaseDir() + ".ldtk"),
-            LevelJson = LevelJson.Load(ImportContext.SourceFile),
+            WorldJson = JsonLoader.Load<WorldJson>(ImportContext.SourceFile.GetBaseDir() + ".ldtk"),
+            LevelJson = JsonLoader.Load<LevelJson>(ImportContext.SourceFile),
         };
 
         protected override Node2D BuildScene()

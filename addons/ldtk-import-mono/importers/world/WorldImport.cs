@@ -23,7 +23,7 @@ namespace LDtkImport.Importers
 
         protected override WorldImportContext GetContext() => new()
         {
-            WorldJson = WorldJson.Load(ImportContext.SourceFile)
+            WorldJson = JsonLoader.Load<WorldJson>(ImportContext.SourceFile)
         };
 
         protected override Node2D BuildScene()

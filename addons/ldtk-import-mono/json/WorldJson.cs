@@ -23,7 +23,7 @@ namespace LDtkImport.Json
         AutoLayer,
     }
 
-    public class WorldJson : JsonPOCO<WorldJson>
+    public class WorldJson
     {
         [JsonProperty("jsonVersion")]
         public string JsonVersion { get; private set; }

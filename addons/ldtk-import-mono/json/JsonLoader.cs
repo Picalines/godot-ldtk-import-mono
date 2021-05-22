@@ -5,9 +5,9 @@ using Newtonsoft.Json;
 
 namespace LDtkImport.Json
 {
-    public abstract class JsonPOCO<T> where T : JsonPOCO<T>
+    public static class JsonLoader
     {
-        public static T Load(string path)
+        public static T Load<T>(string path)
         {
             string jsonText;
 
