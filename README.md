@@ -88,7 +88,8 @@ namespace Editor
 public override string? GetEntityScenePath(LevelJson.EntityInstance entity)
 {
     // This will make the plugin to instance your entity scenes in levels
-    return $"res://test/entities/{entity.Identifier}/{entity.Identifier}.tscn";
+    // Return null to ignore
+    return $"res://entities/{entity.Identifier}/{entity.Identifier}.tscn";
 }
 ```
 
