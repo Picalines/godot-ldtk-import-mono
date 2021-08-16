@@ -2,10 +2,10 @@
 
 using Godot;
 using System.Linq;
-using LDtkImport.Json;
-using LDtkImport.Utils;
+using Picalines.Godot.LDtkImport.Json;
+using Picalines.Godot.LDtkImport.Utils;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     public class TileMapLayerImporter
     {

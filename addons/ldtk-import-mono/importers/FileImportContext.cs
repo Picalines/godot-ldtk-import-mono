@@ -2,7 +2,7 @@
 
 using Godot.Collections;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     public record FileImportContext
     {

@@ -1,9 +1,9 @@
 #if TOOLS
 
-using LDtkImport.Json;
+using Picalines.Godot.LDtkImport.Json;
 using Godot;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     public abstract class LevelImportExtension : SceneImportExtension<Node2D, LevelImportContext>
     {

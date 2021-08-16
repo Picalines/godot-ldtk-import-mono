@@ -3,10 +3,10 @@
 using Godot;
 using System;
 using System.Linq;
-using LDtkImport.Json;
+using Picalines.Godot.LDtkImport.Json;
 using GDArray = Godot.Collections.Array;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     [Tool]
     public class LevelImport : SceneImport<Node2D, LevelImportContext, LevelImportExtension>

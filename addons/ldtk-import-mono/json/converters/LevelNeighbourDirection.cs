@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace LDtkImport.Json.Converters
+namespace Picalines.Godot.LDtkImport.Json.Converters
 {
     public class LevelNeighbourDirectionConverter : JsonConverter<LevelNeighbourDirection>
     {

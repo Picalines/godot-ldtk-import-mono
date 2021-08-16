@@ -2,12 +2,12 @@
 
 using Godot;
 using System;
-using LDtkImport.Json;
+using Picalines.Godot.LDtkImport.Json;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     public class EntityLayerImporter : IDisposable
     {

@@ -2,7 +2,7 @@
 
 using System;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     public abstract class ImportPluginExtension
     {

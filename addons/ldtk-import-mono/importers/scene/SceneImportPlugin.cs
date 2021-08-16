@@ -4,7 +4,7 @@ using System;
 using Godot;
 using Godot.Collections;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     public abstract class SceneImport<SceneBase, Context, Extension> : ExtendableImportPlugin<Extension, LDtkImportExtensionAttribute>
         where SceneBase : Node

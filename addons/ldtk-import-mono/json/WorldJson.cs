@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
-using LDtkImport.Json.Converters;
+using Picalines.Godot.LDtkImport.Json.Converters;
 using Godot;
 using System.Runtime.Serialization;
 
-namespace LDtkImport.Json
+namespace Picalines.Godot.LDtkImport.Json
 {
     public enum WorldLayout
     {

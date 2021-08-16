@@ -1,9 +1,9 @@
 #if TOOLS
 
 using Godot;
-using LDtkImport.Importers;
+using Picalines.Godot.LDtkImport.Importers;
 
-namespace LDtkImport
+namespace Picalines.Godot.LDtkImport
 {
     [Tool]
     public class LDtkImportPlugin : EditorPlugin

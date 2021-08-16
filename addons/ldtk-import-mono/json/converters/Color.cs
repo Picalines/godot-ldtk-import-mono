@@ -2,7 +2,7 @@ using System;
 using Godot;
 using Newtonsoft.Json;
 
-namespace LDtkImport.Json.Converters
+namespace Picalines.Godot.LDtkImport.Json.Converters
 {
     public class ColorConverter : JsonConverter<Color>
     {

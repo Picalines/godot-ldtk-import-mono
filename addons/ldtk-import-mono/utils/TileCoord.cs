@@ -1,7 +1,7 @@
 using Godot;
-using LDtkImport.Json;
+using Picalines.Godot.LDtkImport.Json;
 
-namespace LDtkImport.Utils
+namespace Picalines.Godot.LDtkImport.Utils
 {
     public static class TileCoord
     {

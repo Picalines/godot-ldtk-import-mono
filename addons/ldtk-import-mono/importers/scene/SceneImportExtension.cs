@@ -2,7 +2,7 @@
 
 using Godot;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     public abstract class SceneImportExtension<SceneBase, Context> : ImportPluginExtension
         where SceneBase : Node

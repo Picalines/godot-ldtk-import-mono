@@ -1,11 +1,11 @@
 using Godot;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using LDtkImport.Json.Converters;
+using Picalines.Godot.LDtkImport.Json.Converters;
 using System.Runtime.Serialization;
 using Newtonsoft.Json.Converters;
 
-namespace LDtkImport.Json
+namespace Picalines.Godot.LDtkImport.Json
 {
     public enum LevelNeighbourDirection
     {

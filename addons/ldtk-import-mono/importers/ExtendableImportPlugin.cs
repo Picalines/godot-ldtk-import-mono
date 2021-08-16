@@ -8,7 +8,7 @@ using Godot;
 using Godot.Collections;
 using GDArray = Godot.Collections.Array;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     public abstract class ExtendableImportPlugin<Extension, Attribute> : EditorImportPlugin
         where Extension : ImportPluginExtension

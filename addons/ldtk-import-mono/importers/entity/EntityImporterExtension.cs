@@ -1,9 +1,9 @@
 #if TOOLS
 
 using Godot;
-using LDtkImport.Json;
+using Picalines.Godot.LDtkImport.Json;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     public abstract class EntityImporterExtension
     {

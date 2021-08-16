@@ -2,7 +2,7 @@
 
 using System;
 
-namespace LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class LDtkEntityImporterAttribute : Attribute

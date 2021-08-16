@@ -3,7 +3,7 @@ using Godot;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace LDtkImport.Json.Converters
+namespace Picalines.Godot.LDtkImport.Json.Converters
 {
     public class Rect2Converter : JsonConverter<Rect2>
     {

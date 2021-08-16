@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 using Godot;
 using Newtonsoft.Json;
 
-namespace LDtkImport.Json
+namespace Picalines.Godot.LDtkImport.Json
 {
     public static class JsonLoader
     {
