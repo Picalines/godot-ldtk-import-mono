@@ -24,8 +24,8 @@ But the real purpose of the plugin is working with C#
 #if TOOLS // Godot will not be able to export your game without that!
 
 using Godot;
-using LDtkImport.Importers;
-using LDtkImport.Json;
+using Picalines.Godot.LDtkImport.Importers;
+using Picalines.Godot.LDtkImport.Json;
 
 namespace Editor
 {
@@ -57,8 +57,8 @@ namespace Editor
 #if TOOLS
 
 using Godot;
-using LDtkImport.Importers;
-using LDtkImport.Json;
+using Picalines.Godot.LDtkImport.Importers;
+using Picalines.Godot.LDtkImport.Json;
 
 namespace Editor
 {
@@ -110,8 +110,8 @@ And then you want to assign some custom field to `Health` property in the editor
 #if TOOLS
 
 using Godot;
-using LDtkImport.Importers;
-using LDtkImport.Json;
+using Picalines.Godot.LDtkImport.Importers;
+using Picalines.Godot.LDtkImport.Json;
 
 namespace Editor
 {
@@ -130,4 +130,15 @@ namespace Editor
 }
 
 #endif
+```
+
+#### YSorting
+
+```csharp
+public override bool UseYSortForEntityLayer(LevelJson.LayerInstance entityLayer)
+{
+    // This will set type of entity layer node to YSort instead of Node2D
+    // Return conditions to filter specific layers
+    return true;
+}
 ```
