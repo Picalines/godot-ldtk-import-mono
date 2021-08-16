@@ -23,9 +23,19 @@ namespace LDtkImport.Importers
 
         public Node2D Import(LevelJson.LayerInstance layer)
         {
-            var entitiesLayer = new Node2D { Name = layer.Identifier };
+            var entitiesLayer = CreateEntityLayerNode(layer);
 
             AddEntities(layer, entitiesLayer);
+
+            return entitiesLayer;
+        }
+
+        private Node2D CreateEntityLayerNode(LevelJson.LayerInstance layer)
+        {
+            var useYSort = UsedExtension?.UseYSortForEntityLayer(layer) ?? false;
+            var entitiesLayer = useYSort ? new YSort() : new Node2D();
+
+            entitiesLayer.Name = layer.Identifier;
 
             return entitiesLayer;
         }
