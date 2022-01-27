@@ -4,11 +4,7 @@ using Picalines.Godot.LDtkImport.Json;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
-    public record LevelImportContext
-    {
-        public WorldJson WorldJson { get; init; }
-        public LevelJson LevelJson { get; init; }
-    }
+    public sealed record LevelImportContext(WorldJson WorldJson, LevelJson LevelJson);
 }
 
 #endif

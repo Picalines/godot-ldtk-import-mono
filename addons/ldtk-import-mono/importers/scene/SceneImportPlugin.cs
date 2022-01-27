@@ -16,7 +16,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         public override bool GetOptionVisibility(string option, Dictionary options) => true;
 
-        protected Context SceneContext { get; private set; }
+        protected Context SceneContext { get; private set; } = null!;
 
         protected abstract Context GetContext();
         protected abstract SceneBase BuildScene();

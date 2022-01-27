@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
-using Godot;
 using Newtonsoft.Json;
+using Godot;
 
 namespace Picalines.Godot.LDtkImport.Json
 {
@@ -9,35 +9,23 @@ namespace Picalines.Godot.LDtkImport.Json
     {
         public static T Load<T>(string path)
         {
-            string jsonText;
+            using var file = new File();
 
-            using (var file = new File())
+            if (file.Open(path, File.ModeFlags.Read) != Error.Ok)
             {
-                var openError = file.Open(path, File.ModeFlags.Read);
-                if (openError != Error.Ok)
-                {
-                    throw new Exception($"File not found at {path}");
-                }
-
-                jsonText = file.GetAsText();
+                throw new System.IO.FileNotFoundException($"json file not found at {path}");
             }
 
-            T? result;
+            var jsonText = file.GetAsText();
 
             try
             {
-                result = JsonConvert.DeserializeObject<T>(jsonText);
-                if (result is null)
-                {
-                    throw new NullReferenceException($"{nameof(JsonConvert.DeserializeObject)} returned null");
-                }
+                return JsonConvert.DeserializeObject<T>(jsonText) ?? throw new NullReferenceException();
             }
             catch (Exception exception)
             {
-                throw new SerializationException($"Error on parsing json at '{path}' ({exception.GetType().FullName}): {exception.Message}", exception);
+                throw new SerializationException($"invalid json file {path}", exception);
             }
-
-            return result;
         }
     }
 }

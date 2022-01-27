@@ -1,9 +1,11 @@
-using Godot;
-using Newtonsoft.Json;
 using System.Collections.Generic;
-using Picalines.Godot.LDtkImport.Json.Converters;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Godot;
+using Picalines.Godot.LDtkImport.Json.Converters;
+
+#pragma warning disable CS8618
 
 namespace Picalines.Godot.LDtkImport.Json
 {
@@ -15,8 +17,10 @@ namespace Picalines.Godot.LDtkImport.Json
         East,
     }
 
-    public class LevelJson
+    public sealed class LevelJson
     {
+        private LevelJson() { }
+
         [JsonProperty("identifier")]
         public string Identifier { get; private set; }
 
@@ -65,8 +69,10 @@ namespace Picalines.Godot.LDtkImport.Json
             PxSize = new Vector2(PxWidth, PxHeight);
         }
 
-        public class Neighbour
+        public sealed class Neighbour
         {
+            private Neighbour() { }
+
             [JsonProperty("levelUid")]
             public int LevelUid { get; private set; }
 
@@ -75,8 +81,10 @@ namespace Picalines.Godot.LDtkImport.Json
             public LevelNeighbourDirection Direction { get; private set; }
         }
 
-        public class TileInstance
+        public sealed class TileInstance
         {
+            private TileInstance() { }
+
             [JsonProperty("px")]
             [JsonConverter(typeof(Vector2Converter))]
             public Vector2 LayerPxCoords { get; private set; }
@@ -102,8 +110,10 @@ namespace Picalines.Godot.LDtkImport.Json
             }
         }
 
-        public class FieldInstance
+        public sealed class FieldInstance
         {
+            private FieldInstance() { }
+
             [JsonProperty("__identifier")]
             public string Identifier { get; private set; }
 
@@ -117,10 +127,12 @@ namespace Picalines.Godot.LDtkImport.Json
             public string DefUid { get; private set; }
         }
 
-        public class EntityInstance
+        public sealed class EntityInstance
         {
-            public class TileDisplay
+            public sealed class TileDisplay
             {
+                private TileDisplay() { }
+
                 [JsonProperty("tilesetUid")]
                 public int TileSetUid { get; private set; }
 
@@ -128,6 +140,8 @@ namespace Picalines.Godot.LDtkImport.Json
                 [JsonConverter(typeof(Rect2Converter))]
                 public Rect2 SrcRect { get; private set; }
             }
+
+            private EntityInstance() { }
 
             [JsonProperty("__identifier")]
             public string Identifier { get; private set; }
@@ -168,8 +182,10 @@ namespace Picalines.Godot.LDtkImport.Json
             }
         }
 
-        public class LayerInstance
+        public sealed class LayerInstance
         {
+            private LayerInstance() { }
+
             [JsonProperty("__identifier")]
             public string Identifier { get; private set; }
 

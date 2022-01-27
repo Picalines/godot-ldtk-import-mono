@@ -7,10 +7,16 @@ using Picalines.Godot.LDtkImport.Utils;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
-    public class TileMapLayerImporter
+    public sealed class TileMapLayerImporter
     {
-        public FileImportContext FileContext { get; init; }
-        public LevelImportContext SceneContext { get; init; }
+        public readonly FileImportContext FileContext;
+        public readonly LevelImportContext SceneContext;
+
+        public TileMapLayerImporter(FileImportContext fileContext, LevelImportContext sceneContext)
+        {
+            FileContext = fileContext;
+            SceneContext = sceneContext;
+        }
 
         public TileMap Import(LevelJson.LayerInstance layer)
         {

@@ -6,11 +6,16 @@ namespace Picalines.Godot.LDtkImport.Importers
 {
     public abstract class ImportPluginExtension
     {
-        public FileImportContext ImportContext { get; init; }
+        public readonly FileImportContext ImportContext;
+
+        public ImportPluginExtension(FileImportContext importContext)
+        {
+            ImportContext = importContext;
+        }
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class LDtkImportExtensionAttribute : Attribute { }
+    public sealed class LDtkImportExtensionAttribute : Attribute { }
 }
 
 #endif

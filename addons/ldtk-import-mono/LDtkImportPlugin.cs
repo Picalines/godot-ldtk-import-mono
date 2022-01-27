@@ -6,7 +6,7 @@ using Picalines.Godot.LDtkImport.Importers;
 namespace Picalines.Godot.LDtkImport
 {
     [Tool]
-    public class LDtkImportPlugin : EditorPlugin
+    internal sealed class LDtkImportPlugin : EditorPlugin
     {
         private WorldImport? WorldImportPlugin;
         private LevelImport? LevelImportPlugin;

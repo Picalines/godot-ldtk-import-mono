@@ -8,7 +8,12 @@ namespace Picalines.Godot.LDtkImport.Importers
         where SceneBase : Node
         where Context : class
     {
-        public Context SceneContext { get; init; }
+        public readonly Context SceneContext;
+
+        public SceneImportExtension(FileImportContext importContext, Context sceneContext) : base(importContext)
+        {
+            SceneContext = sceneContext;
+        }
 
         public virtual void OnSceneBuilt(SceneBase node) { }
     }

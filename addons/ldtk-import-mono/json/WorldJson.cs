@@ -1,9 +1,11 @@
 using System.Collections.Generic;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json;
-using Picalines.Godot.LDtkImport.Json.Converters;
-using Godot;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Godot;
+using Picalines.Godot.LDtkImport.Json.Converters;
+
+#pragma warning disable CS8618
 
 namespace Picalines.Godot.LDtkImport.Json
 {
@@ -23,8 +25,10 @@ namespace Picalines.Godot.LDtkImport.Json
         AutoLayer,
     }
 
-    public class WorldJson
+    public sealed class WorldJson
     {
+        private WorldJson() { }
+
         [JsonProperty("jsonVersion")]
         public string JsonVersion { get; private set; }
 
@@ -75,8 +79,10 @@ namespace Picalines.Godot.LDtkImport.Json
             WorldGridSize = new Vector2(WorldGridWidth, WorldGridHeight);
         }
 
-        public class IntGridValueDefinition
+        public sealed class IntGridValueDefinition
         {
+            private IntGridValueDefinition() { }
+
             [JsonProperty("identifier")]
             public string? Identifier { get; private set; }
 
@@ -88,8 +94,10 @@ namespace Picalines.Godot.LDtkImport.Json
             public int Value { get; private set; }
         }
 
-        public class LayerDefinition
+        public sealed class LayerDefinition
         {
+            private LayerDefinition() { }
+
             [JsonProperty("identifier")]
             public string Identifier { get; private set; }
 
@@ -136,8 +144,10 @@ namespace Picalines.Godot.LDtkImport.Json
             }
         }
 
-        public class EntityDefinition
+        public sealed class EntityDefinition
         {
+            private EntityDefinition() { }
+
             [JsonProperty("identifier")]
             public string Identifier { get; private set; }
 
@@ -180,10 +190,14 @@ namespace Picalines.Godot.LDtkImport.Json
             }
         }
 
-        public class TileSetDefinition
+        public sealed class TileSetDefinition
         {
-            public class TileCustomData
+            private TileSetDefinition() { }
+
+            public sealed class TileCustomData
             {
+                private TileCustomData() { }
+
                 [JsonProperty("tileId")]
                 public int TileId { get; private set; }
 
@@ -193,8 +207,10 @@ namespace Picalines.Godot.LDtkImport.Json
                 public T? AsJson<T>() => JsonConvert.DeserializeObject<T>(Data);
             }
 
-            public class TileEnumTag
+            public sealed class TileEnumTag
             {
+                private TileEnumTag() { }
+
                 [JsonProperty("enumValueId")]
                 public string EnumValueId { get; private set; }
 
@@ -256,8 +272,10 @@ namespace Picalines.Godot.LDtkImport.Json
             }
         }
 
-        public class EnumValue
+        public sealed class EnumValue
         {
+            private EnumValue() { }
+
             [JsonProperty("id")]
             public string Id { get; private set; }
 
@@ -274,6 +292,8 @@ namespace Picalines.Godot.LDtkImport.Json
 
         public class Enum
         {
+            protected Enum() { }
+
             [JsonProperty("identifier")]
             public string Identifier { get; private set; }
 
@@ -292,12 +312,16 @@ namespace Picalines.Godot.LDtkImport.Json
 
         public class ExternalEnum : Enum
         {
+            private ExternalEnum() { }
+
             [JsonProperty("relPath")]
             public string RelPath { get; private set; }
         }
 
-        public class DefinitionsCollection
+        public sealed class DefinitionsCollection
         {
+            private DefinitionsCollection() { }
+
             [JsonProperty("layers")]
             public IReadOnlyList<LayerDefinition> Layers { get; private set; }
 

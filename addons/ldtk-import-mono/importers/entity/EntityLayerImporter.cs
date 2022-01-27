@@ -11,10 +11,16 @@ namespace Picalines.Godot.LDtkImport.Importers
 {
     public class EntityLayerImporter : IDisposable
     {
-        public LevelImportContext SceneContext { get; init; }
-        public LevelImportExtension? UsedExtension { get; init; }
+        public LevelImportContext SceneContext;
+        public LevelImportExtension? UsedExtension;
 
         private readonly Dictionary<string, IReadOnlyList<EntityImporterExtension>> CachedEntityImporters = new();
+
+        public EntityLayerImporter(LevelImportContext sceneContext, LevelImportExtension? usedExtension)
+        {
+            SceneContext = sceneContext;
+            UsedExtension = usedExtension;
+        }
 
         public void Dispose()
         {

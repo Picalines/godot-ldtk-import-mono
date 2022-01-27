@@ -16,21 +16,20 @@ namespace Picalines.Godot.LDtkImport.Importers
     {
         public override GDArray GetImportOptions(int preset) => new();
 
-        protected FileImportContext ImportContext { get; private set; }
+        protected FileImportContext ImportContext { get; private set; } = null!;
         protected Extension? UsedExtension { get; private set; }
 
         protected abstract Error Import();
 
         public sealed override int Import(string sourceFile, string savePath, Dictionary options, GDArray platformVariants, GDArray genFiles)
         {
-            ImportContext = new FileImportContext
-            {
-                SourceFile = sourceFile,
-                SavePath = savePath,
-                Options = options,
-                PlatformVariants = platformVariants,
-                GenFiles = genFiles
-            };
+            ImportContext = new FileImportContext(
+                sourceFile,
+                savePath,
+                options,
+                platformVariants,
+                genFiles
+            );
 
             UsedExtension = GetExtension();
 

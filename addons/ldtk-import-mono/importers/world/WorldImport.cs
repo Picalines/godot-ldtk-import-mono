@@ -9,10 +9,10 @@ using GDArray = Godot.Collections.Array;
 namespace Picalines.Godot.LDtkImport.Importers
 {
     [Tool]
-    public class WorldImport : SceneImport<Node2D, WorldImportContext, WorldImportExtension>
+    public sealed class WorldImport : SceneImport<Node2D, WorldImportContext, WorldImportExtension>
     {
         public override string GetImporterName() => "ldtk.world";
-        public override string GetVisibleName() => "World Importer";
+        public override string GetVisibleName() => "LDtk World";
 
         public override GDArray GetRecognizedExtensions() => new() { "ldtk" };
 
@@ -21,10 +21,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         public override bool GetOptionVisibility(string option, Dictionary options) => true;
 
-        protected override WorldImportContext GetContext() => new()
-        {
-            WorldJson = JsonLoader.Load<WorldJson>(ImportContext.SourceFile)
-        };
+        protected override WorldImportContext GetContext() => new(JsonLoader.Load<WorldJson>(ImportContext.SourceFile));
 
         protected override Node2D BuildScene()
         {
@@ -72,13 +69,6 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
         }
 
-        private void CheckRequiredDirs()
-        {
-            using var dir = new Directory();
-            var baseDir = ImportContext.SourceFile.BaseName();
-            dir.MakeDirRecursive(baseDir + "/tilesets");
-        }
-
         private void ImportTileSets()
         {
             string tileSetsDir = ImportContext.SourceFile.BaseName() + "/tilesets";
@@ -99,6 +89,13 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 ImportContext.GenFiles.Add(savePath);
             }
+        }
+
+        private void CheckRequiredDirs()
+        {
+            using var dir = new Directory();
+            var baseDir = ImportContext.SourceFile.BaseName();
+            dir.MakeDirRecursive(baseDir + "/tilesets");
         }
     }
 }
