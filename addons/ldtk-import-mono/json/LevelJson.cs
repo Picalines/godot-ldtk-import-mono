@@ -227,7 +227,7 @@ namespace Picalines.Godot.LDtkImport.Json
             public int LevelId { get; private set; }
 
             [JsonProperty("layerDefUid")]
-            public int LayerDefUid { get; private set; }
+            public int DefUid { get; private set; }
 
             [JsonProperty("pxOffsetX")]
             public int PxOffsetX { get; private set; }

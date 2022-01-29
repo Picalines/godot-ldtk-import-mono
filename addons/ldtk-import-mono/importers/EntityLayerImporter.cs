@@ -1,33 +1,25 @@
 #if TOOLS
 
+using System.Linq;
 using Godot;
 using Picalines.Godot.LDtkImport.Json;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
-    public sealed class EntityLayerImporter
+    internal static class EntityLayerImporter
     {
-        public const string EntityScenePathReplaceTarget = "$";
-
-        private readonly string _EntityScenePath;
-
-        public EntityLayerImporter(string entityScenePathOption)
+        public static Node2D Import(string entityPathTemplate, WorldJson worldJson, LevelJson.LayerInstance layer)
         {
-            _EntityScenePath = entityScenePathOption;
-        }
+            var entitiesLayer = CreateEntityLayerNode(worldJson, layer);
 
-        public Node2D Import(LevelJson.LayerInstance layer)
-        {
-            var entitiesLayer = CreateEntityLayerNode(layer);
-
-            AddEntities(layer, entitiesLayer);
+            AddEntities(entityPathTemplate, layer, entitiesLayer);
 
             return entitiesLayer;
         }
 
-        private Node2D CreateEntityLayerNode(LevelJson.LayerInstance layer)
+        private static Node2D CreateEntityLayerNode(WorldJson worldJson, LevelJson.LayerInstance layer)
         {
-            var useYSort = false; // TODO
+            var useYSort = worldJson.Definitions.Layers.First(l => l.Uid == layer.DefUid).RequiredTags.Contains(nameof(YSort));
             var entitiesLayer = useYSort ? new YSort() : new Node2D();
 
             entitiesLayer.Name = layer.Identifier;
@@ -35,13 +27,13 @@ namespace Picalines.Godot.LDtkImport.Importers
             return entitiesLayer;
         }
 
-        private void AddEntities(LevelJson.LayerInstance layer, Node2D entitiesLayer)
+        private static void AddEntities(string entityPathTemplate, LevelJson.LayerInstance layer, Node2D entitiesLayer)
         {
             LDtkFieldAssigner.Initialize();
 
             foreach (var entityInstance in layer.EntityInstances)
             {
-                var scenePath = GetEntityScenePath(entityInstance);
+                var scenePath = LevelImportPlugin.GetEntityScenePath(entityPathTemplate, entityInstance);
 
                 var entity = TryInstanceEntityScene(entityInstance, scenePath);
 
@@ -52,7 +44,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
         }
 
-        private Node? TryInstanceEntityScene(LevelJson.EntityInstance entityJson, string scenePath)
+        private static Node? TryInstanceEntityScene(LevelJson.EntityInstance entityJson, string scenePath)
         {
             using (var file = new File())
             {
@@ -78,11 +70,6 @@ namespace Picalines.Godot.LDtkImport.Importers
             LDtkFieldAssigner.Assign(entityJson, sceneInstance);
 
             return sceneInstance;
-        }
-
-        private string GetEntityScenePath(LevelJson.EntityInstance entityInstance)
-        {
-            return _EntityScenePath.Replace(EntityScenePathReplaceTarget, entityInstance.Identifier);
         }
     }
 }

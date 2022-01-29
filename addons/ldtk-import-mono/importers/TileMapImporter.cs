@@ -7,20 +7,11 @@ using Picalines.Godot.LDtkImport.Utils;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
-    public sealed class TileMapLayerImporter
+    internal static class TileMapImporter
     {
-        private readonly string _SourceFile;
-        private readonly WorldJson _WorldJson;
-
-        public TileMapLayerImporter(string sourceFile, WorldJson levelJson)
+        public static TileMap Import(string sourceFile, WorldJson worldJson, LevelJson.LayerInstance layer)
         {
-            _SourceFile = sourceFile;
-            _WorldJson = levelJson;
-        }
-
-        public TileMap Import(LevelJson.LayerInstance layer)
-        {
-            var tileSet = GD.Load<TileSet>(GetTileSetPath(layer.TileSetDefUid ?? 0));
+            var tileSet = GD.Load<TileSet>(GetTileSetPath(sourceFile, worldJson, layer.TileSetDefUid ?? 0));
 
             var tileMap = new TileMap()
             {
@@ -72,10 +63,10 @@ namespace Picalines.Godot.LDtkImport.Importers
             tileMap.AddChild(intMap);
         }
 
-        private string GetTileSetPath(int tileSetUid)
+        private static string GetTileSetPath(string sourceFile, WorldJson worldJson, int tileSetUid)
         {
-            var tileSetJson = _WorldJson.Definitions.TileSets.First(t => t.Uid == tileSetUid);
-            return $"{_SourceFile.GetBaseDir()}/tilesets/{tileSetJson.Identifier}.tres";
+            var tileSetJson = worldJson.Definitions.TileSets.First(t => t.Uid == tileSetUid);
+            return $"{sourceFile.GetBaseDir()}/{WorldImportPlugin.TileSetsDirectory}/{tileSetJson.Identifier}.tres";
         }
     }
 }

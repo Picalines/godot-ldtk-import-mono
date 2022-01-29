@@ -1,7 +1,6 @@
 #if TOOLS
 
 using Godot;
-using System;
 using System.Linq;
 using Picalines.Godot.LDtkImport.Json;
 using GDArray = Godot.Collections.Array;
@@ -12,6 +11,8 @@ namespace Picalines.Godot.LDtkImport.Importers
     [Tool]
     public sealed class LevelImportPlugin : EditorSceneImportPlugin
     {
+        public const string EntityScenePathReplaceTarget = "$";
+
         private const string EntityScenePath = "EntityScenePath";
 
         public override string GetImporterName() => "ldtk.level";
@@ -24,7 +25,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             new GDDictionary()
             {
                 ["name"] = EntityScenePath,
-                ["default_value"] = $"res://entities/{EntityLayerImporter.EntityScenePathReplaceTarget}/",
+                ["default_value"] = $"res://entities/{EntityScenePathReplaceTarget}/{EntityScenePathReplaceTarget}.tscn",
             }
         };
 
@@ -40,20 +41,21 @@ namespace Picalines.Godot.LDtkImport.Importers
             return levelNode;
         }
 
-        private void AddLayers(string sourceFile, string entityScenePath, WorldJson worldJson, LevelJson levelJson, Node2D levelNode)
+        private void AddLayers(string sourceFile, string entityPathTemplate, WorldJson worldJson, LevelJson levelJson, Node2D levelNode)
         {
-            var tileMapImporter = new Lazy<TileMapLayerImporter>(() => new(sourceFile, worldJson));
-
-            var entityLayerImporter = new Lazy<EntityLayerImporter>(() => new(entityScenePath));
-
             foreach (var layer in levelJson.LayerInstances!.Reverse())
             {
                 var layerNode = layer.Type == LayerType.Entities
-                    ? entityLayerImporter.Value.Import(layer)
-                    : tileMapImporter.Value.Import(layer);
+                    ? EntityLayerImporter.Import(entityPathTemplate, worldJson, layer)
+                    : TileMapImporter.Import(sourceFile, worldJson, layer);
 
                 levelNode.AddChild(layerNode);
             }
+        }
+
+        public static string GetEntityScenePath(string entityPathTemplate, LevelJson.EntityInstance entityInstance)
+        {
+            return entityPathTemplate.Replace(EntityScenePathReplaceTarget, entityInstance.Identifier);
         }
     }
 }

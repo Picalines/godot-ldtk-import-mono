@@ -124,6 +124,12 @@ namespace Picalines.Godot.LDtkImport.Json
 
             public Vector2 PxOffset { get; private set; }
 
+            [JsonProperty("requiredTags")]
+            public IReadOnlyList<string> RequiredTags { get; private set; }
+
+            [JsonProperty("excludedTags")]
+            public IReadOnlyList<string> ExcludedTags { get; private set; }
+
             [JsonProperty("intGridValues")]
             public IReadOnlyList<IntGridValueDefinition>? IntGridValues { get; private set; }
 
@@ -153,6 +159,9 @@ namespace Picalines.Godot.LDtkImport.Json
 
             [JsonProperty("uid")]
             public int Uid { get; private set; }
+
+            [JsonProperty("tags")]
+            public IReadOnlyList<string> Tags { get; private set; }
 
             [JsonProperty("width")]
             public int Width { get; private set; }

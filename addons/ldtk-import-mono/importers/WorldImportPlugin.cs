@@ -10,7 +10,8 @@ namespace Picalines.Godot.LDtkImport.Importers
     [Tool]
     public sealed class WorldImportPlugin : EditorSceneImportPlugin
     {
-        private const string TileSetsDirectory = "/tilesets";
+        public const string TileSetsDirectory = "tilesets";
+
         private const string BaseScenePath = "BaseScenePath";
         private const string LevelsParentName = "LevelsParentName";
 
@@ -92,7 +93,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         private void ImportTileSets(string sourceFile, GDArray genFiles, WorldJson worldJson)
         {
-            var tileSetsDir = sourceFile.BaseName() + TileSetsDirectory;
+            var tileSetsDir = $"{sourceFile.BaseName()}/{TileSetsDirectory}";
 
             foreach (var tileSetJson in worldJson.Definitions.TileSets)
             {
