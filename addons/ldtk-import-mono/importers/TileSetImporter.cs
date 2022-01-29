@@ -11,9 +11,9 @@ namespace Picalines.Godot.LDtkImport.Importers
         public static TileSet Import(WorldJson.TileSetDefinition tileSetJson, string sourceFile)
         {
             var texture = GD.Load<Texture>(GetTexturePath(tileSetJson, sourceFile));
-            Image textureImage = texture.GetData();
+            var textureImage = texture.GetData();
 
-            TileSet tileSet = new();
+            var tileSet = new TileSet();
 
             int tileFullSize = tileSetJson.TileGridSize + tileSetJson.Spacing;
             int gridWidth = (tileSetJson.PxWidth - tileSetJson.Padding) / tileFullSize;

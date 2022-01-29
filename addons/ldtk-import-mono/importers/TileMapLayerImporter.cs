@@ -9,20 +9,20 @@ namespace Picalines.Godot.LDtkImport.Importers
 {
     public sealed class TileMapLayerImporter
     {
-        public readonly FileImportContext FileContext;
-        public readonly LevelImportContext SceneContext;
+        private readonly string _SourceFile;
+        private readonly WorldJson _WorldJson;
 
-        public TileMapLayerImporter(FileImportContext fileContext, LevelImportContext sceneContext)
+        public TileMapLayerImporter(string sourceFile, WorldJson levelJson)
         {
-            FileContext = fileContext;
-            SceneContext = sceneContext;
+            _SourceFile = sourceFile;
+            _WorldJson = levelJson;
         }
 
         public TileMap Import(LevelJson.LayerInstance layer)
         {
             var tileSet = GD.Load<TileSet>(GetTileSetPath(layer.TileSetDefUid ?? 0));
 
-            TileMap tileMap = new()
+            var tileMap = new TileMap()
             {
                 TileSet = tileSet,
                 Name = layer.Identifier,
@@ -54,7 +54,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         private static void AddIntGrid(LevelJson.LayerInstance layer, TileMap tileMap)
         {
-            TileMap intMap = new()
+            var intMap = new TileMap()
             {
                 Name = "IntGrid",
                 CellSize = tileMap.CellSize,
@@ -74,8 +74,8 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         private string GetTileSetPath(int tileSetUid)
         {
-            var tileSetJson = SceneContext.WorldJson.Definitions.TileSets.First(t => t.Uid == tileSetUid);
-            return $"{FileContext.SourceFile.GetBaseDir()}/tilesets/{tileSetJson.Identifier}.tres";
+            var tileSetJson = _WorldJson.Definitions.TileSets.First(t => t.Uid == tileSetUid);
+            return $"{_SourceFile.GetBaseDir()}/tilesets/{tileSetJson.Identifier}.tres";
         }
     }
 }

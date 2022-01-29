@@ -8,15 +8,15 @@ namespace Picalines.Godot.LDtkImport
     [Tool]
     internal sealed class LDtkImportPlugin : EditorPlugin
     {
-        private WorldImport? WorldImportPlugin;
-        private LevelImport? LevelImportPlugin;
+        private WorldImportPlugin? WorldImportPlugin;
+        private LevelImportPlugin? LevelImportPlugin;
 
         public override void _EnterTree()
         {
             base._EnterTree();
 
-            WorldImportPlugin = new WorldImport();
-            LevelImportPlugin = new LevelImport();
+            WorldImportPlugin = new WorldImportPlugin();
+            LevelImportPlugin = new LevelImportPlugin();
 
             AddImportPlugin(WorldImportPlugin);
             AddImportPlugin(LevelImportPlugin);
