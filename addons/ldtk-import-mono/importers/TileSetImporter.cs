@@ -8,21 +8,44 @@ namespace Picalines.Godot.LDtkImport.Importers
 {
     public static class TileSetImporter
     {
-        public static TileSet Import(WorldJson.TileSetDefinition tileSetJson, string sourceFile)
+        public static TileSet CreateNew(WorldJson.TileSetDefinition tileSetJson, string sourceFile)
         {
             var texture = GD.Load<Texture>(GetTexturePath(tileSetJson, sourceFile));
             var textureImage = texture.GetData();
 
             var tileSet = new TileSet();
 
+            UpdateTiles(tileSet, tileSetJson, texture, textureImage);
+
+            return tileSet;
+        }
+
+        public static void ApplyChanges(TileSet tileSet, WorldJson.TileSetDefinition tileSetJson, string sourceFile)
+        {
+            var texture = GD.Load<Texture>(GetTexturePath(tileSetJson, sourceFile));
+            var textureImage = texture.GetData();
+
+            UpdateTiles(tileSet, tileSetJson, texture, textureImage);
+        }
+
+        private static void UpdateTiles(TileSet tileSet, WorldJson.TileSetDefinition tileSetJson, Texture texture, Image textureImage)
+        {
             int tileFullSize = tileSetJson.TileGridSize + tileSetJson.Spacing;
             int gridWidth = (tileSetJson.PxWidth - tileSetJson.Padding) / tileFullSize;
             int gridHeight = (tileSetJson.PxHeight - tileSetJson.Padding) / tileFullSize;
 
             int gridSize = gridWidth * gridHeight;
 
+            var usedTileIds = tileSet.GetTilesIds();
+
             for (int tileId = 0; tileId < gridSize; tileId++)
             {
+                if (usedTileIds.Contains(tileId))
+                {
+                    tileSet.TileSetTexture(tileId, texture);
+                    continue;
+                }
+
                 var tileRegion = GetTileRegion(tileId, tileSetJson);
 
                 if (!textureImage.GetRect(tileRegion).IsInvisible())
@@ -33,8 +56,6 @@ namespace Picalines.Godot.LDtkImport.Importers
                     tileSet.TileSetRegion(tileId, tileRegion);
                 }
             }
-
-            return tileSet;
         }
 
         private static string GetTexturePath(WorldJson.TileSetDefinition tileSetJson, string worldSourceFile)

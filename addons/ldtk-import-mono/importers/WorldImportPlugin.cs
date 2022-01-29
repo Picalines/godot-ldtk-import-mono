@@ -96,12 +96,23 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             foreach (var tileSetJson in worldJson.Definitions.TileSets)
             {
-                var tileSet = TileSetImporter.Import(tileSetJson, sourceFile);
-
                 var savePath = $"{tileSetsDir}/{tileSetJson.Identifier}.tres";
 
-                var saveResult = ResourceSaver.Save(savePath, tileSet);
-                if (saveResult != Error.Ok)
+                TileSet tileSet;
+
+                using (var file = new File())
+                {
+                    if (file.FileExists(savePath))
+                    {
+                        tileSet = GD.Load<TileSet>(savePath);
+                        TileSetImporter.ApplyChanges(tileSet, tileSetJson, sourceFile);
+                        continue;
+                    }
+                }
+
+                tileSet = TileSetImporter.CreateNew(tileSetJson, sourceFile);
+
+                if (ResourceSaver.Save(savePath, tileSet) != Error.Ok)
                 {
                     GD.PushError($"failed to import tileset '{tileSetJson.Identifier}'");
                     continue;
