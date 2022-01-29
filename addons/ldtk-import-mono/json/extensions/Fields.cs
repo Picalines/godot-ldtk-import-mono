@@ -6,22 +6,22 @@ using static Picalines.Godot.LDtkImport.Json.LevelJson;
 
 namespace Picalines.Godot.LDtkImport.Json
 {
-    public static class FieldInstanceCollection
+    public static class FieldInstanceCollectionExtensions
     {
-        public static FieldInstance FindField(this IReadOnlyCollection<FieldInstance> fieldInstances, string identifier, string? typeName)
+        public static FieldInstance? FindField(this IEnumerable<FieldInstance> fieldInstances, string identifier, string? typeName)
         {
             return typeName is not null
                 ? fieldInstances.FirstOrDefault(f => f.Identifier == identifier && f.Type == typeName)
                 : fieldInstances.FirstOrDefault(f => f.Identifier == identifier);
         }
 
-        public static T? GetValue<T>(this IReadOnlyCollection<FieldInstance> fieldInstances, string identifier, string? typeName = null)
+        public static T? GetValue<T>(this IEnumerable<FieldInstance> fieldInstances, string identifier, string? typeName = null)
         {
             var field = fieldInstances.FindField(identifier, typeName);
             return field is not null ? (T)field.Value : default;
         }
 
-        public static bool TryGetValue<T>(this IReadOnlyCollection<FieldInstance> fieldInstances, string identifier, string? typeName, out T value)
+        public static bool TryGetValue<T>(this IEnumerable<FieldInstance> fieldInstances, string identifier, string? typeName, out T value)
         {
             var field = fieldInstances.FindField(identifier, typeName);
 
@@ -35,7 +35,7 @@ namespace Picalines.Godot.LDtkImport.Json
             return false;
         }
 
-        public static bool TryGetValue<T>(this IReadOnlyCollection<FieldInstance> fieldInstances, string identifier, out T value)
+        public static bool TryGetValue<T>(this IEnumerable<FieldInstance> fieldInstances, string identifier, out T value)
         {
             return fieldInstances.TryGetValue(identifier, null, out value);
         }
