@@ -4,6 +4,7 @@ using Godot;
 using System.Linq;
 using Picalines.Godot.LDtkImport.Json;
 using Picalines.Godot.LDtkImport.Utils;
+using System.Collections.Generic;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
@@ -22,9 +23,13 @@ namespace Picalines.Godot.LDtkImport.Importers
                 Modulate = new Color(1, 1, 1, layer.Opacity),
             };
 
-            SetTiles(layer, tileMap);
+            var tileSetDef = worldJson.Definitions.TileSets.First(t => t.Uid == layer.TileSetDefUid);
 
-            if (layer.Type == LayerType.IntGrid)
+            Dictionary<int, Dictionary<string, object>> tileCustomData = GetTileEntityCustomData(tileSetDef);
+
+            SetTiles(layer, tileMap, tileCustomData);
+
+            if (layer.Type is LayerType.IntGrid)
             {
                 AddIntGrid(layer, tileMap);
             }
@@ -32,14 +37,21 @@ namespace Picalines.Godot.LDtkImport.Importers
             return tileMap;
         }
 
-        private static void SetTiles(LevelJson.LayerInstance layer, TileMap tileMap)
+        private static void SetTiles(LevelJson.LayerInstance layer, TileMap tileMap, Dictionary<int, Dictionary<string, object>> tileScenes)
         {
-            var tiles = layer.Type == LayerType.Tiles ? layer.GridTiles : layer.AutoLayerTiles;
+            var tiles = layer.Type is LayerType.Tiles ? layer.GridTiles : layer.AutoLayerTiles;
 
             foreach (var tile in tiles)
             {
-                Vector2 gridCoords = tileMap.WorldToMap(tile.LayerPxCoords);
-                tileMap.SetCellv(gridCoords, tile.Id, tile.FlipX, tile.FlipY);
+                if (tileScenes.TryGetValue(tile.Id, out var customData))
+                {
+                    InstanceSceneAtTile(tileMap, tile, customData);
+                }
+                else
+                {
+                    var gridCoords = tileMap.WorldToMap(tile.LayerPxCoords);
+                    tileMap.SetCellv(gridCoords, tile.Id, tile.FlipX, tile.FlipY);
+                }
             }
         }
 
@@ -61,6 +73,38 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
 
             tileMap.AddChild(intMap);
+        }
+
+        private static void InstanceSceneAtTile(TileMap tileMap, LevelJson.TileInstance tile, Dictionary<string, object> customData)
+        {
+            var packedScene = GD.Load<PackedScene>(customData["scene"].ToString());
+            var sceneInstance = packedScene.Instance<Node>();
+
+            if (sceneInstance is Node2D node2D)
+            {
+                node2D.Position = tile.LayerPxCoords + tileMap.CellSize / 2;
+            }
+
+            LDtkFieldAssigner.Assign(sceneInstance, customData);
+
+            tileMap.AddChild(sceneInstance);
+        }
+
+        private static Dictionary<int, Dictionary<string, object>> GetTileEntityCustomData(WorldJson.TileSetDefinition tileSetDef)
+        {
+            Dictionary<int, Dictionary<string, object>> tileCustomData = new();
+
+            foreach (var customData in tileSetDef.CustomData)
+            {
+                var jsonData = customData.AsJson<Dictionary<string, object>>();
+
+                if (jsonData?.ContainsKey("scene") ?? false)
+                {
+                    tileCustomData[customData.TileId] = jsonData;
+                }
+            }
+
+            return tileCustomData;
         }
 
         private static string GetTileSetPath(string sourceFile, WorldJson worldJson, int tileSetUid)

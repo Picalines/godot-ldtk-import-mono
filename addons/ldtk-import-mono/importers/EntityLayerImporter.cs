@@ -67,7 +67,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 node2D.Position = entityJson.PxCoords;
             }
 
-            LDtkFieldAssigner.Assign(entityJson, sceneInstance);
+            LDtkFieldAssigner.Assign(sceneInstance, entityJson);
 
             return sceneInstance;
         }

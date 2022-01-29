@@ -21,7 +21,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             ScanAssemblyForTargetFields();
         }
 
-        public static void Assign(LevelJson.EntityInstance entityJson, Node entityNode)
+        public static void Assign(Node entityNode, LevelJson.EntityInstance entityJson)
         {
             var entityType = GetSceneType(entityNode);
 
@@ -41,6 +41,27 @@ namespace Picalines.Godot.LDtkImport.Importers
                 }
 
                 entityNode.Set(targetField.TargetMember.Name, ldTkFieldInstance.Value);
+            }
+        }
+
+        public static void Assign(Node node, IReadOnlyDictionary<string, object> values)
+        {
+            var entityType = GetSceneType(node);
+
+            if (entityType is null || !_TargetFields.TryGetValue(entityType, out var targetFields))
+            {
+                return;
+            }
+
+            foreach (var targetField in targetFields)
+            {
+                if (!values.TryGetValue(targetField.EditorName, out var fieldValue))
+                {
+                    GD.PushWarning($"{entityType}: missing LDtk field named '{targetField.EditorName}'");
+                    continue;
+                }
+
+                node.Set(targetField.TargetMember.Name, fieldValue);
             }
         }
 

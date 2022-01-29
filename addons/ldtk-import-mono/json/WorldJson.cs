@@ -214,6 +214,12 @@ namespace Picalines.Godot.LDtkImport.Json
                 public string Data { get; private set; }
 
                 public T? AsJson<T>() => JsonConvert.DeserializeObject<T>(Data);
+
+                public void Deconstruct(out int tileId, out string data)
+                {
+                    tileId = TileId;
+                    data = Data;
+                }
             }
 
             public sealed class TileEnumTag
