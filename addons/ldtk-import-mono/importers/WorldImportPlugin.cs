@@ -59,7 +59,13 @@ namespace Picalines.Godot.LDtkImport.Importers
                 return;
             }
 
-            var levelsParent = worldNode.GetNodeOrNull(options[LevelsParentName].ToString()) ?? new Node2D();
+            var levelsParent = new Node2D
+            {
+                Name = options[LevelsParentName].ToString()
+            };
+
+            worldNode.AddChild(levelsParent);
+            levelsParent.Owner = worldNode;
 
             foreach (LevelJson levelJson in worldJson.Levels)
             {
@@ -67,7 +73,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 var scene = GD.Load<PackedScene>(path);
                 var instance = scene.Instance();
 
-                if (instance is not Node2D node)
+                if (instance is not Node2D levelNode)
                 {
                     GD.PushError($"scene of type {nameof(Node2D)} expected at {path}");
                     return;
@@ -78,16 +84,10 @@ namespace Picalines.Godot.LDtkImport.Importers
                     child.Free();
                 }
 
-                node.Position = levelJson.WorldPos;
+                levelNode.Position = levelJson.WorldPos;
 
-                levelsParent.AddChild(node);
-                node.Owner = worldNode;
-            }
-
-            levelsParent.Owner = worldNode;
-            if (levelsParent.GetParent() is null)
-            {
-                worldNode.AddChild(levelsParent);
+                levelsParent.AddChild(levelNode);
+                levelNode.Owner = worldNode;
             }
         }
 
