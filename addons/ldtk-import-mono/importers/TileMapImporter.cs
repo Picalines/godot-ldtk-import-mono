@@ -80,6 +80,11 @@ namespace Picalines.Godot.LDtkImport.Importers
             var packedScene = GD.Load<PackedScene>(customData["scene"].ToString());
             var sceneInstance = packedScene.Instance<Node>();
 
+            foreach (Node child in sceneInstance.GetChildren())
+            {
+                child.Free();
+            }
+
             if (sceneInstance is Node2D node2D)
             {
                 node2D.Position = tile.LayerPxCoords + tileMap.CellSize / 2;

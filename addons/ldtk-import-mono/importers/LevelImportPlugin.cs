@@ -13,6 +13,8 @@ namespace Picalines.Godot.LDtkImport.Importers
     {
         public const string EntityScenePathReplaceTarget = "$";
 
+        private const string BaseScenePath = "BaseScenePath";
+        private const string LayersParentName = "LayersParentName";
         private const string EntityScenePath = "EntityScenePath";
 
         public override string GetImporterName() => "ldtk.level";
@@ -22,6 +24,16 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         public override GDArray GetImportOptions(int preset) => new()
         {
+            new GDDictionary()
+            {
+                ["name"] = BaseScenePath,
+                ["default_value"] = "",
+            },
+            new GDDictionary()
+            {
+                ["name"] = LayersParentName,
+                ["default_value"] = "Layers",
+            },
             new GDDictionary()
             {
                 ["name"] = EntityScenePath,
@@ -34,23 +46,44 @@ namespace Picalines.Godot.LDtkImport.Importers
             var worldJson = JsonLoader.Load<WorldJson>(sourceFile.GetBaseDir() + ".ldtk");
             var levelJson = JsonLoader.Load<LevelJson>(sourceFile);
 
-            Node2D levelNode = new() { Name = levelJson.Identifier };
+            var levelNode = CreateLevelScene(levelJson, options);
 
-            AddLayers(sourceFile, options[EntityScenePath].ToString(), worldJson, levelJson, levelNode);
+            AddLayers(sourceFile, options, worldJson, levelJson, levelNode);
 
             return levelNode;
         }
 
-        private void AddLayers(string sourceFile, string entityPathTemplate, WorldJson worldJson, LevelJson levelJson, Node2D levelNode)
+        private void AddLayers(string sourceFile, GDDictionary options, WorldJson worldJson, LevelJson levelJson, Node2D levelNode)
         {
+            var layersNode = levelNode.GetNodeOrNull(options[LayersParentName].ToString())
+                ?? new Node2D() { Name = options[LayersParentName].ToString() };
+
+            if (layersNode.GetParent() is null)
+            {
+                levelNode.AddChild(layersNode);
+            }
+
             foreach (var layer in levelJson.LayerInstances!.Reverse())
             {
                 var layerNode = layer.Type is LayerType.Entities
-                    ? EntityLayerImporter.Import(entityPathTemplate, worldJson, layer)
+                    ? EntityLayerImporter.Import(options[EntityScenePath].ToString(), worldJson, layer)
                     : TileMapImporter.Import(sourceFile, worldJson, layer);
 
-                levelNode.AddChild(layerNode);
+                layersNode.AddChild(layerNode);
             }
+        }
+
+        private static Node2D CreateLevelScene(LevelJson levelJson, GDDictionary options)
+        {
+            var baseScenePath = options[BaseScenePath].ToString();
+
+            var scene = baseScenePath != ""
+                ? GD.Load<PackedScene>(baseScenePath).Instance<Node2D>(PackedScene.GenEditState.Disabled)
+                : new Node2D();
+
+            scene.Name = levelJson.Identifier;
+
+            return scene;
         }
 
         public static string GetEntityScenePath(string entityPathTemplate, LevelJson.EntityInstance entityInstance)

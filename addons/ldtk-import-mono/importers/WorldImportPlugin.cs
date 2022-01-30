@@ -42,9 +42,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             ImportTileSets(sourceFile, genFiles, worldJson);
 
-            var worldNode = CreateWorldScene(options);
-
-            worldNode.Name = sourceFile.BaseName().Substring(sourceFile.GetBaseDir().Length);
+            var worldNode = CreateWorldScene(sourceFile, options);
 
             PlaceLevels(sourceFile, options, worldJson, worldNode);
 
@@ -59,13 +57,13 @@ namespace Picalines.Godot.LDtkImport.Importers
                 return;
             }
 
-            var levelsParent = new Node2D
-            {
-                Name = options[LevelsParentName].ToString()
-            };
+            var levelsParent = worldNode.GetNodeOrNull(options[LevelsParentName].ToString())
+                ?? new Node2D { Name = options[LevelsParentName].ToString() };
 
-            worldNode.AddChild(levelsParent);
-            levelsParent.Owner = worldNode;
+            if (levelsParent.GetParent() is null)
+            {
+                worldNode.AddChild(levelsParent);
+            }
 
             foreach (LevelJson levelJson in worldJson.Levels)
             {
@@ -87,7 +85,6 @@ namespace Picalines.Godot.LDtkImport.Importers
                 levelNode.Position = levelJson.WorldPos;
 
                 levelsParent.AddChild(levelNode);
-                levelNode.Owner = worldNode;
             }
         }
 
@@ -123,17 +120,17 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
         }
 
-        private static Node2D CreateWorldScene(GDDictionary options)
+        private static Node2D CreateWorldScene(string sourceFile, GDDictionary options)
         {
             var baseScenePath = options[BaseScenePath].ToString();
 
-            if (baseScenePath != "")
-            {
-                var packedBaseScene = GD.Load<PackedScene>(baseScenePath);
-                return packedBaseScene.Instance<Node2D>(PackedScene.GenEditState.Disabled);
-            }
+            var scene = baseScenePath != ""
+                ? GD.Load<PackedScene>(baseScenePath).Instance<Node2D>(PackedScene.GenEditState.Disabled)
+                : new Node2D();
 
-            return new Node2D();
+            scene.Name = sourceFile.BaseName().Substring(sourceFile.GetBaseDir().Length);
+
+            return scene;
         }
 
         private void CheckRequiredDirs(string sourceFile)
