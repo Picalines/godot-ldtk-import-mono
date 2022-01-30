@@ -45,7 +45,7 @@ namespace Picalines.Godot.LDtkImport.Importers
         {
             foreach (var layer in levelJson.LayerInstances!.Reverse())
             {
-                var layerNode = layer.Type == LayerType.Entities
+                var layerNode = layer.Type is LayerType.Entities
                     ? EntityLayerImporter.Import(entityPathTemplate, worldJson, layer)
                     : TileMapImporter.Import(sourceFile, worldJson, layer);
 

@@ -25,7 +25,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             var tileSetDef = worldJson.Definitions.TileSets.First(t => t.Uid == layer.TileSetDefUid);
 
-            Dictionary<int, Dictionary<string, object>> tileCustomData = GetTileEntityCustomData(tileSetDef);
+            var tileCustomData = GetTileEntityCustomData(tileSetDef);
 
             SetTiles(layer, tileMap, tileCustomData);
 

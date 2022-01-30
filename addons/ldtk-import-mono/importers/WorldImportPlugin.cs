@@ -140,7 +140,7 @@ namespace Picalines.Godot.LDtkImport.Importers
         {
             using var dir = new Directory();
             var baseDir = sourceFile.BaseName();
-            dir.MakeDirRecursive(baseDir + TileSetsDirectory);
+            dir.MakeDirRecursive($"{baseDir}/{TileSetsDirectory}");
         }
     }
 }
