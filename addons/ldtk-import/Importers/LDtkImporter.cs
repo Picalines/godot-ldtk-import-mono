@@ -7,7 +7,7 @@ using System;
 namespace Picalines.Godot.LDtkImport.Importers
 {
     [Tool]
-    public static class LDtkImporter
+    internal static class LDtkImporter
     {
         public static void Import(string ldtkFilePath, string settingsFilePath, out string outputDirectory)
         {
@@ -15,7 +15,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             var settings = JsonFile.Parse<LDtkImportSettings>(settingsFilePath);
 
             using var outputDir = new Directory();
-            outputDir.MakeDirRecursive(settings.OutputDirectory);
+            outputDir.MakeDirRecursive(settings.OutputDirectory + "/tilesets");
 
             ImportTileSets(ldtkFilePath, settings.OutputDirectory, worldJson);
 
@@ -36,22 +36,27 @@ namespace Picalines.Godot.LDtkImport.Importers
             {
                 var levelJson = getLevelJson(levelInfo);
 
-                LevelImporter.Import(ldtkFilePath, importSettings, levelJson);
+                LevelImporter.Import(new LevelImportContext(ldtkFilePath, importSettings, worldJson, levelJson));
             }
         }
 
         private static void ImportTileSets(string ldtkFilePath, string outputDir, WorldJson worldJson)
         {
-            var tileSetsDir = outputDir + "tilesets";
-
-            using var dir = new Directory();
-            dir.MakeDir(tileSetsDir);
-
             foreach (var tileSetJson in worldJson.Definitions.TileSets)
             {
-                var tileSet = TileSetImporter.Import(tileSetJson, ldtkFilePath);
+                var savePath = $"{outputDir}/tilesets/{tileSetJson.Identifier}.tres";
 
-                var savePath = $"{tileSetsDir}/{tileSetJson.Identifier}.tres";
+                TileSet tileSet;
+
+                if (ResourceLoader.Exists(savePath))
+                {
+                    tileSet = GD.Load<TileSet>(savePath);
+                    TileSetImporter.ApplyChanges(ldtkFilePath, tileSetJson, tileSet);
+                }
+                else
+                {
+                    tileSet = TileSetImporter.CreateNew(ldtkFilePath, tileSetJson);
+                }
 
                 if (ResourceSaver.Save(savePath, tileSet) is not Error.Ok)
                 {

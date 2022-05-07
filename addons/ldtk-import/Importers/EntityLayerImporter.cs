@@ -2,15 +2,16 @@
 
 using Godot;
 using Picalines.Godot.LDtkImport.Json;
-using System;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
     internal static class EntityLayerImporter
     {
-        public static Node2D Import(string ldtkFilePath, LDtkImportSettings importSettings, LevelJson.LayerInstance entitiesLayerJson)
+        public static Node2D Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
-            throw new NotImplementedException();
+            // TODO: actual import.
+
+            return new Node2D() { Name = layerJson.Identifier };
         }
     }
 }
