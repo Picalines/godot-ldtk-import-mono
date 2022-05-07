@@ -1,0 +1,27 @@
+{
+  "outputDir": "res://worlds/Overworld/",
+
+  // All of the following settings are optional
+
+  // {} is replaced by entity name from LDtk
+  "entityScenePath": "res://entities/{}/{}.tscn",
+  "entityScenePathOverrides": {
+    "Item": "res://items/Item.tscn"
+  },
+
+  // If worldScene settings is present,
+  // plugin will generate a scene with all
+  // level scenes at their positions
+  "worldScene": {
+    "baseScenePath": "res://scenes/world.tscn",
+    "scriptPath": "res://scripts/world.gd",
+    // Set to true if you want only a
+    // Position2D node with the level name
+    "onlyMarkers": false
+  },
+
+  "levelScene": {
+    "baseScenePath": "res://scenes/level.tscn",
+    "scriptPath": "res://scripts/level.gd"
+  }
+}
