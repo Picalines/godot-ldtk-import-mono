@@ -7,44 +7,51 @@ namespace Picalines.Godot.LDtkImport.Importers
 {
     internal class LevelImporter
     {
-        public static void Import(string ldtkFilePath, LDtkImportSettings importSettings, LevelJson levelJson)
+        public static void Import(LevelImportContext context)
         {
             var levelNode = new Node2D()
             {
-                Name = levelJson.Identifier,
+                Name = context.LevelJson.Identifier,
             };
 
-            AddLayers(ldtkFilePath, importSettings, levelJson, levelNode);
+            AddLayers(context, levelNode);
 
-            var savePath = $"{importSettings.OutputDirectory}{levelJson.Identifier}.tscn";
+            var savePath = $"{context.ImportSettings.OutputDirectory}/{context.LevelJson.Identifier}.tscn";
 
             var packedLevelScene = new PackedScene();
             packedLevelScene.Pack(levelNode);
 
             if (ResourceSaver.Save(savePath, packedLevelScene) is not Error.Ok)
             {
-                throw LDtkImportException.FailedToImportLevel(ldtkFilePath, levelJson.Identifier);
+                throw LDtkImportException.FailedToImportLevel(context.LDtkFilePath, context.LevelJson.Identifier);
             }
         }
 
-        private static void AddLayers(string ldtkFilePath, LDtkImportSettings importSettings, LevelJson levelJson, Node2D levelNode)
+        private static void AddLayers(LevelImportContext context, Node2D levelNode)
         {
-            foreach (var layer in levelJson.LayerInstances!)
+            foreach (var layer in context.LevelJson.LayerInstances!)
             {
+                var layerContext = new LayerImportContext(
+                    context.LDtkFilePath,
+                    context.ImportSettings,
+                    context.WorldJson,
+                    context.LevelJson,
+                    layer
+                );
+
                 var layerNode = layer.Type switch
                 {
-                    LayerType.Entities => EntityLayerImporter.Import(ldtkFilePath, importSettings, layer),
-                    _ => TileMapImporter.Import(ldtkFilePath, importSettings, layer),
+                    LayerType.Entities => EntityLayerImporter.Import(layerContext),
+                    _ => TileMapImporter.Import(layerContext),
                 };
 
-                layerNode.Owner = levelNode;
+                levelNode.AddChild(layerNode);
 
-                foreach (Node child in levelNode.GetChildren())
+                layerNode.Owner = levelNode;
+                foreach (Node child in layerNode.GetChildren())
                 {
                     child.Owner = levelNode;
                 }
-
-                levelNode.AddChild(layerNode);
             }
         }
     }

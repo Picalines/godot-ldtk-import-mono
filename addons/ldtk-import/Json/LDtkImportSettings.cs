@@ -28,10 +28,7 @@ namespace Picalines.Godot.LDtkImport.Json
         [OnDeserialized]
         private void Init(StreamingContext _)
         {
-            if (!OutputDirectory.EndsWith("/"))
-            {
-                OutputDirectory += "/";
-            }
+            OutputDirectory = OutputDirectory.TrimEnd('/');
         }
 
         public string? GetEntityScenePath(string entityName)

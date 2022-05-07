@@ -36,22 +36,34 @@ namespace Picalines.Godot.LDtkImport.Importers
             {
                 var levelJson = getLevelJson(levelInfo);
 
-                LevelImporter.Import(ldtkFilePath, importSettings, levelJson);
+                LevelImporter.Import(new LevelImportContext(ldtkFilePath, importSettings, worldJson, levelJson));
             }
         }
 
         private static void ImportTileSets(string ldtkFilePath, string outputDir, WorldJson worldJson)
         {
-            var tileSetsDir = outputDir + "tilesets";
+            var tileSetsDir = outputDir + "/tilesets";
 
             using var dir = new Directory();
             dir.MakeDir(tileSetsDir);
 
             foreach (var tileSetJson in worldJson.Definitions.TileSets)
             {
-                var tileSet = TileSetImporter.Import(tileSetJson, ldtkFilePath);
-
                 var savePath = $"{tileSetsDir}/{tileSetJson.Identifier}.tres";
+
+                TileSet tileSet;
+
+                using var file = new File();
+
+                if (file.FileExists(savePath))
+                {
+                    tileSet = GD.Load<TileSet>(savePath);
+                    TileSetImporter.ApplyChanges(ldtkFilePath, tileSetJson, tileSet);
+                }
+                else
+                {
+                    tileSet = TileSetImporter.CreateNew(ldtkFilePath, tileSetJson);
+                }
 
                 if (ResourceSaver.Save(savePath, tileSet) is not Error.Ok)
                 {
