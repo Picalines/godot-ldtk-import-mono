@@ -1,4 +1,6 @@
-﻿using Godot;
+﻿#if TOOLS
+
+using Godot;
 using Picalines.Godot.LDtkImport.Json;
 using Picalines.Godot.LDtkImport.Utils;
 
@@ -47,3 +49,5 @@ namespace Picalines.Godot.LDtkImport.Importers
         };
     }
 }
+
+#endif

@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿#if TOOLS
+
+using Newtonsoft.Json;
 using System;
 
 namespace Picalines.Godot.LDtkImport.Json.Converters
@@ -23,3 +25,5 @@ namespace Picalines.Godot.LDtkImport.Json.Converters
         }
     }
 }
+
+#endif

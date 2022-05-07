@@ -2,7 +2,6 @@
 
 using Godot;
 using Picalines.Godot.LDtkImport.Importers;
-using Picalines.Godot.LDtkImport.Utils;
 
 namespace Picalines.Godot.LDtkImport
 {
@@ -90,20 +89,21 @@ namespace Picalines.Godot.LDtkImport
                 return;
             }
 
-            var success = LDtkImporter.Import(ldtkFile, settingsFilePath, out var outputDirectory);
+            string outputDirectory;
 
-            if (!success)
+            try
             {
-                GD.PushError(ErrorMessage.FailedToImportLDtkProject(ldtkFile));
+                LDtkImporter.Import(ldtkFile, settingsFilePath, out outputDirectory);
+            }
+            catch (LDtkImportException exception)
+            {
+                GD.PushError($"LDtk import error: {exception.Message}");
                 return;
             }
 
             GD.Print($"successfully imported LDtk project at {ldtkFile}");
 
-            if (outputDirectory is not null)
-            {
-                GetEditorInterface().GetFileSystemDock().NavigateToPath(outputDirectory);
-            }
+            GetEditorInterface().GetFileSystemDock().NavigateToPath(outputDirectory);
         }
 
         private void OpenSettingsInExternalEditor()

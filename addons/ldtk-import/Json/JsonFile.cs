@@ -2,13 +2,12 @@
 
 using Godot;
 using Newtonsoft.Json;
-using Picalines.Godot.LDtkImport.Utils;
 
 namespace Picalines.Godot.LDtkImport.Json
 {
     internal static class JsonFile
     {
-        public static T? TryParse<T>(string path) where T : class
+        public static T Parse<T>(string path) where T : class
         {
             using var file = new File();
 
@@ -18,16 +17,14 @@ namespace Picalines.Godot.LDtkImport.Json
 
                 if (openError is not Error.Ok)
                 {
-                    GD.PushError(ErrorMessage.FailedToOpenFile(openError));
-                    return null;
+                    throw LDtkImportException.FailedToOpenFile(openError);
                 }
 
                 return JsonConvert.DeserializeObject<T>(file.GetAsText());
             }
             catch (JsonSerializationException exception)
             {
-                GD.PushError(ErrorMessage.FailedToParseJsonFile(path, exception.Message));
-                return null;
+                throw LDtkImportException.FailedToParseJsonFile(path, exception.Message);
             }
             finally
             {
