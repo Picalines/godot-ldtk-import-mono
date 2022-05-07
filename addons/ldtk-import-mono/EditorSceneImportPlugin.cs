@@ -1,66 +1,65 @@
 #if TOOLS
 
-using System;
 using Godot;
+using System;
 using GDArray = Godot.Collections.Array;
 using GDDictionary = Godot.Collections.Dictionary;
 
-namespace Picalines.Godot.LDtkImport
+namespace Picalines.Godot.LDtkImport;
+
+public abstract class EditorSceneImportPlugin : EditorImportPlugin
 {
-    public abstract class EditorSceneImportPlugin : EditorImportPlugin
+    public sealed override string GetResourceType() => nameof(PackedScene);
+    public sealed override string GetSaveExtension() => "tscn";
+
+    public override int GetPresetCount() => 1;
+    public override string GetPresetName(int preset) => "default";
+
+    public override bool GetOptionVisibility(string option, GDDictionary options) => true;
+
+    public sealed override int Import(string sourceFile, string savePath, GDDictionary options, GDArray platformVariants, GDArray genFiles)
     {
-        public sealed override string GetResourceType() => nameof(PackedScene);
-        public sealed override string GetSaveExtension() => "tscn";
-
-        public override int GetPresetCount() => 1;
-        public override string GetPresetName(int preset) => "default";
-
-        public override bool GetOptionVisibility(string option, GDDictionary options) => true;
-
-        public sealed override int Import(string sourceFile, string savePath, GDDictionary options, GDArray platformVariants, GDArray genFiles)
+        Node sceneNode;
+        try
         {
-            Node sceneNode;
-            try
-            {
-                sceneNode = ImportScene(sourceFile, savePath, options, platformVariants, genFiles);
-            }
-            catch (Exception exception)
-            {
-                GD.PushError(exception.Message);
-                return (int)Error.Failed;
-            }
-
-            return (int)SaveScene(savePath, sceneNode);
+            sceneNode = ImportScene(sourceFile, savePath, options, platformVariants, genFiles);
+        }
+        catch (Exception exception)
+        {
+            GD.PushError(exception.Message);
+            return (int)Error.Failed;
         }
 
-        protected abstract Node ImportScene(string sourceFile, string savePath, GDDictionary options, GDArray platformVariants, GDArray genFiles);
+        return (int)SaveScene(savePath, sceneNode);
+    }
 
-        private Error SaveScene(string savePath, Node sceneNode)
+    protected abstract Node ImportScene(string sourceFile, string savePath, GDDictionary options, GDArray platformVariants, GDArray genFiles);
+
+    private Error SaveScene(string savePath, Node sceneNode)
+    {
+        foreach (Node child in sceneNode.GetChildren())
         {
-            foreach (Node child in sceneNode.GetChildren())
-            {
-                SetOwnerRecursive(child, sceneNode);
-            }
-
-            var packedScene = new PackedScene();
-            packedScene.TakeOverPath(savePath);
-
-            if (packedScene.Pack(sceneNode) != Error.Ok)
-            {
-                return Error.Failed;
-            }
-
-            return ResourceSaver.Save($"{savePath}.{GetSaveExtension()}", packedScene);
+            SetOwnerRecursive(child, sceneNode);
         }
 
-        protected static void SetOwnerRecursive(Node node, Node owner)
-        {
-            node.Owner = owner;
+        var packedScene = new PackedScene();
+        packedScene.TakeOverPath(savePath);
 
-            foreach (Node child in node.GetChildren())
-            {
-                SetOwnerRecursive(child, owner);
-            }
+        if (packedScene.Pack(sceneNode) != Error.Ok)
+        {
+            return Error.Failed;
+        }
+
+        return ResourceSaver.Save($"{savePath}.{GetSaveExtension()}", packedScene);
+    }
+
+    protected static void SetOwnerRecursive(Node node, Node owner)
+    {
+        node.Owner = owner;
+
+        foreach (Node child in node.GetChildren())
+        {
+            SetOwnerRecursive(child, owner);
         }
     }
 }

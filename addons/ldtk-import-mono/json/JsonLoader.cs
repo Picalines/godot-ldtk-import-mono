@@ -1,31 +1,30 @@
+using Godot;
+using Newtonsoft.Json;
 using System;
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Godot;
 
-namespace Picalines.Godot.LDtkImport.Json
+namespace Picalines.Godot.LDtkImport.Json;
+
+public static class JsonLoader
 {
-    public static class JsonLoader
+    public static T Load<T>(string path)
     {
-        public static T Load<T>(string path)
+        using var file = new File();
+
+        if (file.Open(path, File.ModeFlags.Read) != Error.Ok)
         {
-            using var file = new File();
+            throw new System.IO.FileNotFoundException($"json file not found at {path}");
+        }
 
-            if (file.Open(path, File.ModeFlags.Read) != Error.Ok)
-            {
-                throw new System.IO.FileNotFoundException($"json file not found at {path}");
-            }
+        var jsonText = file.GetAsText();
 
-            var jsonText = file.GetAsText();
-
-            try
-            {
-                return JsonConvert.DeserializeObject<T>(jsonText) ?? throw new NullReferenceException();
-            }
-            catch (Exception exception)
-            {
-                throw new SerializationException($"invalid json file {path}", exception);
-            }
+        try
+        {
+            return JsonConvert.DeserializeObject<T>(jsonText) ?? throw new NullReferenceException();
+        }
+        catch (Exception exception)
+        {
+            throw new SerializationException($"invalid json file {path}", exception);
         }
     }
 }

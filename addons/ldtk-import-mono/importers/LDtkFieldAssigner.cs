@@ -1,147 +1,146 @@
 #if TOOLS
 
+using Godot;
+using Picalines.Godot.LDtkImport.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Godot;
-using Picalines.Godot.LDtkImport.Json;
 
-namespace Picalines.Godot.LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers;
+
+internal static class LDtkFieldAssigner
 {
-    internal static class LDtkFieldAssigner
+    private record LDtkFieldInfo(string EditorName, MemberInfo TargetMember);
+
+    private static readonly Dictionary<Type, IEnumerable<LDtkFieldInfo>> _TargetFields = new();
+
+    public static void Initialize()
     {
-        private record LDtkFieldInfo(string EditorName, MemberInfo TargetMember);
+        ScanAssemblyForTargetFields();
+    }
 
-        private static readonly Dictionary<Type, IEnumerable<LDtkFieldInfo>> _TargetFields = new();
+    public static void Assign(Node entityNode, LevelJson.EntityInstance entityJson)
+    {
+        var entityType = GetSceneType(entityNode);
 
-        public static void Initialize()
+        if (entityType is null || !_TargetFields.TryGetValue(entityType, out var targetFields))
         {
-            ScanAssemblyForTargetFields();
+            return;
         }
 
-        public static void Assign(Node entityNode, LevelJson.EntityInstance entityJson)
+        foreach (var targetField in targetFields)
         {
-            var entityType = GetSceneType(entityNode);
+            var ldTkFieldInstance = entityJson.FieldInstances.FindField(targetField.EditorName, null);
 
-            if (entityType is null || !_TargetFields.TryGetValue(entityType, out var targetFields))
+            if (ldTkFieldInstance is null)
             {
-                return;
+                GD.PushWarning($"LDtk entity '{entityJson.Identifier}' does not have a field '{targetField.EditorName}'");
+                continue;
             }
 
-            foreach (var targetField in targetFields)
-            {
-                var ldTkFieldInstance = entityJson.FieldInstances.FindField(targetField.EditorName, null);
+            entityNode.Set(targetField.TargetMember.Name, ldTkFieldInstance.Value);
+        }
+    }
 
-                if (ldTkFieldInstance is null)
-                {
-                    GD.PushWarning($"LDtk entity '{entityJson.Identifier}' does not have a field '{targetField.EditorName}'");
-                    continue;
-                }
+    public static void Assign(Node node, IReadOnlyDictionary<string, object> values)
+    {
+        var entityType = GetSceneType(node);
 
-                entityNode.Set(targetField.TargetMember.Name, ldTkFieldInstance.Value);
-            }
+        if (entityType is null || !_TargetFields.TryGetValue(entityType, out var targetFields))
+        {
+            return;
         }
 
-        public static void Assign(Node node, IReadOnlyDictionary<string, object> values)
+        foreach (var targetField in targetFields)
         {
-            var entityType = GetSceneType(node);
-
-            if (entityType is null || !_TargetFields.TryGetValue(entityType, out var targetFields))
+            if (!values.TryGetValue(targetField.EditorName, out var fieldValue))
             {
-                return;
+                GD.PushWarning($"{entityType}: missing LDtk field named '{targetField.EditorName}'");
+                continue;
             }
 
-            foreach (var targetField in targetFields)
-            {
-                if (!values.TryGetValue(targetField.EditorName, out var fieldValue))
-                {
-                    GD.PushWarning($"{entityType}: missing LDtk field named '{targetField.EditorName}'");
-                    continue;
-                }
+            node.Set(targetField.TargetMember.Name, fieldValue);
+        }
+    }
 
-                node.Set(targetField.TargetMember.Name, fieldValue);
-            }
+    private static Type? GetSceneType(Node scene)
+    {
+        if (scene.GetScript() is not Script { ResourcePath: var scriptPath })
+        {
+            return null;
         }
 
-        private static Type? GetSceneType(Node scene)
+        var scriptClassName = scriptPath.BaseName().GetFile();
+
+        try
         {
-            if (scene.GetScript() is not Script { ResourcePath: var scriptPath })
-            {
-                return null;
-            }
-
-            var scriptClassName = scriptPath.BaseName().GetFile();
-
-            try
-            {
-                return Assembly.GetExecutingAssembly().GetTypes()
-                    .Where(type => type.IsClass && !type.IsAbstract)
-                    .Where(type => type.Name == scriptClassName)
-                    .SingleOrDefault();
-            }
-            catch (InvalidOperationException)
-            {
-                GD.PushWarning($"{scriptPath}: C# class {scriptClassName} not found");
-                return null;
-            }
-        }
-
-        private static void ScanAssemblyForTargetFields()
-        {
-            _TargetFields.Clear();
-
-            var validTypes = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(type => type.Assembly.GetName().Name != "GodotSharp" && !type.IsDefined(typeof(CompilerGeneratedAttribute)))
+            return Assembly.GetExecutingAssembly().GetTypes()
                 .Where(type => type.IsClass && !type.IsAbstract)
-                .Where(type => type.IsSubclassOf(typeof(Node)));
-
-            foreach (var validType in validTypes)
-            {
-                RegisterLDtkFields(validType);
-            }
+                .Where(type => type.Name == scriptClassName)
+                .SingleOrDefault();
         }
-
-        private static void RegisterLDtkFields(Type type)
+        catch (InvalidOperationException)
         {
-            var members = type.FindMembers(
-                MemberTypes.Field | MemberTypes.Property,
-                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
-                (member, _) => IsTargetMember(member),
-                null);
-
-            if (members.Any())
-            {
-                _TargetFields[type] = members.Select(member => new LDtkFieldInfo(
-                    member.GetCustomAttribute<LDtkFieldAttribute>().FieldEditorName ?? member.Name,
-                    member
-                )).ToList();
-            }
+            GD.PushWarning($"{scriptPath}: C# class {scriptClassName} not found");
+            return null;
         }
+    }
 
-        private static bool IsTargetMember(MemberInfo member)
+    private static void ScanAssemblyForTargetFields()
+    {
+        _TargetFields.Clear();
+
+        var validTypes = Assembly.GetExecutingAssembly().GetTypes()
+            .Where(type => type.Assembly.GetName().Name != "GodotSharp" && !type.IsDefined(typeof(CompilerGeneratedAttribute)))
+            .Where(type => type.IsClass && !type.IsAbstract)
+            .Where(type => type.IsSubclassOf(typeof(Node)));
+
+        foreach (var validType in validTypes)
         {
-            if (!member.IsDefined(typeof(LDtkFieldAttribute)) || member.IsDefined(typeof(CompilerGeneratedAttribute)))
-            {
-                return false;
-            }
-
-            if (member is PropertyInfo property)
-            {
-                if (!(property is { CanRead: true, CanWrite: true } && property.GetGetMethod(nonPublic: true).IsDefined(typeof(CompilerGeneratedAttribute), inherit: true)))
-                {
-                    throw new InvalidOperationException($"{nameof(LDtkFieldAttribute)} can be used only on auto properties or fields ({member.DeclaringType}.{member.Name})");
-                }
-            }
-
-            if (!member.IsDefined(typeof(ExportAttribute)))
-            {
-                throw new InvalidOperationException($"{nameof(ExportAttribute)} is required when {nameof(LDtkFieldAttribute)} is used");
-            }
-
-            return true;
+            RegisterLDtkFields(validType);
         }
+    }
+
+    private static void RegisterLDtkFields(Type type)
+    {
+        var members = type.FindMembers(
+            MemberTypes.Field | MemberTypes.Property,
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            (member, _) => IsTargetMember(member),
+            null);
+
+        if (members.Any())
+        {
+            _TargetFields[type] = members.Select(member => new LDtkFieldInfo(
+                member.GetCustomAttribute<LDtkFieldAttribute>().FieldEditorName ?? member.Name,
+                member
+            )).ToList();
+        }
+    }
+
+    private static bool IsTargetMember(MemberInfo member)
+    {
+        if (!member.IsDefined(typeof(LDtkFieldAttribute)) || member.IsDefined(typeof(CompilerGeneratedAttribute)))
+        {
+            return false;
+        }
+
+        if (member is PropertyInfo property)
+        {
+            if (!(property is { CanRead: true, CanWrite: true } && property.GetGetMethod(nonPublic: true).IsDefined(typeof(CompilerGeneratedAttribute), inherit: true)))
+            {
+                throw new InvalidOperationException($"{nameof(LDtkFieldAttribute)} can be used only on auto properties or fields ({member.DeclaringType}.{member.Name})");
+            }
+        }
+
+        if (!member.IsDefined(typeof(ExportAttribute)))
+        {
+            throw new InvalidOperationException($"{nameof(ExportAttribute)} is required when {nameof(LDtkFieldAttribute)} is used");
+        }
+
+        return true;
     }
 }
 

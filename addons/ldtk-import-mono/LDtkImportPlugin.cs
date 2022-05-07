@@ -2,39 +2,38 @@
 
 using Godot;
 
-namespace Picalines.Godot.LDtkImport
+namespace Picalines.Godot.LDtkImport;
+
+[Tool]
+internal sealed class LDtkImportPlugin : EditorPlugin
 {
-    [Tool]
-    internal sealed class LDtkImportPlugin : EditorPlugin
-    {
-        private const string ImportPanelScenePath = "res://addons/ldtk-import-mono/ui/ImportPanel.tscn";
+	private const string ImportPanelScenePath = "res://addons/ldtk-import-mono/ui/ImportPanel.tscn";
 
-        private Control? _ImportPanel;
+	private Control? _ImportPanel;
 
-        public override void _EnterTree()
-        {
-            base._EnterTree();
+	public override void _EnterTree()
+	{
+		base._EnterTree();
 
-            _ImportPanel = GD.Load<PackedScene>(ImportPanelScenePath).Instance<Control>();
+		_ImportPanel = GD.Load<PackedScene>(ImportPanelScenePath).Instance<Control>();
 
-            AddControlToBottomPanel(_ImportPanel, "LDtk import");
-        }
+		AddControlToBottomPanel(_ImportPanel, "LDtk import");
+	}
 
-        public override void _ExitTree()
-        {
-            base._ExitTree();
+	public override void _ExitTree()
+	{
+		base._ExitTree();
 
-            if (_ImportPanel is not null)
-            {
-                RemoveControlFromBottomPanel(_ImportPanel);
+		if (_ImportPanel is not null)
+		{
+			RemoveControlFromBottomPanel(_ImportPanel);
 
-                _ImportPanel.QueueFree();
+			_ImportPanel.QueueFree();
 
-                _ImportPanel = null;
-            }
+			_ImportPanel = null;
+		}
 
-        }
-    }
+	}
 }
 
 #endif

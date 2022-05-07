@@ -2,20 +2,19 @@
 
 using System;
 
-namespace Picalines.Godot.LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers;
+
+public abstract class ImportPluginExtension
 {
-    public abstract class ImportPluginExtension
+    public readonly FileImportContext ImportContext;
+
+    public ImportPluginExtension(FileImportContext importContext)
     {
-        public readonly FileImportContext ImportContext;
-
-        public ImportPluginExtension(FileImportContext importContext)
-        {
-            ImportContext = importContext;
-        }
+        ImportContext = importContext;
     }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class LDtkImportExtensionAttribute : Attribute { }
 }
+
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class LDtkImportExtensionAttribute : Attribute { }
 
 #endif

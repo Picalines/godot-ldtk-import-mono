@@ -1,76 +1,75 @@
 #if TOOLS
 
-using System.Linq;
 using Godot;
 using Picalines.Godot.LDtkImport.Json;
+using System.Linq;
 
-namespace Picalines.Godot.LDtkImport.Importers
+namespace Picalines.Godot.LDtkImport.Importers;
+
+internal static class EntityLayerImporter
 {
-    internal static class EntityLayerImporter
+    public static Node2D Import(string entityPathTemplate, WorldJson worldJson, LevelJson.LayerInstance layer)
     {
-        public static Node2D Import(string entityPathTemplate, WorldJson worldJson, LevelJson.LayerInstance layer)
+        var entitiesLayer = CreateEntityLayerNode(worldJson, layer);
+
+        AddEntities(entityPathTemplate, layer, entitiesLayer);
+
+        return entitiesLayer;
+    }
+
+    private static Node2D CreateEntityLayerNode(WorldJson worldJson, LevelJson.LayerInstance layer)
+    {
+        var useYSort = worldJson.Definitions.Layers.First(l => l.Uid == layer.DefUid).RequiredTags.Contains(nameof(YSort));
+        var entitiesLayer = useYSort ? new YSort() : new Node2D();
+
+        entitiesLayer.Name = layer.Identifier;
+
+        return entitiesLayer;
+    }
+
+    private static void AddEntities(string entityPathTemplate, LevelJson.LayerInstance layer, Node2D entitiesLayer)
+    {
+        LDtkFieldAssigner.Initialize();
+
+        foreach (var entityInstance in layer.EntityInstances)
         {
-            var entitiesLayer = CreateEntityLayerNode(worldJson, layer);
+            var scenePath = LevelImportPlugin.GetEntityScenePath(entityPathTemplate, entityInstance);
 
-            AddEntities(entityPathTemplate, layer, entitiesLayer);
+            var entity = TryInstanceEntityScene(entityInstance, scenePath);
 
-            return entitiesLayer;
-        }
-
-        private static Node2D CreateEntityLayerNode(WorldJson worldJson, LevelJson.LayerInstance layer)
-        {
-            var useYSort = worldJson.Definitions.Layers.First(l => l.Uid == layer.DefUid).RequiredTags.Contains(nameof(YSort));
-            var entitiesLayer = useYSort ? new YSort() : new Node2D();
-
-            entitiesLayer.Name = layer.Identifier;
-
-            return entitiesLayer;
-        }
-
-        private static void AddEntities(string entityPathTemplate, LevelJson.LayerInstance layer, Node2D entitiesLayer)
-        {
-            LDtkFieldAssigner.Initialize();
-
-            foreach (var entityInstance in layer.EntityInstances)
+            if (entity is not null)
             {
-                var scenePath = LevelImportPlugin.GetEntityScenePath(entityPathTemplate, entityInstance);
+                entitiesLayer.AddChild(entity);
+            }
+        }
+    }
 
-                var entity = TryInstanceEntityScene(entityInstance, scenePath);
-
-                if (entity is not null)
-                {
-                    entitiesLayer.AddChild(entity);
-                }
+    private static Node? TryInstanceEntityScene(LevelJson.EntityInstance entityJson, string scenePath)
+    {
+        using (var file = new File())
+        {
+            if (!file.FileExists(scenePath))
+            {
+                GD.PushWarning($"{scenePath}: file not found. Entity '{entityJson.Identifier}' is ignored");
+                return null;
             }
         }
 
-        private static Node? TryInstanceEntityScene(LevelJson.EntityInstance entityJson, string scenePath)
+        var sceneInstance = GD.Load<PackedScene>(scenePath).Instance<Node>();
+
+        foreach (Node child in sceneInstance.GetChildren())
         {
-            using (var file = new File())
-            {
-                if (!file.FileExists(scenePath))
-                {
-                    GD.PushWarning($"{scenePath}: file not found. Entity '{entityJson.Identifier}' is ignored");
-                    return null;
-                }
-            }
-
-            var sceneInstance = GD.Load<PackedScene>(scenePath).Instance<Node>();
-
-            foreach (Node child in sceneInstance.GetChildren())
-            {
-                child.Free();
-            }
-
-            if (sceneInstance is Node2D node2D)
-            {
-                node2D.Position = entityJson.PxCoords;
-            }
-
-            LDtkFieldAssigner.Assign(sceneInstance, entityJson);
-
-            return sceneInstance;
+            child.Free();
         }
+
+        if (sceneInstance is Node2D node2D)
+        {
+            node2D.Position = entityJson.PxCoords;
+        }
+
+        LDtkFieldAssigner.Assign(sceneInstance, entityJson);
+
+        return sceneInstance;
     }
 }
 
