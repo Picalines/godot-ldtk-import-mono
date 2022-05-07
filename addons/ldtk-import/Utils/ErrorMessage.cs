@@ -2,7 +2,7 @@
 
 using Godot;
 
-namespace Picalines.Godot.LDtkImport
+namespace Picalines.Godot.LDtkImport.Utils
 {
     internal static class ErrorMessage
     {

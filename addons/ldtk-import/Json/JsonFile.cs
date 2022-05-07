@@ -2,8 +2,9 @@
 
 using Godot;
 using Newtonsoft.Json;
+using Picalines.Godot.LDtkImport.Utils;
 
-namespace Picalines.Godot.LDtkImport
+namespace Picalines.Godot.LDtkImport.Json
 {
     internal static class JsonFile
     {
