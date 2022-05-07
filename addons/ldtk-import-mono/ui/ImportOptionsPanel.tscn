@@ -1,0 +1,200 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://addons/ldtk-import-mono/ui/ImportOptionsPanel.cs" type="Script" id=1]
+[ext_resource path="res://addons/ldtk-import-mono/ui/FileSelectButton/FileSelectButton.tscn" type="PackedScene" id=2]
+
+[node name="Options" type="VBoxContainer"]
+margin_right = 182.0
+margin_bottom = 56.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="."]
+margin_right = 256.0
+margin_bottom = 14.0
+text = "Options:"
+
+[node name="GenerateWorldSceneCheckBox" type="CheckBox" parent="."]
+margin_top = 18.0
+margin_right = 168.0
+margin_bottom = 42.0
+hint_tooltip = "If enabled, plugin will generate a scene with all levels instanced at their positions"
+size_flags_horizontal = 0
+text = "Generate world scene"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WorldSceneOptions" type="PanelContainer" parent="."]
+margin_top = 46.0
+margin_right = 256.0
+margin_bottom = 126.0
+
+[node name="VBox" type="VBoxContainer" parent="WorldSceneOptions"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 249.0
+margin_bottom = 73.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="WorldSceneOptions/VBox"]
+margin_right = 242.0
+margin_bottom = 14.0
+text = "World scene:"
+
+[node name="BaseScenePath" type="HBoxContainer" parent="WorldSceneOptions/VBox"]
+margin_top = 18.0
+margin_right = 242.0
+margin_bottom = 38.0
+hint_tooltip = "Scene that the world scene should inherit (optional)"
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="WorldSceneOptions/VBox/BaseScenePath"]
+margin_top = 3.0
+margin_right = 116.0
+margin_bottom = 17.0
+text = "Base world scene:"
+
+[node name="FileSelectButton" parent="WorldSceneOptions/VBox/BaseScenePath" instance=ExtResource( 2 )]
+margin_left = 120.0
+margin_right = 242.0
+margin_bottom = 20.0
+size_flags_horizontal = 0
+text = "select .tscn file..."
+FileExtension = "tscn"
+
+[node name="LevelsParentName" type="HBoxContainer" parent="WorldSceneOptions/VBox"]
+margin_top = 42.0
+margin_right = 242.0
+margin_bottom = 66.0
+hint_tooltip = "If not empty, plugin will create a seperate Node2D for levels
+
+When base world scene is used, plugin tries to search for an existing node with that name"
+
+[node name="Label" type="Label" parent="WorldSceneOptions/VBox/LevelsParentName"]
+margin_top = 5.0
+margin_right = 166.0
+margin_bottom = 19.0
+text = "Levels parent node name:"
+
+[node name="LineEdit" type="LineEdit" parent="WorldSceneOptions/VBox/LevelsParentName"]
+margin_left = 170.0
+margin_right = 228.0
+margin_bottom = 24.0
+text = "Levels"
+expand_to_text_length = true
+caret_blink = true
+caret_blink_speed = 0.5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LevelScenOptions" type="PanelContainer" parent="."]
+margin_top = 130.0
+margin_right = 256.0
+margin_bottom = 210.0
+
+[node name="VBox" type="VBoxContainer" parent="LevelScenOptions"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 249.0
+margin_bottom = 73.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="LevelScenOptions/VBox"]
+margin_right = 242.0
+margin_bottom = 14.0
+text = "Level scene:"
+
+[node name="BaseScenePath" type="HBoxContainer" parent="LevelScenOptions/VBox"]
+margin_top = 18.0
+margin_right = 242.0
+margin_bottom = 38.0
+hint_tooltip = "Scene that the level scene should inherit (optional)"
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="LevelScenOptions/VBox/BaseScenePath"]
+margin_top = 3.0
+margin_right = 112.0
+margin_bottom = 17.0
+text = "Base level scene:"
+
+[node name="FileSelectButton" parent="LevelScenOptions/VBox/BaseScenePath" instance=ExtResource( 2 )]
+margin_left = 116.0
+margin_right = 238.0
+margin_bottom = 20.0
+size_flags_horizontal = 0
+text = "select .tscn file..."
+FileExtension = "tscn"
+
+[node name="LayersParentName" type="HBoxContainer" parent="LevelScenOptions/VBox"]
+margin_top = 42.0
+margin_right = 242.0
+margin_bottom = 66.0
+hint_tooltip = "If not empty, plugin will create a seperate Node2D for level layers from LDtk
+
+When base level scene is used, plugin tries to search for an existing node with that name"
+
+[node name="Label" type="Label" parent="LevelScenOptions/VBox/LayersParentName"]
+margin_top = 5.0
+margin_right = 166.0
+margin_bottom = 19.0
+text = "Layers parent node name:"
+
+[node name="LineEdit" type="LineEdit" parent="LevelScenOptions/VBox/LayersParentName"]
+margin_left = 170.0
+margin_right = 228.0
+margin_bottom = 24.0
+text = "Layers"
+expand_to_text_length = true
+caret_blink = true
+caret_blink_speed = 0.5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EntityScenePaths" type="PanelContainer" parent="."]
+margin_top = 214.0
+margin_right = 256.0
+margin_bottom = 248.0
+
+[node name="HBox" type="HBoxContainer" parent="EntityScenePaths"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 249.0
+margin_bottom = 27.0
+
+[node name="EntityName" type="Label" parent="EntityScenePaths/HBox"]
+margin_top = 3.0
+margin_right = 38.0
+margin_bottom = 17.0
+text = "Name"
+
+[node name="FileSelectButton" parent="EntityScenePaths/HBox" instance=ExtResource( 2 )]
+margin_left = 42.0
+margin_right = 137.0
+margin_bottom = 20.0
+FileExtension = "tscn"
+
+[connection signal="initialized" from="." to="." method="set_LevelsParentName" binds= [ "Levels" ]]
+[connection signal="initialized" from="." to="." method="set_LayersParentName" binds= [ "Layers" ]]
+[connection signal="initialized" from="." to="GenerateWorldSceneCheckBox" method="set_pressed" binds= [ false ]]
+[connection signal="initialized" from="." to="WorldSceneOptions/VBox/BaseScenePath/FileSelectButton" method="set_SelectedFile" binds= [ "" ]]
+[connection signal="initialized" from="." to="WorldSceneOptions/VBox/LevelsParentName/LineEdit" method="set_text" binds= [ "Levels" ]]
+[connection signal="initialized" from="." to="LevelScenOptions/VBox/BaseScenePath/FileSelectButton" method="set_SelectedFile" binds= [ "" ]]
+[connection signal="initialized" from="." to="LevelScenOptions/VBox/LayersParentName/LineEdit" method="set_text" binds= [ "Layers" ]]
+[connection signal="toggled" from="GenerateWorldSceneCheckBox" to="." method="set_GenerateWorldScene"]
+[connection signal="toggled" from="GenerateWorldSceneCheckBox" to="WorldSceneOptions" method="set_visible"]
+[connection signal="ready" from="WorldSceneOptions" to="WorldSceneOptions" method="hide"]
+[connection signal="file_cleared" from="WorldSceneOptions/VBox/BaseScenePath/FileSelectButton" to="." method="set_BaseWorldScene" binds= [ "" ]]
+[connection signal="file_selected" from="WorldSceneOptions/VBox/BaseScenePath/FileSelectButton" to="." method="set_BaseWorldScene"]
+[connection signal="text_changed" from="WorldSceneOptions/VBox/LevelsParentName/LineEdit" to="." method="set_LevelsParentName"]
+[connection signal="file_cleared" from="LevelScenOptions/VBox/BaseScenePath/FileSelectButton" to="." method="set_BaseLevelScene" binds= [ "" ]]
+[connection signal="file_selected" from="LevelScenOptions/VBox/BaseScenePath/FileSelectButton" to="." method="set_BaseLevelScene"]
+[connection signal="text_changed" from="LevelScenOptions/VBox/LayersParentName/LineEdit" to="." method="set_LayersParentName"]

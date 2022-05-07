@@ -3,6 +3,7 @@ test/
 project.godot
 
 .vscode/
+/.vs
 
 .import/
 *.import

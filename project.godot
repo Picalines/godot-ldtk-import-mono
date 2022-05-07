@@ -22,6 +22,18 @@ config/icon="res://icon.png"
 
 enabled=PoolStringArray( "res://addons/ldtk-import-mono/plugin.cfg" )
 
+[importer_defaults]
+
+ldtk.level={
+"BaseScenePath": "res://test/BaseLevel.tscn",
+"EntityScenePath": "res://test/entities/$/$.tscn",
+"LayersParentName": "Layers"
+}
+ldtk.world={
+"BaseScenePath": "res://test/BaseWorld.tscn",
+"LevelsParentName": "Levels"
+}
+
 [rendering]
 
 environment/default_environment="res://default_env.tres"
