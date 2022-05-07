@@ -2,6 +2,7 @@
 
 using Godot;
 using Picalines.Godot.LDtkImport.Importers;
+using Picalines.Godot.LDtkImport.Utils;
 
 namespace Picalines.Godot.LDtkImport
 {
@@ -83,11 +84,26 @@ namespace Picalines.Godot.LDtkImport
                 file.StoreString(settingsTemplate);
                 file.Close();
 
+                GD.Print($"LDtk import settings file created at {settingsFilePath}");
+
                 _ImportSettingsFileCreationPopup.PopupCentered();
                 return;
             }
 
-            LDtkImporter.Import(ldtkFile, settingsFilePath);
+            var success = LDtkImporter.Import(ldtkFile, settingsFilePath, out var outputDirectory);
+
+            if (!success)
+            {
+                GD.PushError(ErrorMessage.FailedToImportLDtkProject(ldtkFile));
+                return;
+            }
+
+            GD.Print($"successfully imported LDtk project at {ldtkFile}");
+
+            if (outputDirectory is not null)
+            {
+                GetEditorInterface().GetFileSystemDock().NavigateToPath(outputDirectory);
+            }
         }
 
         private void OpenSettingsInExternalEditor()

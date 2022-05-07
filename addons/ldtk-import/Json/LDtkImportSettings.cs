@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Picalines.Godot.LDtkImport.Json
 {
@@ -23,6 +24,15 @@ namespace Picalines.Godot.LDtkImport.Json
 
         [JsonProperty("levelScene")]
         public LevelSceneImportSettings? LevelSceneSettings { get; private set; }
+
+        [OnDeserialized]
+        private void Init(StreamingContext _)
+        {
+            if (!OutputDirectory.EndsWith("/"))
+            {
+                OutputDirectory += "/";
+            }
+        }
 
         public string? GetEntityScenePath(string entityName)
         {
