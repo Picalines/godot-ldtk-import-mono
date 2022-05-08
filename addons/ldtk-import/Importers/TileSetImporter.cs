@@ -22,6 +22,21 @@ namespace Picalines.Godot.LDtkImport.Importers
             var texture = GD.Load<Texture>(GetTexturePath(ldtkFilePath, tileSetJson));
             var textureImage = texture.GetData();
 
+            UpdateTiles(tileSetJson, tileSet, texture, textureImage);
+
+            return tileSet;
+        }
+
+        public static void ApplyChanges(string ldtkFilePath, WorldJson.TileSetDefinition tileSetJson, TileSet tileSet)
+        {
+            var texture = GD.Load<Texture>(GetTexturePath(ldtkFilePath, tileSetJson));
+            Image textureImage = texture.GetData();
+
+            UpdateTiles(tileSetJson, tileSet, texture, textureImage);
+        }
+
+        private static void UpdateTiles(WorldJson.TileSetDefinition tileSetJson, TileSet tileSet, Texture texture, Image textureImage)
+        {
             int tileFullSize = tileSetJson.TileGridSize + tileSetJson.Spacing;
             int gridWidth = (tileSetJson.PxWidth - tileSetJson.Padding) / tileFullSize;
             int gridHeight = (tileSetJson.PxHeight - tileSetJson.Padding) / tileFullSize;
