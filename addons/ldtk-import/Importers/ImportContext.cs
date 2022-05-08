@@ -1,4 +1,6 @@
-﻿namespace Picalines.Godot.LDtkImport.Importers
+﻿using Picalines.Godot.LDtkImport.Json;
+
+namespace Picalines.Godot.LDtkImport.Importers
 {
     internal record LevelImportContext(
         string LDtkFilePath,

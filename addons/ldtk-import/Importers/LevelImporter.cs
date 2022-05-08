@@ -23,14 +23,6 @@ namespace Picalines.Godot.LDtkImport.Importers
         {
             foreach (var layer in context.LevelJson.LayerInstances!)
             {
-                var layerContext = new LayerImportContext(
-                    context.LDtkFilePath,
-                    context.ImportSettings,
-                    context.WorldJson,
-                    context.LevelJson,
-                    layer
-                );
-
                 var layerNode = layer.Type switch
                 {
                     LayerType.Entities => EntityLayerImporter.Import(context, layer),
