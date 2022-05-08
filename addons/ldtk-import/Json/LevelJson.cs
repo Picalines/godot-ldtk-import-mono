@@ -119,6 +119,9 @@ namespace Picalines.Godot.LDtkImport.Json
 
             [JsonProperty("defUid")]
             public string DefUid { get; private set; }
+
+            [JsonProperty("__tags")]
+            public IReadOnlyList<string> Tags { get; private set; }
         }
 
         public class EntityInstance

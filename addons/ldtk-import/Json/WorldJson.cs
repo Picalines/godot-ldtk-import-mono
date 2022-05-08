@@ -132,6 +132,15 @@ namespace Picalines.Godot.LDtkImport.Json
             [JsonProperty("tilesetDefUid")]
             public int? TileSetDefUid { get; private set; }
 
+            // NOTE: requiredTags and excludedTags are not documented...
+            // for some reason
+
+            [JsonProperty("requiredTags")]
+            public IReadOnlyList<string>? RequiredEntityTags { get; private set; }
+
+            [JsonProperty("excludedTags")]
+            public IReadOnlyList<string>? ExcludedEntityTags { get; private set; }
+
             [OnDeserialized]
             private void Init(StreamingContext context)
             {
