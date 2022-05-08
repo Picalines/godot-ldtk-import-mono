@@ -11,7 +11,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
     internal static class TileMapImporter
     {
-        public static Node2D Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
+        public static TileMap Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
             var tileSet = GD.Load<TileSet>(GetTileSetPath(context, layerJson));
 
