@@ -2,6 +2,7 @@
 
 using Godot;
 using Picalines.Godot.LDtkImport.Json;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Picalines.Godot.LDtkImport.Importers
@@ -17,13 +18,37 @@ namespace Picalines.Godot.LDtkImport.Importers
             return layerNode;
         }
 
+        public static Node? TryInstantiate(LevelImportContext context, string entityName, IEnumerable<KeyValuePair<string, object>> fieldValues)
+        {
+            var possiblePaths = context.ImportSettings.GetPossibleEntityPaths(entityName);
+
+            var scenePath = possiblePaths.FirstOrDefault(path => ResourceLoader.Exists(path, nameof(PackedScene)));
+
+            if (scenePath is null)
+            {
+                return null;
+            }
+
+            var entityPackedScene = GD.Load<PackedScene>(scenePath);
+            var entityNode = entityPackedScene.Instance<Node>();
+
+            foreach (var pair in fieldValues)
+            {
+                // TODO: LDtkFieldAttribute
+                entityNode.Set(pair.Key, pair.Value);
+            }
+
+            return entityNode;
+        }
+
         private static void AddEntities(LevelImportContext context, LevelJson.LayerInstance layerJson, Node2D layerNode)
         {
             foreach (var entityInstance in layerJson.EntityInstances)
             {
-                var scenePath = context.ImportSettings.GetEntityScenePath(entityInstance.Identifier);
+                var fieldValues = entityInstance.FieldInstances
+                    .Select(fieldInstance => new KeyValuePair<string, object>(fieldInstance.Identifier, fieldInstance.Value));
 
-                var entityNode = scenePath is not null ? TryInstantiateEntity(entityInstance, scenePath) : null;
+                var entityNode = TryInstantiate(context, entityInstance.Identifier, fieldValues);
 
                 entityNode ??= new Position2D() { Name = entityInstance.Identifier };
 
@@ -34,23 +59,6 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 layerNode.AddChild(entityNode);
             }
-        }
-
-        private static Node? TryInstantiateEntity(LevelJson.EntityInstance entityInstance, string scenePath)
-        {
-            if (!ResourceLoader.Exists(scenePath, nameof(PackedScene)))
-            {
-                return null;
-            }
-
-            var entityPackedScene = GD.Load<PackedScene>(scenePath);
-            var entityNode = entityPackedScene.Instance<Node>();
-
-            entityNode.SetScript(null!);
-
-            // TODO: assign fields
-
-            return entityNode;
         }
 
         private static Node2D CreateEntityLayer(LevelImportContext context, LevelJson.LayerInstance layerJson)

@@ -3,6 +3,7 @@
 using Godot;
 using Picalines.Godot.LDtkImport.Json;
 using Picalines.Godot.LDtkImport.Utils;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Picalines.Godot.LDtkImport.Importers
@@ -11,6 +12,8 @@ namespace Picalines.Godot.LDtkImport.Importers
 
     internal static class TileMapImporter
     {
+        private const string TileEntityNameField = "$entity";
+
         public static TileMap Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
             var tileSet = GD.Load<TileSet>(GetTileSetPath(context, layerJson));
@@ -24,26 +27,39 @@ namespace Picalines.Godot.LDtkImport.Importers
                 Modulate = new Color(1, 1, 1, layerJson.Opacity),
             };
 
-            SetTiles(layerJson, tileMap);
-
             if (layerJson.Type is LayerType.IntGrid)
             {
                 AddIntGrid(layerJson, tileMap);
             }
 
+            SetTiles(context, layerJson, tileMap);
+
             return tileMap;
         }
 
-        private static void SetTiles(LevelJson.LayerInstance layer, TileMap tileMap)
+        private static void SetTiles(LevelImportContext context, LevelJson.LayerInstance layerJson, TileMap tileMap)
         {
-            var tiles = layer.Type is LayerType.Tiles
-                ? layer.GridTiles
-                : layer.AutoLayerTiles;
+            var tileSetDefinition = context.WorldJson.Definitions.TileSets
+                .First(tileSetDef => tileSetDef.Uid == layerJson.TileSetDefUid);
+
+            var tileEntities = GetTileEntities(tileSetDefinition);
+
+            var tiles = layerJson.Type is LayerType.Tiles
+                ? layerJson.GridTiles
+                : layerJson.AutoLayerTiles;
 
             foreach (var tile in tiles)
             {
                 var gridCoords = tileMap.WorldToMap(tile.LayerPxCoords);
-                tileMap.SetCellv(gridCoords, tile.Id, tile.FlipX, tile.FlipY);
+
+                if (tileEntities.TryGetValue(tile.Id, out var tileCustomData))
+                {
+                    TryInstantiateTileEntity(context, tileMap, tile, tileCustomData);
+                }
+                else
+                {
+                    tileMap.SetCellv(gridCoords, tile.Id, tile.FlipX, tile.FlipY);
+                }
             }
         }
 
@@ -65,6 +81,51 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
 
             tileMap.AddChild(intMap);
+        }
+
+        private static void TryInstantiateTileEntity(LevelImportContext context, TileMap tileMap, LevelJson.TileInstance tile, Dictionary<string, object> tileCustomData)
+        {
+            var entityName = (string)tileCustomData[TileEntityNameField];
+
+            var entityFields = tileCustomData.Where(pair => pair.Key != TileEntityNameField);
+
+            var tileEntity = EntityLayerImporter.TryInstantiate(context, entityName, entityFields);
+
+            if (tileEntity is null)
+            {
+                return;
+            }
+
+            tileMap.AddChild(tileEntity);
+
+            if (tileEntity is Node2D entity2D)
+            {
+                entity2D.Position = tile.LayerPxCoords + tileMap.CellSize / 2;
+
+                var scale = Vector2.One;
+
+                if (tile.FlipX) scale.x *= -1;
+                if (tile.FlipY) scale.y *= -1;
+
+                entity2D.Scale = scale;
+            }
+        }
+
+        private static Dictionary<int, Dictionary<string, object>> GetTileEntities(WorldJson.TileSetDefinition tileSetDefinition)
+        {
+            var tileEntities = new Dictionary<int, Dictionary<string, object>>();
+
+            foreach (var customData in tileSetDefinition.CustomData)
+            {
+                var json = customData.AsJson<Dictionary<string, object>>();
+
+                if (json?.ContainsKey(TileEntityNameField) ?? false)
+                {
+                    tileEntities.Add(customData.TileId, json);
+                }
+            }
+
+            return tileEntities;
         }
 
         private static string GetTileSetPath(LevelImportContext context, LevelJson.LayerInstance layerJson)
