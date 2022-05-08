@@ -15,6 +15,7 @@
   "worldScene": {
     "baseScenePath": "res://scenes/world.tscn",
     "scriptPath": "res://scripts/world.gd",
+    "levelsParent": "Levels",
     // Set to true if you want only a
     // Position2D node with the level name
     "onlyMarkers": false
@@ -22,6 +23,7 @@
 
   "levelScene": {
     "baseScenePath": "res://scenes/level.tscn",
-    "scriptPath": "res://scripts/level.gd"
+    "scriptPath": "res://scripts/level.gd",
+    "layersParent": "Layers"
   }
 }

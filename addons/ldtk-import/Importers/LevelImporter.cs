@@ -9,10 +9,21 @@ namespace Picalines.Godot.LDtkImport.Importers
     {
         public static void Import(LevelImportContext context)
         {
-            var levelNode = new Node2D()
+            Node2D levelNode;
+
+            if (context.ImportSettings.LevelSceneSettings?.BaseScenePath is string baseScenePath)
             {
-                Name = context.LevelJson.Identifier,
-            };
+                // NOTE: actual scene inheritance through code is impossible in Godot.
+                // https://github.com/godotengine/godot-proposals/issues/3907
+                var basePackedScene = GD.Load<PackedScene>(baseScenePath);
+                levelNode = basePackedScene.Instance<Node2D>();
+            }
+            else
+            {
+                levelNode = new();
+            }
+
+            levelNode.Name = context.LevelJson.Identifier;
 
             AddLayers(context, levelNode);
 
@@ -21,6 +32,16 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         private static void AddLayers(LevelImportContext context, Node2D levelNode)
         {
+            Node layersParent = levelNode;
+
+            if (context.ImportSettings.LevelSceneSettings?.LayersParentNodeName is string layersParentNodeName)
+            {
+                layersParent = levelNode.GetNodeOrNull(layersParentNodeName)
+                    ?? new Node2D() { Name = layersParentNodeName };
+
+                layersParent.Owner = levelNode;
+            }
+
             foreach (var layer in context.LevelJson.LayerInstances!)
             {
                 var layerNode = layer.Type switch
@@ -29,7 +50,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                     _ => TileMapImporter.Import(context, layer),
                 };
 
-                levelNode.AddChild(layerNode);
+                layersParent.AddChild(layerNode);
 
                 layerNode.Owner = levelNode;
                 foreach (Node child in layerNode.GetChildren())

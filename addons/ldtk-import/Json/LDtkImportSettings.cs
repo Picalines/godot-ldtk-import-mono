@@ -55,6 +55,9 @@ namespace Picalines.Godot.LDtkImport.Json
     {
         private WorldSceneImportSettings() { }
 
+        [JsonProperty("levelsParent")]
+        public string? LevelsParentNodeName { get; private set; }
+
         [JsonProperty("onlyMarkers")]
         public bool OnlyMarkers { get; private set; } = false;
     }
@@ -62,6 +65,9 @@ namespace Picalines.Godot.LDtkImport.Json
     internal sealed class LevelSceneImportSettings : SceneImportSettings
     {
         private LevelSceneImportSettings() { }
+
+        [JsonProperty("layersParent")]
+        public string? LayersParentNodeName { get; private set; }
     }
 }
 
