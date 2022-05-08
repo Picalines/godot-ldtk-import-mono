@@ -44,11 +44,8 @@ namespace Picalines.Godot.LDtkImport.Json
 
     internal abstract class SceneImportSettings
     {
-        [JsonProperty("baseScenePath")]
+        [JsonProperty("base")]
         public string? BaseScenePath { get; private set; }
-
-        [JsonProperty("scriptPath")]
-        public string? ScriptPath { get; private set; }
     }
 
     internal sealed class WorldSceneImportSettings : SceneImportSettings
