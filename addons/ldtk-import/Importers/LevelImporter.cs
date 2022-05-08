@@ -2,6 +2,7 @@
 
 using Godot;
 using Picalines.Godot.LDtkImport.Json;
+using System.Linq;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
@@ -42,7 +43,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 layersParent.Owner = levelNode;
             }
 
-            foreach (var layer in context.LevelJson.LayerInstances!)
+            foreach (var layer in context.LevelJson.LayerInstances!.Reverse())
             {
                 var layerNode = layer.Type switch
                 {
