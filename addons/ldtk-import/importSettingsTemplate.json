@@ -16,8 +16,9 @@
     "baseScenePath": "res://scenes/world.tscn",
     "scriptPath": "res://scripts/world.gd",
     "levelsParent": "Levels",
-    // Set to true if you want only a
-    // Position2D node with the level name
+    // If true, plugin will place Position2D
+    // nodes with level names and their scene
+    // paths in EditorDescription property
     "onlyMarkers": false
   },
 

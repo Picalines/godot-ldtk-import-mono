@@ -6,7 +6,6 @@ using System;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
-    [Tool]
     internal static class LDtkImporter
     {
         public static void Import(string ldtkFilePath, string settingsFilePath, out string outputDirectory)
@@ -21,7 +20,10 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             ImportLevels(ldtkFilePath, settings, worldJson);
 
-            // TODO: world scene
+            if (settings.WorldSceneSettings is not null)
+            {
+                WorldImporter.Import(ldtkFilePath, settings, worldJson);
+            }
 
             outputDirectory = settings.OutputDirectory;
         }

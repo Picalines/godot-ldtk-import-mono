@@ -20,6 +20,9 @@ namespace Picalines.Godot.LDtkImport
 
         public static LDtkImportException FailedToImportLevel(string ldtkFile, string level) =>
             new($"failed to import level '{level}' from {ldtkFile}");
+
+        public static LDtkImportException FailedToImportWorld(string ldtkFile) =>
+            new($"failed to import world from {ldtkFile}");
     }
 }
 
