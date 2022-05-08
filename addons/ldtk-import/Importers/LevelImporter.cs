@@ -9,14 +9,14 @@ namespace Picalines.Godot.LDtkImport.Importers
     {
         public static void Import(LevelImportContext context)
         {
-            Node2D levelNode;
+            Node levelNode;
 
             if (context.ImportSettings.LevelSceneSettings?.BaseScenePath is string baseScenePath)
             {
                 // NOTE: actual scene inheritance through code is impossible in Godot.
                 // https://github.com/godotengine/godot-proposals/issues/3907
                 var basePackedScene = GD.Load<PackedScene>(baseScenePath);
-                levelNode = basePackedScene.Instance<Node2D>();
+                levelNode = basePackedScene.Instance<Node>();
             }
             else
             {
@@ -30,7 +30,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             SaveScene(context, levelNode);
         }
 
-        private static void AddLayers(LevelImportContext context, Node2D levelNode)
+        private static void AddLayers(LevelImportContext context, Node levelNode)
         {
             Node layersParent = levelNode;
 
@@ -60,7 +60,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
         }
 
-        private static void SaveScene(LevelImportContext context, Node2D levelNode)
+        private static void SaveScene(LevelImportContext context, Node levelNode)
         {
             var savePath = $"{context.ImportSettings.OutputDirectory}/{context.LevelJson.Identifier}.tscn";
 
