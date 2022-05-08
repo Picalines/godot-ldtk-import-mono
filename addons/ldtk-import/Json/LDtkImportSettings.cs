@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Picalines.Godot.LDtkImport.Json
@@ -13,10 +14,10 @@ namespace Picalines.Godot.LDtkImport.Json
         [JsonProperty("outputDir", Required = Required.Always)]
         public string OutputDirectory { get; private set; } = null!;
 
-        [JsonProperty("entityScenePath")]
-        public string? EntityScenePathTemplate { get; private set; }
+        [JsonProperty("entityPaths")]
+        public IReadOnlyList<string>? EntityScenePathTemplates { get; private set; }
 
-        [JsonProperty("entitySceneOverrides")]
+        [JsonProperty("entityPathOverrides")]
         public IReadOnlyDictionary<string, string>? EntityScenePathOverrides { get; private set; }
 
         [JsonProperty("worldScene")]
@@ -31,14 +32,21 @@ namespace Picalines.Godot.LDtkImport.Json
             OutputDirectory = OutputDirectory.TrimEnd('/');
         }
 
-        public string? GetEntityScenePath(string entityName)
+        public IEnumerable<string> GetPossibleEntityPaths(string entityName)
         {
-            if (EntityScenePathOverrides?.TryGetValue(entityName, out var path) ?? false)
+            if (EntityScenePathOverrides?.TryGetValue(entityName, out var overridenPath) ?? false)
             {
-                return path;
+                yield return overridenPath;
             }
+            else if (EntityScenePathTemplates is not null)
+            {
+                var resolvedTemplates = EntityScenePathTemplates.Select(template => template.Replace("{}", entityName));
 
-            return EntityScenePathTemplate?.Replace("{}", entityName);
+                foreach (var path in resolvedTemplates)
+                {
+                    yield return path;
+                }
+            }
         }
     }
 

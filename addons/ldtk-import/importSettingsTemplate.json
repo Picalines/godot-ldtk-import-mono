@@ -4,15 +4,18 @@
   // the generated tilesets and scenes
   "outputDir": "res://worlds/Overworld/",
 
-  // Template of the path by which the plugin
+  // Templates of the path by which the plugin
   // will search for the scene of entity
   // ({} is replaced by entity name from LDtk)
-  "entityScenePath": "res://entities/{}/{}.tscn",
+  "entityPaths": [
+    "res://scenes/mobs/{}/{}.tscn",
+    "res://scenes/decor/{}/{}.tscn"
+  ],
 
   // If the plugin did not find the entity name
-  // in entityScenePathOverrides, entityScenePath
-  // is used instead
-  "entityScenePathOverrides": {
+  // in entitySceneOverrides, one of entityPaths
+  // will be used instead
+  "entityPathOverrides": {
     "Item": "res://items/Item.tscn"
   },
 
