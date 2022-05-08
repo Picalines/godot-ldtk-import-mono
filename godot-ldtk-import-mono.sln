@@ -1,28 +1,19 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.1.32228.430
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "godot-ldtk-import-mono", "godot-ldtk-import-mono.csproj", "{A84C64BD-C402-4E8B-8C7E-23AF283E833F}"
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "godot-ldtk-import-mono", "godot-ldtk-import-mono.csproj", "{7347D973-8384-484B-A759-6F333D49BBF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		ExportDebug|Any CPU = ExportDebug|Any CPU
-		ExportRelease|Any CPU = ExportRelease|Any CPU
+	Debug|Any CPU = Debug|Any CPU
+	ExportDebug|Any CPU = ExportDebug|Any CPU
+	ExportRelease|Any CPU = ExportRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A84C64BD-C402-4E8B-8C7E-23AF283E833F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A84C64BD-C402-4E8B-8C7E-23AF283E833F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A84C64BD-C402-4E8B-8C7E-23AF283E833F}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
-		{A84C64BD-C402-4E8B-8C7E-23AF283E833F}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
-		{A84C64BD-C402-4E8B-8C7E-23AF283E833F}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
-		{A84C64BD-C402-4E8B-8C7E-23AF283E833F}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {6E197C62-862B-4C4B-8C68-F2D1FE1A7575}
+		{7347D973-8384-484B-A759-6F333D49BBF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7347D973-8384-484B-A759-6F333D49BBF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7347D973-8384-484B-A759-6F333D49BBF1}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{7347D973-8384-484B-A759-6F333D49BBF1}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{7347D973-8384-484B-A759-6F333D49BBF1}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{7347D973-8384-484B-A759-6F333D49BBF1}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
 	EndGlobalSection
 EndGlobal
