@@ -87,14 +87,16 @@ namespace Picalines.Godot.LDtkImport.Importers
         {
             var entityName = (string)tileCustomData[TileEntityNameField];
 
-            var entityFields = tileCustomData.Where(pair => pair.Key != TileEntityNameField);
-
-            var tileEntity = EntityLayerImporter.TryInstantiate(context, entityName, entityFields);
+            var tileEntity = EntityLayerImporter.TryInstantiate(context, entityName);
 
             if (tileEntity is null)
             {
                 return;
             }
+
+            var entityFields = tileCustomData.Where(pair => pair.Key != TileEntityNameField).ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            LDtkFieldAssigner.Assign(tileEntity, entityFields);
 
             tileMap.AddChild(tileEntity);
 

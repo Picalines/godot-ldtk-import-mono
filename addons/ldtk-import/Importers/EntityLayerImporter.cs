@@ -2,7 +2,6 @@
 
 using Godot;
 using Picalines.Godot.LDtkImport.Json;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Picalines.Godot.LDtkImport.Importers
@@ -18,7 +17,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             return layerNode;
         }
 
-        public static Node? TryInstantiate(LevelImportContext context, string entityName, IEnumerable<KeyValuePair<string, object>> fieldValues)
+        public static Node? TryInstantiate(LevelImportContext context, string entityName)
         {
             var possiblePaths = context.ImportSettings.GetPossibleEntityPaths(entityName);
 
@@ -32,12 +31,6 @@ namespace Picalines.Godot.LDtkImport.Importers
             var entityPackedScene = GD.Load<PackedScene>(scenePath);
             var entityNode = entityPackedScene.Instance<Node>();
 
-            foreach (var pair in fieldValues)
-            {
-                // TODO: LDtkFieldAttribute
-                entityNode.Set(pair.Key, pair.Value);
-            }
-
             return entityNode;
         }
 
@@ -45,10 +38,12 @@ namespace Picalines.Godot.LDtkImport.Importers
         {
             foreach (var entityInstance in layerJson.EntityInstances)
             {
-                var fieldValues = entityInstance.FieldInstances
-                    .Select(fieldInstance => new KeyValuePair<string, object>(fieldInstance.Identifier, fieldInstance.Value));
+                var entityNode = TryInstantiate(context, entityInstance.Identifier);
 
-                var entityNode = TryInstantiate(context, entityInstance.Identifier, fieldValues);
+                if (entityNode is not null)
+                {
+                    LDtkFieldAssigner.Assign(entityNode, entityInstance);
+                }
 
                 entityNode ??= new Position2D() { Name = entityInstance.Identifier };
 
