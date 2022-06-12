@@ -8,8 +8,6 @@ using System.Linq;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
-    // TODO: tile entities
-
     internal static class TileMapImporter
     {
         private const string TileEntityNameField = "$entity";
@@ -24,7 +22,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 Name = layerJson.Identifier,
                 Position = layerJson.PxTotalOffset,
                 CellSize = layerJson.GridSizeV,
-                Modulate = new Color(1, 1, 1, layerJson.Opacity),
+                Modulate = Colors.White with { a = layerJson.Opacity },
             };
 
             if (layerJson.Type is LayerType.IntGrid)
@@ -94,9 +92,14 @@ namespace Picalines.Godot.LDtkImport.Importers
                 return;
             }
 
-            var entityFields = tileCustomData.Where(pair => pair.Key != TileEntityNameField).ToDictionary(pair => pair.Key, pair => pair.Value);
+            var entityFields = tileCustomData
+                .Where(pair => pair.Key != TileEntityNameField)
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            LDtkFieldAssigner.Assign(tileEntity, entityFields, new((int)tileMap.CellSize.x));
+            LDtkFieldAssigner.Assign(tileEntity, entityFields, new()
+            {
+                GridSize = (int)tileMap.CellSize.x,
+            });
 
             tileMap.AddChild(tileEntity);
 
