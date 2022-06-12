@@ -42,9 +42,11 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             var tileEntities = GetTileEntities(tileSetDefinition);
 
-            var tiles = layerJson.Type is LayerType.Tiles
-                ? layerJson.GridTiles
-                : layerJson.AutoLayerTiles;
+            var tiles = layerJson.Type switch
+            {
+                LayerType.Tiles => layerJson.GridTiles,
+                _ => layerJson.AutoLayerTiles,
+            };
 
             foreach (var tile in tiles)
             {
