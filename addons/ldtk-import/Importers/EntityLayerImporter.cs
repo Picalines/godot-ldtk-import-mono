@@ -53,7 +53,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 if (instantiated)
                 {
-                    LDtkFieldAssigner.Assign(entityNode, entityInstance, new()
+                    LDtkFieldAssigner.Assign(entityNode, entityInstance.FieldInstances, new()
                     {
                         GridSize = layerJson.GridSize,
                         ReferenceAssigner = referenceAssigner,

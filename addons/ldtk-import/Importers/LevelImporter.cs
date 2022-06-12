@@ -28,6 +28,8 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             AddLayers(context, levelNode);
 
+            LDtkFieldAssigner.Assign(levelNode, context.LevelJson.FieldInstances, new());
+
             SaveScene(context, levelNode);
         }
 

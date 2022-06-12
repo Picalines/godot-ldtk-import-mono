@@ -21,7 +21,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         private record CheckContext : Context
         {
-            public Node? EntityNode { get; init; }
+            public Node? TargetNode { get; init; }
             public string? MemberName { get; init; }
             public int? ArrayIndex { get; init; }
         }
@@ -48,11 +48,11 @@ namespace Picalines.Godot.LDtkImport.Importers
             ScanAssemblyForTargetFields();
         }
 
-        public static void Assign(Node entityNode, IReadOnlyDictionary<string, object> values, Context context)
+        public static void Assign(Node node, IReadOnlyDictionary<string, object> values, Context context)
         {
-            var entityType = GetSceneType(entityNode);
+            var nodeScriptType = GetNodeScriptType(node);
 
-            if (entityType is null || !_TargetFields.TryGetValue(entityType, out var targetFields))
+            if (nodeScriptType is null || !_TargetFields.TryGetValue(nodeScriptType, out var targetFields))
             {
                 return;
             }
@@ -61,7 +61,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             {
                 if (!values.TryGetValue(targetField.EditorName, out var fieldValue))
                 {
-                    GD.PushWarning($"{entityType}: missing LDtk field named '{targetField.EditorName}'");
+                    GD.PushWarning($"{nodeScriptType}: missing LDtk field named '{targetField.EditorName}'");
                     continue;
                 }
 
@@ -76,7 +76,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 {
                     GridSize = context.GridSize,
                     ReferenceAssigner = context.ReferenceAssigner,
-                    EntityNode = entityNode,
+                    TargetNode = node,
                     MemberName = targetField.TargetMember.Name
                 };
 
@@ -85,13 +85,13 @@ namespace Picalines.Godot.LDtkImport.Importers
                     continue;
                 }
 
-                entityNode.Set(targetField.TargetMember.Name, fieldValue);
+                node.Set(targetField.TargetMember.Name, fieldValue);
             }
         }
 
-        public static void Assign(Node entityNode, LevelJson.EntityInstance entityJson, Context context)
+        public static void Assign(Node targetNode, IEnumerable<LevelJson.FieldInstance> fieldInstances, Context context)
         {
-            Assign(entityNode, entityJson.FieldInstances.ToDictionary(field => field.Identifier, field => field.Value), context);
+            Assign(targetNode, fieldInstances.ToDictionary(field => field.Identifier, field => field.Value), context);
         }
 
         private static bool CheckFieldType(Type targetType, ref object? fieldValue, CheckContext context)
@@ -183,7 +183,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                         _ => throw new NotImplementedException(),
                     };
 
-                    referenceAssigner.RegisterReference(context.EntityNode!, (string)entityRef["entityIid"], targetMember);
+                    referenceAssigner.RegisterReference(context.TargetNode!, (string)entityRef["entityIid"], targetMember);
                     return true;
                 }
 
@@ -195,7 +195,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
         }
 
-        private static Type? GetSceneType(Node scene)
+        private static Type? GetNodeScriptType(Node scene)
         {
             if (scene.GetScript() is not CSharpScript { ResourcePath: var scriptPath })
             {
