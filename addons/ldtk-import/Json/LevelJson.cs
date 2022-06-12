@@ -137,6 +137,9 @@ namespace Picalines.Godot.LDtkImport.Json
                 public Rect2 SrcRect { get; private set; }
             }
 
+            [JsonProperty("iid")]
+            public string Id { get; private set; }
+
             [JsonProperty("__identifier")]
             public string Identifier { get; private set; }
 
