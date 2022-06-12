@@ -36,24 +36,40 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         private static void AddEntities(LevelImportContext context, LevelJson.LayerInstance layerJson, Node2D layerNode)
         {
+            var referenceAssigner = CreateReferenceAssigner();
+
+            layerNode.AddChild(referenceAssigner);
+
             foreach (var entityInstance in layerJson.EntityInstances)
             {
                 var entityNode = TryInstantiate(context, entityInstance.Identifier);
 
-                if (entityNode is not null)
-                {
-                    LDtkFieldAssigner.Assign(entityNode, entityInstance, new(layerJson.GridSize));
-                }
+                bool instantiated = entityNode is not null;
 
                 entityNode ??= new Position2D() { Name = entityInstance.Identifier };
 
+                entityNode.SetMeta(LDtkEntityReferenceAssigner.InstanceIdMetaKey, entityInstance.Id);
+                entityNode.AddToGroup(LDtkEntityReferenceAssigner.EntitiesGroupName, persistent: true);
+
+                if (instantiated)
+                {
+                    LDtkFieldAssigner.Assign(entityNode, entityInstance, new()
+                    {
+                        GridSize = layerJson.GridSize,
+                        ReferenceAssigner = referenceAssigner,
+                    });
+                }
+
                 if (entityNode is Node2D entity2D)
                 {
-                    entity2D.Position = entityInstance.PxCoords;
+                    var pivotOffset = (Vector2.One / 2 - entityInstance.Pivot) * entityInstance.Size;
+                    entity2D.Position = entityInstance.PxCoords + pivotOffset;
                 }
 
                 layerNode.AddChild(entityNode);
             }
+
+            referenceAssigner.Serialize();
         }
 
         private static Node2D CreateEntityLayer(LevelImportContext context, LevelJson.LayerInstance layerJson)
@@ -66,6 +82,12 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             layerNode.Name = layerJson.Identifier;
             return layerNode;
+        }
+
+        private static LDtkEntityReferenceAssigner CreateReferenceAssigner()
+        {
+            var packedScene = GD.Load<PackedScene>("res://addons/ldtk-import/LDtkEntityReferenceAssigner.tscn");
+            return packedScene.Instance<LDtkEntityReferenceAssigner>();
         }
     }
 }

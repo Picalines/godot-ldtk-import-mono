@@ -13,7 +13,18 @@ namespace Picalines.Godot.LDtkImport.Importers
 {
     internal static class LDtkFieldAssigner
     {
-        public sealed record Context(int GridSize);
+        public record Context
+        {
+            public int? GridSize { get; init; }
+            public LDtkEntityReferenceAssigner? ReferenceAssigner { get; init; }
+        }
+
+        private record CheckContext : Context
+        {
+            public Node? EntityNode { get; init; }
+            public string? MemberName { get; init; }
+            public int? ArrayIndex { get; init; }
+        }
 
         private record TargetFieldInfo(string EditorName, MemberInfo TargetMember);
 
@@ -61,7 +72,15 @@ namespace Picalines.Godot.LDtkImport.Importers
                     _ => throw new NotImplementedException(),
                 };
 
-                if (!CheckFieldType(targetFieldType, ref fieldValue, context))
+                var checkContext = new CheckContext()
+                {
+                    GridSize = context.GridSize,
+                    ReferenceAssigner = context.ReferenceAssigner,
+                    EntityNode = entityNode,
+                    MemberName = targetField.TargetMember.Name
+                };
+
+                if (!CheckFieldType(targetFieldType, ref fieldValue, checkContext))
                 {
                     continue;
                 }
@@ -75,7 +94,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             Assign(entityNode, entityJson.FieldInstances.ToDictionary(field => field.Identifier, field => field.Value), context);
         }
 
-        private static bool CheckFieldType(Type targetType, ref object? fieldValue, Context context)
+        private static bool CheckFieldType(Type targetType, ref object? fieldValue, CheckContext context)
         {
             switch (fieldValue)
             {
@@ -94,7 +113,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 {
                     if (!Enum.IsDefined(targetType, enumValueName))
                     {
-                        GD.PushError($"LDtk field error: value '{enumValueName}' is not defined in {targetType} enum");
+                        GD.PushError($"LDtk field error: value '{enumValueName}' is not defined in {targetType} enum (member {context.MemberName})");
                         return false;
                     }
 
@@ -108,7 +127,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                     for (int i = 0; i < array.Length; i++)
                     {
-                        if (!CheckFieldType(elementType, ref array[i], context))
+                        if (!CheckFieldType(elementType, ref array[i], context with { ArrayIndex = i }))
                         {
                             return false;
                         }
@@ -125,7 +144,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                     for (int i = 0; i < array.Length; i++)
                     {
-                        if (!CheckFieldType(elementType, ref array[i], context))
+                        if (!CheckFieldType(elementType, ref array[i], context with { ArrayIndex = i }))
                         {
                             return false;
                         }
@@ -141,7 +160,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 {
                     var editorPoint = new Vector2() { x = Convert.ToSingle(point["cx"]), y = Convert.ToSingle(point["cy"]) };
 
-                    var gridSizeV = Vector2.One * context.GridSize;
+                    var gridSizeV = Vector2.One * (context.GridSize ?? 1);
                     editorPoint *= gridSizeV;
                     editorPoint += gridSizeV / 2;
 
@@ -149,15 +168,28 @@ namespace Picalines.Godot.LDtkImport.Importers
                     return true;
                 }
 
-                case Dictionary<string, object> when targetType == typeof(NodePath):
+                case Dictionary<string, object> entityRef when typeof(Node).IsAssignableFrom(targetType):
                 {
-                    GD.PushWarning("LDtk importer does not currently support entity refs");
-                    return false;
+                    if (context.ReferenceAssigner is not { } referenceAssigner)
+                    {
+                        GD.PushError($"LDtk entity reference is ignored in tiles");
+                        return false;
+                    }
+
+                    var targetMember = context switch
+                    {
+                        { MemberName: { } member, ArrayIndex: { } index } => $"{member}/{index}",
+                        { MemberName: { } member } => member,
+                        _ => throw new NotImplementedException(),
+                    };
+
+                    referenceAssigner.RegisterReference(context.EntityNode!, (string)entityRef["entityIid"], targetMember);
+                    return true;
                 }
 
                 default:
                 {
-                    GD.PushError($"LDtk field type error: C# script expected value of type {targetType}, but received {fieldValue?.GetType().ToString() ?? "null"}");
+                    GD.PushError($"LDtk field type error: C# script expected value of type {targetType} for member {context.MemberName}, but received {fieldValue?.GetType().ToString() ?? "null"}");
                     return false;
                 }
             }
@@ -165,7 +197,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         private static Type? GetSceneType(Node scene)
         {
-            if (scene.GetScript() is not Script { ResourcePath: var scriptPath })
+            if (scene.GetScript() is not CSharpScript { ResourcePath: var scriptPath })
             {
                 return null;
             }
