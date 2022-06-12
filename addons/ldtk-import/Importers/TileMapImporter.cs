@@ -96,7 +96,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             var entityFields = tileCustomData.Where(pair => pair.Key != TileEntityNameField).ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            LDtkFieldAssigner.Assign(tileEntity, entityFields);
+            LDtkFieldAssigner.Assign(tileEntity, entityFields, new((int)tileMap.CellSize.x));
 
             tileMap.AddChild(tileEntity);
 

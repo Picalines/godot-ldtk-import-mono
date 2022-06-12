@@ -3,6 +3,7 @@
 using Godot;
 using Picalines.Godot.LDtkImport.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,21 +11,33 @@ using System.Runtime.CompilerServices;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
-    // TODO: type checking
-    // TODO: enums
-
     internal static class LDtkFieldAssigner
     {
-        private record LDtkFieldInfo(string EditorName, MemberInfo TargetMember);
+        public sealed record Context(int GridSize);
 
-        private static readonly Dictionary<Type, IEnumerable<LDtkFieldInfo>> _TargetFields = new();
+        private record TargetFieldInfo(string EditorName, MemberInfo TargetMember);
+
+        private static readonly Dictionary<Type, IEnumerable<TargetFieldInfo>> _TargetFields = new();
+
+        private static readonly HashSet<Type> _NumberTypes = new()
+        {
+            typeof(int),
+            typeof(byte),
+            typeof(short),
+            typeof(long),
+            typeof(float),
+            typeof(double),
+            typeof(decimal)
+        };
+
+        public static TileMap? CurrentTileMap { get; set; }
 
         public static void Initialize()
         {
             ScanAssemblyForTargetFields();
         }
 
-        public static void Assign(Node entityNode, IReadOnlyDictionary<string, object> values)
+        public static void Assign(Node entityNode, IReadOnlyDictionary<string, object> values, Context context)
         {
             var entityType = GetSceneType(entityNode);
 
@@ -41,13 +54,113 @@ namespace Picalines.Godot.LDtkImport.Importers
                     continue;
                 }
 
+                var targetFieldType = targetField.TargetMember switch
+                {
+                    FieldInfo { FieldType: var type } => type,
+                    PropertyInfo { PropertyType: var type } => type,
+                    _ => throw new NotImplementedException(),
+                };
+
+                if (!CheckFieldType(targetFieldType, ref fieldValue, context))
+                {
+                    continue;
+                }
+
                 entityNode.Set(targetField.TargetMember.Name, fieldValue);
             }
         }
 
-        public static void Assign(Node entityNode, LevelJson.EntityInstance entityJson)
+        public static void Assign(Node entityNode, LevelJson.EntityInstance entityJson, Context context)
         {
-            Assign(entityNode, entityJson.FieldInstances.ToDictionary(field => field.Identifier, field => field.Value));
+            Assign(entityNode, entityJson.FieldInstances.ToDictionary(field => field.Identifier, field => field.Value), context);
+        }
+
+        private static bool CheckFieldType(Type targetType, ref object? fieldValue, Context context)
+        {
+            switch (fieldValue)
+            {
+                case null when targetType.IsClass || Nullable.GetUnderlyingType(targetType) is not null:
+                case bool or string when targetType == fieldValue.GetType():
+                case { } when _NumberTypes.Contains(fieldValue.GetType()) && _NumberTypes.Contains(targetType):
+                    return true;
+
+                case string colorString when targetType == typeof(Color):
+                {
+                    fieldValue = new Color(colorString);
+                    return true;
+                }
+
+                case string enumValueName when targetType.IsEnum:
+                {
+                    if (!Enum.IsDefined(targetType, enumValueName))
+                    {
+                        GD.PushError($"LDtk field error: value '{enumValueName}' is not defined in {targetType} enum");
+                        return false;
+                    }
+
+                    fieldValue = Enum.Parse(targetType, enumValueName);
+                    return true;
+                }
+
+                case object?[] array when targetType.IsArray:
+                {
+                    var elementType = targetType.GetElementType();
+
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        if (!CheckFieldType(elementType, ref array[i], context))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+                case object?[] array when targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(List<>):
+                {
+                    var elementType = targetType.GenericTypeArguments[0];
+
+                    var checkedList = (Activator.CreateInstance(targetType, new object[] { array.Length }) as IList)!;
+
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        if (!CheckFieldType(elementType, ref array[i], context))
+                        {
+                            return false;
+                        }
+
+                        checkedList.Add(array[i]);
+                    }
+
+                    fieldValue = checkedList;
+                    return true;
+                }
+
+                case Dictionary<string, object> point when targetType == typeof(Vector2):
+                {
+                    var editorPoint = new Vector2() { x = Convert.ToSingle(point["cx"]), y = Convert.ToSingle(point["cy"]) };
+
+                    var gridSizeV = Vector2.One * context.GridSize;
+                    editorPoint *= gridSizeV;
+                    editorPoint += gridSizeV / 2;
+
+                    fieldValue = editorPoint;
+                    return true;
+                }
+
+                case Dictionary<string, object> when targetType == typeof(NodePath):
+                {
+                    GD.PushWarning("LDtk importer does not currently support entity refs");
+                    return false;
+                }
+
+                default:
+                {
+                    GD.PushError($"LDtk field type error: C# script expected value of type {targetType}, but received {fieldValue?.GetType().ToString() ?? "null"}");
+                    return false;
+                }
+            }
         }
 
         private static Type? GetSceneType(Node scene)
@@ -84,11 +197,11 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             foreach (var validType in validTypes)
             {
-                RegisterLDtkFields(validType);
+                RegisterTargetFields(validType);
             }
         }
 
-        private static void RegisterLDtkFields(Type type)
+        private static void RegisterTargetFields(Type type)
         {
             var members = type.FindMembers(
                 MemberTypes.Field | MemberTypes.Property,
@@ -96,13 +209,18 @@ namespace Picalines.Godot.LDtkImport.Importers
                 (member, _) => IsTargetMember(member),
                 null);
 
-            if (members.Any())
+            if (!members.Any())
             {
-                _TargetFields[type] = members.Select(member => new LDtkFieldInfo(
-                    member.GetCustomAttribute<LDtkFieldAttribute>().LDtkFieldName,
-                    member
-                )).ToList();
+                return;
             }
+
+            static TargetFieldInfo CreateFieldInfo(MemberInfo member)
+            {
+                var infoAttribute = member.GetCustomAttribute<LDtkFieldAttribute>();
+                return new(infoAttribute.LDtkFieldName, member);
+            }
+
+            _TargetFields[type] = members.Select(CreateFieldInfo).ToList();
         }
 
         private static bool IsTargetMember(MemberInfo member)

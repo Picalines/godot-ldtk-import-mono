@@ -42,7 +42,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 if (entityNode is not null)
                 {
-                    LDtkFieldAssigner.Assign(entityNode, entityInstance);
+                    LDtkFieldAssigner.Assign(entityNode, entityInstance, new(layerJson.GridSize));
                 }
 
                 entityNode ??= new Position2D() { Name = entityInstance.Identifier };

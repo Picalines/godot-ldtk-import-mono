@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 
 namespace Picalines.Godot.LDtkImport.Json.Converters
 {
@@ -12,7 +13,22 @@ namespace Picalines.Godot.LDtkImport.Json.Converters
 
             if (defaultValue is JArray jArray)
             {
-                defaultValue = jArray.ToObject<object[]>();
+                var array = jArray.ToObject<object[]>();
+
+                for (int i = 0; i < array.Length; i++)
+                {
+                    if (array[i] is JObject jObjectItem)
+                    {
+                        array[i] = jObjectItem.ToObject<Dictionary<string, object>>();
+                    }
+                }
+
+                defaultValue = array;
+            }
+
+            if (defaultValue is JObject jObject)
+            {
+                defaultValue = jObject.ToObject<Dictionary<string, object>>();
             }
 
             return defaultValue;
