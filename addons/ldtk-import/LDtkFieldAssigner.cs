@@ -176,14 +176,11 @@ namespace Picalines.Godot.LDtkImport.Importers
                         return false;
                     }
 
-                    var targetMember = context switch
-                    {
-                        { MemberName: { } member, ArrayIndex: { } index } => $"{member}/{index}",
-                        { MemberName: { } member } => member,
-                        _ => throw new NotImplementedException(),
-                    };
+                    var targetMember = context.MemberName ?? throw new InvalidOperationException();
+                    var index = context.ArrayIndex;
 
-                    referenceAssigner.RegisterReference(context.TargetNode!, (string)entityRef["entityIid"], targetMember);
+                    referenceAssigner.RegisterReference(context.TargetNode!, (string)entityRef["entityIid"], targetMember, addToArray: index is not null);
+                    fieldValue = null;
                     return true;
                 }
 
