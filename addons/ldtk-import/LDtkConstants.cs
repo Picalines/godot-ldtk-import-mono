@@ -1,6 +1,6 @@
 namespace Picalines.Godot.LDtkImport
 {
-    internal sealed partial class LDtkEditorPlugin
+    public static class LDtkConstants
     {
         public static class GroupNames
         {

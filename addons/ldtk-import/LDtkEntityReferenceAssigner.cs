@@ -55,11 +55,11 @@ namespace Picalines.Godot.LDtkImport
                 return;
             }
 
-            var entities = GetTree().GetNodesInGroup(LDtkEditorPlugin.GroupNames.Entities).OfType<Node>();
+            var entities = GetTree().GetNodesInGroup(LDtkConstants.GroupNames.Entities).OfType<Node>();
 
             Node? FindEntity(string id)
             {
-                return entities.FirstOrDefault(entity => (string)entity.GetMeta(LDtkEditorPlugin.MetaKeys.InstanceId) == id);
+                return entities.FirstOrDefault(entity => (string)entity.GetMeta(LDtkConstants.MetaKeys.InstanceId) == id);
             }
 
             foreach (var pair in _References)

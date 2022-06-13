@@ -9,7 +9,7 @@ namespace Picalines.Godot.LDtkImport.Importers
         {
             var worldNode = CreateWorldNode(ldtkFilePath, settings);
 
-            worldNode.AddToGroup(LDtkEditorPlugin.GroupNames.Worlds, persistent: true);
+            worldNode.AddToGroup(LDtkConstants.GroupNames.Worlds, persistent: true);
 
             AddLevels(settings, worldJson, worldNode);
 
