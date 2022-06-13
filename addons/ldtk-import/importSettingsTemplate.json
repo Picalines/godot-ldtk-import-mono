@@ -1,0 +1,51 @@
+{
+  // [The only required setting]
+  // Folder in which the plugin will place
+  // the generated tilesets and scenes
+  "outputDir": "res://worlds/Overworld/",
+
+  // Templates of the path by which the plugin
+  // will search for the scene of entity
+  // ({} is replaced by entity name from LDtk)
+  "entityPaths": [
+    "res://scenes/mobs/{}/{}.tscn",
+    "res://scenes/decor/{}/{}.tscn"
+  ],
+
+  // If the plugin did not find the entity name
+  // in entitySceneOverrides, one of entityPaths
+  // will be used instead
+  "entityPathOverrides": {
+    "Item": "res://items/Item.tscn"
+  },
+
+  // If worldScene settings is present,
+  // plugin will generate a scene with all
+  // level scenes at their positions
+  "worldScene": {
+    // Use base to add additional nodes or script
+    "base": "res://scenes/world.tscn",
+
+    // If present, plugin will make (or search in base)
+    // a seperate node for storing levels
+    "levelsParent": "Levels",
+
+    // If true, plugin will place Position2D
+    // nodes with level names and their scene
+    // paths in EditorDescription property
+    "onlyMarkers": false
+  },
+
+  "levelScene": {
+    // same as worldScene.base
+    "base": "res://scenes/level.tscn",
+
+    // same as worldScene.levelsParent
+    "layersParent": "Layers",
+
+    // If present, plugin will make (or search in base)
+    // a seperate node for background (ColorRect or Sprite).
+    // Else background will be placed before all other nodes
+    "bgParent": "Background"
+  }
+}
