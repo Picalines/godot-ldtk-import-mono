@@ -2,6 +2,7 @@
 
 using Godot;
 using Picalines.Godot.LDtkImport.Json;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Picalines.Godot.LDtkImport.Importers
@@ -53,7 +54,12 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 if (instantiated)
                 {
-                    LDtkFieldAssigner.Assign(entityNode, entityInstance.FieldInstances, new()
+                    var entityFields = entityInstance.FieldInstances
+                        .Select(field => new KeyValuePair<string, object>(field.Identifier, field.Value))
+                        .Append(new("$size", entityInstance.Size))
+                        .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+                    LDtkFieldAssigner.Assign(entityNode, entityFields, new()
                     {
                         GridSize = layerJson.GridSize,
                         ReferenceAssigner = referenceAssigner,
