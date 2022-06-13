@@ -8,10 +8,6 @@ namespace Picalines.Godot.LDtkImport
     [Tool]
     internal sealed class LDtkEntityReferenceAssigner : Node
     {
-        public const string EntitiesGroupName = "LDtkEntities";
-
-        public const string InstanceIdMetaKey = "LDtkEntityInstanceId";
-
         private static readonly Regex _ReferenceRegex = new($@"(?<id>.+)/(?<member>.+)");
 
         [Export]
@@ -46,7 +42,7 @@ namespace Picalines.Godot.LDtkImport
                 return;
             }
 
-            var entities = GetTree().GetNodesInGroup(EntitiesGroupName).OfType<Node>();
+            var entities = GetTree().GetNodesInGroup(LDtkEditorPlugin.GroupNames.Entities).OfType<Node>();
 
             foreach (var pair in _References)
             {
@@ -58,7 +54,7 @@ namespace Picalines.Godot.LDtkImport
                     var targetId = match.Groups["id"]!.Value;
                     var targetMember = match.Groups["member"]!.Value;
 
-                    var target = entities.First(entity => (string)entity.GetMeta(InstanceIdMetaKey) == targetId);
+                    var target = entities.First(entity => (string)entity.GetMeta(LDtkEditorPlugin.MetaKeys.InstanceId) == targetId);
                     node.Set(targetMember, target);
                 }
             }

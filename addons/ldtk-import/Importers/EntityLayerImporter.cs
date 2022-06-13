@@ -48,8 +48,8 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 entityNode ??= new Position2D() { Name = entityInstance.Identifier };
 
-                entityNode.SetMeta(LDtkEntityReferenceAssigner.InstanceIdMetaKey, entityInstance.Id);
-                entityNode.AddToGroup(LDtkEntityReferenceAssigner.EntitiesGroupName, persistent: true);
+                entityNode.SetMeta(LDtkEditorPlugin.MetaKeys.InstanceId, entityInstance.Id);
+                entityNode.AddToGroup(LDtkEditorPlugin.GroupNames.Entities, persistent: true);
 
                 if (instantiated)
                 {

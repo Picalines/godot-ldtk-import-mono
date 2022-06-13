@@ -4,5 +4,8 @@
 
 [node name="LDtkReferenceAssigner" type="Node"]
 script = ExtResource( 1 )
+__meta__ = {
+"_editor_description_": "This node assigns values to EntityRefs from LDtk. It uses a special group and key in meta, so don't delete them"
+}
 _References = {
 }

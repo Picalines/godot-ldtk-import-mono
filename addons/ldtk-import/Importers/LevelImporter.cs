@@ -25,6 +25,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
 
             levelNode.Name = context.LevelJson.Identifier;
+            levelNode.AddToGroup(LDtkEditorPlugin.GroupNames.Levels, persistent: true);
 
             AddLayers(context, levelNode);
 

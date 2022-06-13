@@ -6,7 +6,7 @@ using Picalines.Godot.LDtkImport.Importers;
 namespace Picalines.Godot.LDtkImport
 {
     [Tool]
-    internal sealed class LDtkEditorPlugin : EditorPlugin
+    internal sealed partial class LDtkEditorPlugin : EditorPlugin
     {
         private const string ImportSettingsTemplatePath = "res://addons/ldtk-import/importSettingsTemplate.json";
 
