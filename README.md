@@ -125,6 +125,8 @@ Config will looks like this:
 }
 ```
 
+After creating a config use `Project -> Tools -> Import LDtk project` again. That's it!
+
 ## ⚠ Notes
 
 Almost any change to exported fields requires to reimport (because that's how Godot works)
