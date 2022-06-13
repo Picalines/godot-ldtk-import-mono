@@ -27,6 +27,8 @@ namespace Picalines.Godot.LDtkImport.Importers
             levelNode.Name = context.LevelJson.Identifier;
             levelNode.AddToGroup(LDtkConstants.GroupNames.Levels, persistent: true);
 
+            AddBackground(context, levelNode);
+
             AddLayers(context, levelNode);
 
             LDtkFieldAssigner.Assign(levelNode, context.LevelJson.FieldInstances, new());
@@ -38,12 +40,16 @@ namespace Picalines.Godot.LDtkImport.Importers
         {
             Node layersParent = levelNode;
 
-            if (context.ImportSettings.LevelSceneSettings?.LayersParentNodeName is string layersParentNodeName)
+            if (context.ImportSettings.LevelSceneSettings?.LayersParentNodeName is { } layersParentNodeName)
             {
                 layersParent = levelNode.GetNodeOrNull(layersParentNodeName)
                     ?? new Node2D() { Name = layersParentNodeName };
 
-                layersParent.Owner = levelNode;
+                if (layersParent.Owner is null)
+                {
+                    levelNode.AddChild(layersParent);
+                    layersParent.Owner = levelNode;
+                }
             }
 
             foreach (var layer in context.LevelJson.LayerInstances!.Reverse())
@@ -61,6 +67,59 @@ namespace Picalines.Godot.LDtkImport.Importers
                 {
                     child.Owner = levelNode;
                 }
+            }
+        }
+
+        private static void AddBackground(LevelImportContext context, Node levelNode)
+        {
+            Node bgParent = levelNode;
+
+            if (context.ImportSettings.LevelSceneSettings?.BackgroundParentNodeName is { } backgroundParentNodeName)
+            {
+                bgParent = levelNode.GetNodeOrNull(backgroundParentNodeName)
+                    ?? new Node2D() { Name = backgroundParentNodeName };
+
+                if (bgParent.Owner is null)
+                {
+                    levelNode.AddChild(bgParent);
+                    levelNode.MoveChild(bgParent, 0);
+                    bgParent.Owner = levelNode;
+                }
+            }
+
+            bool hasBgColor = false;
+
+            if (context.LevelJson.BgColor is { } color)
+            {
+                hasBgColor = true;
+                var colorRect = new ColorRect()
+                {
+                    Color = color,
+                    RectSize = context.LevelJson.PxSize
+                };
+
+                bgParent.AddChild(colorRect);
+                bgParent.MoveChild(colorRect, 0);
+                colorRect.Owner = levelNode;
+            }
+
+            if (context.LevelJson is { BgRelPath: { } bgRelPath, BgPosition: { } bgPosition })
+            {
+                var bgTexture = GD.Load<Texture>($"{context.LDtkFilePath.GetBaseDir()}/{bgRelPath}");
+
+                var bgSprite = new Sprite()
+                {
+                    Texture = bgTexture,
+                    Centered = false,
+                    RegionEnabled = true,
+                    RegionRect = bgPosition.CropRect,
+                    Position = bgPosition.TopLeftPxCoords,
+                    Scale = bgPosition.Scale
+                };
+
+                bgParent.AddChild(bgSprite);
+                bgParent.MoveChild(bgSprite, hasBgColor ? 1 : 0);
+                bgSprite.Owner = levelNode;
             }
         }
 

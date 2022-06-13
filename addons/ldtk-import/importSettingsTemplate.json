@@ -41,6 +41,11 @@
     "base": "res://scenes/level.tscn",
 
     // same as worldScene.levelsParent
-    "layersParent": "Layers"
+    "layersParent": "Layers",
+
+    // If present, plugin will make (or search in base)
+    // a seperate node for background (ColorRect or Sprite).
+    // Else background will be placed before all other nodes
+    "bgParent": "Background"
   }
 }

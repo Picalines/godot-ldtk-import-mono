@@ -73,6 +73,9 @@ namespace Picalines.Godot.LDtkImport.Json
 
         [JsonProperty("layersParent")]
         public string? LayersParentNodeName { get; private set; }
+
+        [JsonProperty("bgParent")]
+        public string? BackgroundParentNodeName { get; private set; }
     }
 }
 

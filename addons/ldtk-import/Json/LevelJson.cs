@@ -47,6 +47,9 @@ namespace Picalines.Godot.LDtkImport.Json
         [JsonConverter(typeof(ColorConverter))]
         public Color? BgColor { get; private set; }
 
+        [JsonProperty("__bgPos")]
+        public BackgroundPosition? BgPosition { get; private set; }
+
         [JsonProperty("bgRelPath")]
         public string? BgRelPath { get; private set; }
 
@@ -67,6 +70,21 @@ namespace Picalines.Godot.LDtkImport.Json
         {
             WorldPos = new Vector2(WorldX, WorldY);
             PxSize = new Vector2(PxWidth, PxHeight);
+        }
+
+        public class BackgroundPosition
+        {
+            [JsonProperty("cropRect")]
+            [JsonConverter(typeof(Rect2Converter))]
+            public Rect2 CropRect { get; private set; }
+
+            [JsonProperty("scale")]
+            [JsonConverter(typeof(Vector2Converter))]
+            public Vector2 Scale { get; private set; }
+
+            [JsonProperty("topLeftPx")]
+            [JsonConverter(typeof(Vector2Converter))]
+            public Vector2 TopLeftPxCoords { get; private set; }
         }
 
         public class Neighbour
