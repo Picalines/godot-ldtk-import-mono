@@ -168,6 +168,12 @@ namespace Picalines.Godot.LDtkImport.Importers
                     return true;
                 }
 
+                case Vector2 vector2 when targetType == typeof(Vector2):
+                {
+                    fieldValue = vector2;
+                    return true;
+                }
+
                 case Dictionary<string, object> entityRef when typeof(Node).IsAssignableFrom(targetType):
                 {
                     if (context.ReferenceAssigner is not { } referenceAssigner)
