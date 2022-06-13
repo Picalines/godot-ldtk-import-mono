@@ -96,7 +96,15 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             var entityFields = tileCustomData
                 .Where(pair => pair.Key != TileEntityNameField)
+                .Append(new("$tileId", tile.Id))
+                .Append(new("$tileSrc", tile.TileSetPxCoords))
+                .Append(new("$size", tileMap.CellSize))
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            if (entityFields.TryGetValue("$keepTileSprite", out var keepTileSprite) && keepTileSprite is true)
+            {
+                TryKeepTileSprite(tileEntity, tile, tileMap);
+            }
 
             LDtkFieldAssigner.Assign(tileEntity, entityFields, new()
             {
@@ -141,6 +149,38 @@ namespace Picalines.Godot.LDtkImport.Importers
                 .First(t => t.Uid == (layerJson.TileSetDefUid ?? 0));
 
             return $"{context.ImportSettings.OutputDirectory}/tilesets/{tileSetJson.Identifier}.tres";
+        }
+
+        private static void TryKeepTileSprite(Node tileEntity, LevelJson.TileInstance tile, TileMap tileMap)
+        {
+            var firstSprite = GetFirstChildOfType<Sprite>(tileEntity);
+
+            if (firstSprite is null)
+            {
+                return;
+            }
+
+            firstSprite.Texture = tileMap.TileSet.TileGetTexture(0);
+            firstSprite.RegionEnabled = true;
+            firstSprite.RegionRect = new() { Position = tile.TileSetPxCoords, Size = tileMap.CellSize };
+        }
+
+        private static T? GetFirstChildOfType<T>(Node node) where T : Node
+        {
+            if (node is T found)
+            {
+                return found;
+            }
+
+            foreach (Node child in node.GetChildren())
+            {
+                if (GetFirstChildOfType<T>(child) is T foundInner)
+                {
+                    return foundInner;
+                }
+            }
+
+            return null;
         }
     }
 }
