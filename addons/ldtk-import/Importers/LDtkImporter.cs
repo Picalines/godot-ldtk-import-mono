@@ -8,7 +8,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 {
     internal static class LDtkImporter
     {
-        public static void Import(string ldtkFilePath, string settingsFilePath, out string outputDirectory)
+        public static void Import(string ldtkFilePath, string settingsFilePath)
         {
             var worldJson = JsonFile.Parse<WorldJson>(ldtkFilePath);
             var settings = JsonFile.Parse<LDtkImportSettings>(settingsFilePath);
@@ -26,8 +26,6 @@ namespace Picalines.Godot.LDtkImport.Importers
             {
                 WorldImporter.Import(ldtkFilePath, settings, worldJson);
             }
-
-            outputDirectory = settings.OutputDirectory;
         }
 
         private static void ImportLevels(string ldtkFilePath, LDtkImportSettings importSettings, WorldJson worldJson)

@@ -14,6 +14,8 @@ namespace Picalines.Godot.LDtkImport
 
         private const string ImportSettingsFileExtension = ".import.settings.json";
 
+        private LDtkInspectorPlugin? _InspectorPlugin;
+
         private FileDialog _LDtkFileDialog = null!;
 
         private ConfirmationDialog _ImportSettingsFileCreationPopup = null!;
@@ -22,6 +24,29 @@ namespace Picalines.Godot.LDtkImport
         {
             base._EnterTree();
 
+            AddProjectFileOpenDialog();
+
+            AddSettingsFileCreationPopup();
+
+            AddToolMenuItem(ImportToolMenuItemName, this, nameof(ImportToolMenuItemHandler), "");
+
+            AddInspectorPlugin(_InspectorPlugin = new() { EditorPlugin = this });
+        }
+
+        public override void _ExitTree()
+        {
+            base._ExitTree();
+
+            RemoveToolMenuItem(ImportToolMenuItemName);
+
+            if (_InspectorPlugin is not null)
+            {
+                RemoveInspectorPlugin(_InspectorPlugin);
+            }
+        }
+
+        private void AddProjectFileOpenDialog()
+        {
             AddChild(_LDtkFileDialog = new FileDialog()
             {
                 Resizable = true,
@@ -36,30 +61,23 @@ namespace Picalines.Godot.LDtkImport
                 Filters = new[] { "*.ldtk" },
             });
 
+            _LDtkFileDialog.Connect("file_selected", this, nameof(ImportProject));
+        }
+
+        private void AddSettingsFileCreationPopup()
+        {
             AddChild(_ImportSettingsFileCreationPopup = new ConfirmationDialog()
             {
                 Theme = CurrentEditorTheme,
-
                 WindowTitle = "Import settings file was generated",
                 DialogText = "Edit the file and click import again",
             });
 
-            _ImportSettingsFileCreationPopup.GetOk().Text = "Open settings in external text editor";
+            var okButton = _ImportSettingsFileCreationPopup.GetOk();
+            okButton.Text = "Open settings in external text editor";
+            okButton.Connect("pressed", this, nameof(OpenSettingsInExternalEditor));
 
             _ImportSettingsFileCreationPopup.GetCancel().Text = "Hide dialog";
-
-            _LDtkFileDialog.Connect("file_selected", this, nameof(OnLDtkFileSelected));
-
-            _ImportSettingsFileCreationPopup.GetOk().Connect("pressed", this, nameof(OpenSettingsInExternalEditor));
-
-            AddToolMenuItem(ImportToolMenuItemName, this, nameof(ImportToolMenuItemHandler), "");
-        }
-
-        public override void _ExitTree()
-        {
-            base._ExitTree();
-
-            RemoveToolMenuItem(ImportToolMenuItemName);
         }
 
         private void ImportToolMenuItemHandler(string _)
@@ -67,7 +85,7 @@ namespace Picalines.Godot.LDtkImport
             _LDtkFileDialog.PopupCentered();
         }
 
-        private void OnLDtkFileSelected(string ldtkFile)
+        public void ImportProject(string ldtkFile)
         {
             using var file = new File();
 
@@ -89,11 +107,9 @@ namespace Picalines.Godot.LDtkImport
                 return;
             }
 
-            string outputDirectory;
-
             try
             {
-                LDtkImporter.Import(ldtkFile, settingsFilePath, out outputDirectory);
+                LDtkImporter.Import(ldtkFile, settingsFilePath);
             }
             catch (LDtkImportException exception)
             {
@@ -102,8 +118,6 @@ namespace Picalines.Godot.LDtkImport
             }
 
             GD.Print($"successfully imported LDtk project at {ldtkFile}");
-
-            GetEditorInterface().GetFileSystemDock().NavigateToPath(outputDirectory);
         }
 
         private void OpenSettingsInExternalEditor()
@@ -126,7 +140,7 @@ namespace Picalines.Godot.LDtkImport
             OS.Execute(externalEditorExecPath, execFlags.Split(' '), false);
         }
 
-        private Theme CurrentEditorTheme => GetEditorInterface().GetBaseControl().Theme;
+        public Theme CurrentEditorTheme => GetEditorInterface().GetBaseControl().Theme;
     }
 }
 
