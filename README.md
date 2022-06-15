@@ -64,7 +64,7 @@ Example of tile custom data for entity:
 `LDtkFieldAttribute` also can accept special data from LDtk:
  * `$size` for entity, tile and level... well... *sizes*
  * `$tileId` for... `:)`
- * `$tileSrc` for position of tile in TileSet texture (line top left of a sprite region)
+ * `$tileSrc` for position of tile in TileSet texture (like top left of a sprite region)
 
 ## How to use
 
