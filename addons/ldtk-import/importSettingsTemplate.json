@@ -4,6 +4,11 @@
   // the generated tilesets and scenes
   "outputDir": "res://worlds/Overworld/",
 
+  // If true, plugin will delete all (!) *.tscn files
+  // from outputDir before importing. TileSets will
+  // not be deleted to keep your changes like collisions
+  "clearOutput": false,
+
   // Templates of the path by which the plugin
   // will search for the scene of entity
   // ({} is replaced by entity name from LDtk)

@@ -14,7 +14,14 @@ namespace Picalines.Godot.LDtkImport.Importers
             var settings = JsonFile.Parse<LDtkImportSettings>(settingsFilePath);
 
             using var outputDir = new Directory();
-            outputDir.MakeDirRecursive(settings.OutputDirectory + "/tilesets");
+            outputDir.ChangeDir(settings.OutputDirectory);
+
+            if (settings.ClearOutput)
+            {
+                ClearOutputDir(outputDir);
+            }
+
+            outputDir.MakeDirRecursive("tilesets");
 
             ImportTileSets(ldtkFilePath, settings.OutputDirectory, worldJson);
 
@@ -63,6 +70,19 @@ namespace Picalines.Godot.LDtkImport.Importers
                 if (ResourceSaver.Save(savePath, tileSet) is not Error.Ok)
                 {
                     throw LDtkImportException.FailedToImportTileSet(ldtkFilePath, tileSetJson.Identifier);
+                }
+            }
+        }
+
+        private static void ClearOutputDir(Directory outputDir)
+        {
+            outputDir.ListDirBegin(skipNavigational: true, skipHidden: true);
+
+            while (outputDir.GetNext() is { Length: > 0 } dirItem)
+            {
+                if (dirItem.EndsWith(".tscn"))
+                {
+                    outputDir.Remove(dirItem);
                 }
             }
         }

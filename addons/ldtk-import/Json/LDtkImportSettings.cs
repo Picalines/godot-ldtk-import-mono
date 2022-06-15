@@ -14,6 +14,9 @@ namespace Picalines.Godot.LDtkImport.Json
         [JsonProperty("outputDir", Required = Required.Always)]
         public string OutputDirectory { get; private set; } = null!;
 
+        [JsonProperty("clearOutput")]
+        public bool ClearOutput { get; private set; } = false;
+
         [JsonProperty("entityPaths")]
         public IReadOnlyList<string>? EntityScenePathTemplates { get; private set; }
 
