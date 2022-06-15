@@ -9,6 +9,8 @@ namespace Picalines.Godot.LDtkImport.Importers
 {
     internal static class EntityLayerImporter
     {
+        private static PackedScene? _ReferenceAssignerScene = null;
+
         public static Node Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
             var layerNode = CreateEntityLayer(context, layerJson);
@@ -38,8 +40,6 @@ namespace Picalines.Godot.LDtkImport.Importers
         private static void AddEntities(LevelImportContext context, LevelJson.LayerInstance layerJson, Node2D layerNode)
         {
             var referenceAssigner = CreateReferenceAssigner();
-
-            layerNode.AddChild(referenceAssigner);
 
             foreach (var entityInstance in layerJson.EntityInstances)
             {
@@ -75,7 +75,11 @@ namespace Picalines.Godot.LDtkImport.Importers
                 layerNode.AddChild(entityNode);
             }
 
-            referenceAssigner.Serialize();
+            if (referenceAssigner.IsUsed)
+            {
+                layerNode.AddChild(referenceAssigner);
+                layerNode.MoveChild(referenceAssigner, 0);
+            }
         }
 
         private static Node2D CreateEntityLayer(LevelImportContext context, LevelJson.LayerInstance layerJson)
@@ -92,8 +96,8 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         private static LDtkEntityReferenceAssigner CreateReferenceAssigner()
         {
-            var packedScene = GD.Load<PackedScene>("res://addons/ldtk-import/LDtkEntityReferenceAssigner.tscn");
-            return packedScene.Instance<LDtkEntityReferenceAssigner>();
+            _ReferenceAssignerScene ??= GD.Load<PackedScene>("res://addons/ldtk-import/LDtkEntityReferenceAssigner.tscn");
+            return _ReferenceAssignerScene.Instance<LDtkEntityReferenceAssigner>();
         }
     }
 }

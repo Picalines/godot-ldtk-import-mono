@@ -14,6 +14,8 @@ namespace Picalines.Godot.LDtkImport
         [Export]
         private readonly Dictionary<string, List<string>> _References = new();
 
+        private IEnumerable<Node>? _Entities = null;
+
 #if TOOLS
         public void RegisterReference(Node owner, string targetId, string targetMember, bool addToArray)
         {
@@ -38,12 +40,11 @@ namespace Picalines.Godot.LDtkImport
 
                 refList.Add(existingRef);
             }
+
+            PropertyListChangedNotify();
         }
 
-        public void Serialize()
-        {
-            Set(nameof(_References), _References);
-        }
+        public bool IsUsed => _References.Any();
 #endif
 
         public override void _Ready()
@@ -55,48 +56,59 @@ namespace Picalines.Godot.LDtkImport
                 return;
             }
 
-            var entities = GetTree().GetNodesInGroup(LDtkConstants.GroupNames.Entities).OfType<Node>();
-
-            Node? FindEntity(string id)
-            {
-                return entities.FirstOrDefault(entity => (string)entity.GetMeta(LDtkConstants.MetaKeys.InstanceId) == id);
-            }
-
             foreach (var pair in _References)
             {
                 var node = GetNode($"../{pair.Key}");
 
-                foreach (var reference in pair.Value)
-                {
-                    var match = _ReferenceRegex.Match(reference);
-                    var targetMember = match.Groups["member"]!.Value;
-                    var targetIdsString = match.Groups["ids"]!.Value;
-
-                    bool isArray = targetIdsString.Contains(',');
-                    var targetIds = targetIdsString.Split(',');
-
-                    if (!isArray)
-                    {
-                        node.Set(targetMember, FindEntity(targetIds[0]));
-                    }
-                    else
-                    {
-                        var targets = new List<Node?>() as IList<Node?>;
-
-                        foreach (var targetId in targetIds.Where(id => id.Length > 0))
-                        {
-                            targets.Add(FindEntity(targetId));
-                        }
-
-                        if (node.Get(targetMember) is Array)
-                        {
-                            targets = targets.ToArray();
-                        }
-
-                        node.Set(targetMember, targets);
-                    }
-                }
+                AssignReferences(node, pair.Value);
             }
+
+            QueueFree();
+        }
+
+        private void AssignReferences(Node node, List<string> references)
+        {
+            foreach (var reference in references)
+            {
+                var match = _ReferenceRegex.Match(reference);
+                var targetMember = match.Groups["member"]!.Value;
+                var targetIdsString = match.Groups["ids"]!.Value;
+
+                bool isArray = targetIdsString.Contains(',');
+                var targetIds = targetIdsString.Split(',');
+
+                object? targetMemberValue;
+
+                if (!isArray)
+                {
+                    targetMemberValue = FindEntity(targetIds[0]);
+                }
+                else
+                {
+                    IList<Node?> targets = new List<Node?>();
+
+                    foreach (var targetId in targetIds.Where(id => id.Length > 0))
+                    {
+                        targets.Add(FindEntity(targetId));
+                    }
+
+                    if (node.Get(targetMember) is Array)
+                    {
+                        targets = targets.ToArray();
+                    }
+
+                    targetMemberValue = targets;
+                }
+
+                node.Set(targetMember, targetMemberValue);
+            }
+        }
+
+        private Node? FindEntity(string id)
+        {
+            _Entities ??= GetTree().GetNodesInGroup(LDtkConstants.GroupNames.Entities).OfType<Node>();
+
+            return _Entities.FirstOrDefault(entity => (string)entity.GetMeta(LDtkConstants.MetaKeys.InstanceId) == id);
         }
     }
 }
