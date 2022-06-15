@@ -40,6 +40,8 @@ namespace Picalines.Godot.LDtkImport.Importers
                     levelScene = levelPackedScene.Instance<Node>();
                 }
 
+                levelScene.SetMeta(LDtkConstants.MetaKeys.LevelScenePath, levelScenePath);
+
                 levelsParent.AddChild(levelScene);
 
                 if (levelScene is Node2D level2D)

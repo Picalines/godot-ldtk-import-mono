@@ -14,6 +14,8 @@ namespace Picalines.Godot.LDtkImport
         public static class MetaKeys
         {
             public const string InstanceId = "LDtkInstanceId";
+
+            public const string LevelScenePath = "LDtkLevelScenePath";
         }
     }
 }
