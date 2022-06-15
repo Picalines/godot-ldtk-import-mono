@@ -47,6 +47,7 @@ From a special `json` config plugin will generate a Godot scene files (see [How 
  * Level fields are also supported!
  * To set tile collisions edit the auto generated `TileSet` resource
  * Background images and color are converted to `Sprite` and `ColorRect` nodes
+ * Add `YSort` tag to Entity layer in LDtk to use `YSort` node
 
 Example of tile custom data for entity:
 ```json5
@@ -125,7 +126,7 @@ Config will looks like this:
 }
 ```
 
-After creating a config use `Project -> Tools -> Import LDtk project` again. That's it!
+After creating a config use `Project -> Tools -> Import LDtk project` again. To Reimport world you can open it's generated scene and press a special button in the inspector!
 
 ## ⚠ Notes
 
