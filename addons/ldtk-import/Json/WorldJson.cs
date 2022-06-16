@@ -11,7 +11,7 @@ using System.Runtime.Serialization;
 
 namespace Picalines.Godot.LDtkImport.Json
 {
-    public enum WorldLayout
+    internal enum WorldLayout
     {
         Free,
         GridVania,
@@ -19,7 +19,7 @@ namespace Picalines.Godot.LDtkImport.Json
         LinearVertical,
     }
 
-    public enum LayerType
+    internal enum LayerType
     {
         Tiles,
         IntGrid,
@@ -27,7 +27,7 @@ namespace Picalines.Godot.LDtkImport.Json
         AutoLayer,
     }
 
-    public sealed class WorldJson
+    internal sealed class WorldJson
     {
         private WorldJson() { }
 

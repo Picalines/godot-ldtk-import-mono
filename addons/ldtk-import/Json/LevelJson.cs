@@ -11,7 +11,7 @@ using System.Runtime.Serialization;
 
 namespace Picalines.Godot.LDtkImport.Json
 {
-    public enum LevelNeighbourDirection
+    internal enum LevelNeighbourDirection
     {
         North,
         South,
@@ -19,7 +19,7 @@ namespace Picalines.Godot.LDtkImport.Json
         East,
     }
 
-    public sealed class LevelJson
+    internal sealed class LevelJson
     {
         private LevelJson() { }
 
