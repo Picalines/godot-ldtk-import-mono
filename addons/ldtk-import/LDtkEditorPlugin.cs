@@ -92,7 +92,7 @@ namespace Picalines.Godot.LDtkImport
         {
             var editorSettings = GetEditorInterface().GetEditorSettings();
 
-            if (!(bool)editorSettings.GetSetting("text_editor/external/use_external_editor"))
+            if (editorSettings.GetSetting("text_editor/external/use_external_editor") is false)
             {
                 return;
             }
