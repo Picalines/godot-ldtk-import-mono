@@ -9,6 +9,9 @@ namespace Picalines.Godot.LDtkImport
     {
         private LDtkImportException(string message) : base(message) { }
 
+        public static LDtkImportException FailedToCreateDirectory(string path, Error error) =>
+            new($"failed to create an output directory '{path}': {error}");
+
         public static LDtkImportException FailedToOpenFile(Error error) =>
             new($"failed to open file: {error}");
 
