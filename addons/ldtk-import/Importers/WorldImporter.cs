@@ -81,7 +81,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
             else
             {
-                worldNode = new();
+                worldNode = new Node2D();
             }
 
             worldNode.Name = ldtkFilePath.GetFile().BaseName();
