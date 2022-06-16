@@ -50,7 +50,7 @@ namespace Picalines.Godot.LDtkImport.Json
 
         [JsonProperty("__bgColor")]
         [JsonConverter(typeof(ColorConverter))]
-        public Color? BgColor { get; private set; }
+        public Color BgColor { get; private set; }
 
         [JsonProperty("__bgPos")]
         public BackgroundPosition? BgPosition { get; private set; }

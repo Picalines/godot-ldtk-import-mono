@@ -81,6 +81,9 @@ namespace Picalines.Godot.LDtkImport.Json
 
         [JsonProperty("bgParent")]
         public string? BackgroundParentNodeName { get; private set; }
+
+        [JsonProperty("ignoreBgColor")]
+        public bool IgnoreBackgroundColor { get; private set; } = false;
     }
 }
 

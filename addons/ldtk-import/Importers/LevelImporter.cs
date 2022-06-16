@@ -85,9 +85,12 @@ namespace Picalines.Godot.LDtkImport.Importers
         private static void AddBackground(LevelImportContext context, Node levelNode)
         {
             Node bgParent = levelNode;
+            bool seperateParent = false;
 
             if (context.ImportSettings.LevelSceneSettings?.BackgroundParentNodeName is { } backgroundParentNodeName)
             {
+                seperateParent = true;
+
                 bgParent = levelNode.GetNodeOrNull(backgroundParentNodeName)
                     ?? new Node2D() { Name = backgroundParentNodeName };
 
@@ -101,12 +104,13 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             bool hasBgColor = false;
 
-            if (context.LevelJson.BgColor is { } color)
+            if (context.ImportSettings.LevelSceneSettings?.IgnoreBackgroundColor is false)
             {
                 hasBgColor = true;
                 var colorRect = new ColorRect()
                 {
-                    Color = color,
+                    Name = $"{(seperateParent ? "Background" : "")}{nameof(ColorRect)}",
+                    Color = context.LevelJson.BgColor,
                     RectSize = context.LevelJson.PxSize
                 };
 
@@ -121,6 +125,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 var bgSprite = new Sprite()
                 {
+                    Name = $"{(seperateParent ? "Background" : "")}{nameof(Sprite)}",
                     Texture = bgTexture,
                     Centered = false,
                     RegionEnabled = true,
