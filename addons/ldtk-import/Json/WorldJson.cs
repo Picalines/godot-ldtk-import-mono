@@ -235,8 +235,11 @@ namespace Picalines.Godot.LDtkImport.Json
             [JsonProperty("uid")]
             public int Uid { get; private set; }
 
+            [JsonProperty("embedAtlas")]
+            public string? EmbedAtlas { get; private set; }
+
             [JsonProperty("relPath")]
-            public string TextureRelPath { get; private set; }
+            public string? TextureRelPath { get; private set; }
 
             [JsonProperty("pxWid")]
             public int PxWidth { get; private set; }

@@ -14,7 +14,9 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         public static TileMap Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
-            var tileSet = GD.Load<TileSet>(GetTileSetPath(context, layerJson));
+            var tileSet = GetTileSetPath(context, layerJson) is string tileSetPath
+                ? GD.Load<TileSet>(tileSetPath)
+                : null;
 
             var tileMap = new TileMap()
             {
@@ -143,10 +145,15 @@ namespace Picalines.Godot.LDtkImport.Importers
             return tileEntities;
         }
 
-        private static string GetTileSetPath(LevelImportContext context, LevelJson.LayerInstance layerJson)
+        private static string? GetTileSetPath(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
             var tileSetJson = context.WorldJson.Definitions.TileSets
                 .First(t => t.Uid == (layerJson.TileSetDefUid ?? 0));
+
+            if (tileSetJson.EmbedAtlas is not null)
+            {
+                return null;
+            }
 
             return $"{context.ImportSettings.OutputDirectory}/tilesets/{tileSetJson.Identifier}.tres";
         }

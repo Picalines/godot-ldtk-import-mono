@@ -64,6 +64,11 @@ namespace Picalines.Godot.LDtkImport.Importers
         {
             foreach (var tileSetJson in worldJson.Definitions.TileSets)
             {
+                if (tileSetJson.EmbedAtlas is not null)
+                {
+                    continue;
+                }
+
                 var savePath = $"{outputDir}/tilesets/{tileSetJson.Identifier}.tres";
 
                 TileSet tileSet;
