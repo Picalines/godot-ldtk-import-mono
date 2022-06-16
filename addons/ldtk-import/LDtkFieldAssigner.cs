@@ -15,7 +15,7 @@ namespace Picalines.Godot.LDtkImport.Importers
     {
         public record Context
         {
-            public int? GridSize { get; init; }
+            public Vector2? GridSize { get; init; }
             public LDtkEntityReferenceAssigner? ReferenceAssigner { get; init; }
         }
 
@@ -160,7 +160,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 {
                     var editorPoint = new Vector2() { x = Convert.ToSingle(point["cx"]), y = Convert.ToSingle(point["cy"]) };
 
-                    var gridSizeV = Vector2.One * (context.GridSize ?? 1);
+                    var gridSizeV = context.GridSize ?? Vector2.One;
                     editorPoint *= gridSizeV;
                     editorPoint += gridSizeV / 2;
 
