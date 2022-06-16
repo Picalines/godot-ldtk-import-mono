@@ -73,9 +73,15 @@ namespace Picalines.Godot.LDtkImport
             {
                 LDtkImporter.Import(ldtkFile, settingsFilePath);
             }
-            catch (LDtkImportException exception)
+            catch (System.Exception exception)
             {
-                GD.PushError($"LDtk import error: {exception.Message}");
+                var errorMessage = "LDtk import error: " + exception switch
+                {
+                    LDtkImportException => exception.Message,
+                    _ => $"[PLUGIN BUG] {exception.Message}\n{exception.StackTrace}",
+                };
+
+                GD.PushError(errorMessage);
                 return;
             }
 
