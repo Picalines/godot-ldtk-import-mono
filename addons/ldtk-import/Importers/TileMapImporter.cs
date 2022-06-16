@@ -6,43 +6,25 @@ using Picalines.Godot.LDtkImport.Utils;
 using System.Collections.Generic;
 using System.Linq;
 
+using TileEntityDictionary = System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<string, object>>;
+
 namespace Picalines.Godot.LDtkImport.Importers
 {
     internal static class TileMapImporter
     {
         private const string TileEntityNameField = "$entity";
 
-        public static TileMap Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
+        private const string StackLayerGroupName = "LDtkStackLayer";
+
+        public static Node Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
+            Node2D layerNode;
+
             var tileSet = GetTileSetPath(context, layerJson) is string tileSetPath
                 ? GD.Load<TileSet>(tileSetPath)
                 : null;
 
-            var tileMap = new TileMap()
-            {
-                TileSet = tileSet,
-                Name = layerJson.Identifier,
-                Position = layerJson.PxTotalOffset,
-                CellSize = layerJson.GridSizeV,
-                Modulate = Colors.White with { a = layerJson.Opacity },
-            };
-
-            if (layerJson.Type is LayerType.IntGrid)
-            {
-                AddIntGrid(layerJson, tileMap);
-            }
-
-            SetTiles(context, layerJson, tileMap);
-
-            return tileMap;
-        }
-
-        private static void SetTiles(LevelImportContext context, LevelJson.LayerInstance layerJson, TileMap tileMap)
-        {
-            var tileSetDefinition = context.WorldJson.Definitions.TileSets
-                .First(tileSetDef => tileSetDef.Uid == layerJson.TileSetDefUid);
-
-            var tileEntities = GetTileEntities(tileSetDefinition);
+            var tileEntities = GetTileEntities(context, layerJson);
 
             var tiles = layerJson.Type switch
             {
@@ -50,31 +32,150 @@ namespace Picalines.Godot.LDtkImport.Importers
                 _ => layerJson.AutoLayerTiles,
             };
 
+            var tileStacks = tiles.GroupBy(tile => tile.LayerPxCoords);
+
+            TileMap CreateTileMap() => new()
+            {
+                TileSet = tileSet,
+                CellSize = layerJson.GridSizeV,
+            };
+
+            if (tileStacks.Select(stack => stack.Count()).Max() is > 1 and var maxStackSize)
+            {
+                layerNode = new Node2D();
+
+                var layerTileMaps = new List<TileMap>();
+
+                for (int i = 0; i < maxStackSize; i++)
+                {
+                    var stackTileMap = CreateTileMap();
+                    stackTileMap.AddToGroup(StackLayerGroupName, persistent: false);
+                    stackTileMap.Name = $"StackLayer_{i}";
+
+                    layerTileMaps.Add(stackTileMap);
+                    layerNode.AddChild(stackTileMap);
+                }
+
+                var tileLayers = tileStacks
+                    .SelectMany(stack => stack.Select((tile, index) => new { tile, layer = index }))
+                    .GroupBy(tile => tile.layer, elementSelector: tile => tile.tile);
+
+                foreach (var tileLayer in tileLayers)
+                {
+                    SetTilesOrEntities(context, layerTileMaps[tileLayer.Key], tileLayer, tileEntities);
+                }
+            }
+            else
+            {
+                SetTilesOrEntities(context, (TileMap)(layerNode = CreateTileMap()), tiles, tileEntities);
+            }
+
+            layerNode.Name = layerJson.Identifier;
+            layerNode.Position = layerJson.PxTotalOffset;
+            layerNode.Modulate = Colors.White with { a = layerJson.Opacity };
+
+            if (layerJson.Type is LayerType.IntGrid)
+            {
+                AddIntGrid(layerJson, layerNode);
+            }
+
+            return layerNode;
+        }
+
+        private static void SetTilesOrEntities(
+            LevelImportContext context,
+            TileMap tileMap,
+            IEnumerable<LevelJson.TileInstance> tiles,
+            TileEntityDictionary tileEntities)
+        {
             foreach (var tile in tiles)
             {
-                var gridCoords = tileMap.WorldToMap(tile.LayerPxCoords);
-
                 if (tileEntities.TryGetValue(tile.Id, out var tileCustomData))
                 {
-                    TryInstantiateTileEntity(context, tileMap, tile, tileCustomData);
+                    var entity = TryCreateTileEntity(context, tileCustomData, tile, tileMap.CellSize, tileMap.TileSet);
+
+                    if (entity is null)
+                    {
+                        continue;
+                    }
+
+                    Node entityParent = tileMap;
+
+                    if (tileMap.IsInGroup(StackLayerGroupName))
+                    {
+                        entityParent = tileMap.GetParent();
+                    }
+
+                    entityParent.AddChild(entity);
                 }
                 else
                 {
+                    var gridCoords = tileMap.WorldToMap(tile.LayerPxCoords);
                     tileMap.SetCellv(gridCoords, tile.Id, tile.FlipX, tile.FlipY);
                 }
             }
         }
 
-        private static void AddIntGrid(LevelJson.LayerInstance layer, TileMap tileMap)
+        private static Node? TryCreateTileEntity(
+            LevelImportContext context,
+            Dictionary<string, object> tileCustomData,
+            LevelJson.TileInstance tile,
+            Vector2 cellSize,
+            TileSet tileSet)
+        {
+            var tileEntity = EntityLayerImporter.TryInstantiate(context, (string)tileCustomData[TileEntityNameField]);
+
+            if (tileEntity is null)
+            {
+                return null;
+            }
+
+            if (tileEntity is Node2D entity2D)
+            {
+                entity2D.Position = tile.LayerPxCoords + cellSize / 2;
+
+                entity2D.Scale = new Vector2()
+                {
+                    x = tile.FlipX ? -1 : 1,
+                    y = tile.FlipY ? -1 : 1,
+                };
+            }
+
+            var entityFields = tileCustomData
+                .Where(pair => pair.Key != TileEntityNameField)
+                .Append(new("$tileId", tile.Id))
+                .Append(new("$tileSrc", tile.TileSetPxCoords))
+                .Append(new("$size", cellSize))
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            if (entityFields.TryGetValue("$keepTileSprite", out var keepTileSprite) && keepTileSprite is true)
+            {
+                var firstSprite = GetFirstChildOfType<Sprite>(tileEntity);
+
+                if (firstSprite is not null)
+                {
+                    firstSprite.Texture = tileSet.TileGetTexture(0);
+                    firstSprite.RegionEnabled = true;
+                    firstSprite.RegionRect = new() { Position = tile.TileSetPxCoords, Size = cellSize };
+                }
+            }
+
+            LDtkFieldAssigner.Assign(tileEntity, entityFields, new() { GridSize = cellSize });
+
+            return tileEntity;
+        }
+
+        private static void AddIntGrid(LevelJson.LayerInstance layer, Node2D layerNode)
         {
             var intMap = new TileMap()
             {
                 Name = "IntGrid",
-                CellSize = tileMap.CellSize,
+                CellSize = layer.GridSizeV,
             };
 
-            var cellsWithId = layer.IntGrid.Select((value, id) => new { id, value });
-            var nonEmptyCells = cellsWithId.Where(p => p.value > 0);
+            var nonEmptyCells = layer.IntGrid
+                .Select((value, id) => new { id, value })
+                .Where(p => p.value > 0);
 
             foreach (var p in nonEmptyCells)
             {
@@ -82,67 +183,18 @@ namespace Picalines.Godot.LDtkImport.Importers
                 intMap.SetCellv(gridCoords, p.value);
             }
 
-            tileMap.AddChild(intMap);
+            layerNode.AddChild(intMap);
         }
 
-        private static void TryInstantiateTileEntity(LevelImportContext context, TileMap tileMap, LevelJson.TileInstance tile, Dictionary<string, object> tileCustomData)
+        private static TileEntityDictionary GetTileEntities(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
-            var entityName = (string)tileCustomData[TileEntityNameField];
+            var tileSetDefinition = context.WorldJson.Definitions.TileSets
+                .First(tileSetDef => tileSetDef.Uid == layerJson.TileSetDefUid);
 
-            var tileEntity = EntityLayerImporter.TryInstantiate(context, entityName);
-
-            if (tileEntity is null)
-            {
-                return;
-            }
-
-            var entityFields = tileCustomData
-                .Where(pair => pair.Key != TileEntityNameField)
-                .Append(new("$tileId", tile.Id))
-                .Append(new("$tileSrc", tile.TileSetPxCoords))
-                .Append(new("$size", tileMap.CellSize))
-                .ToDictionary(pair => pair.Key, pair => pair.Value);
-
-            if (entityFields.TryGetValue("$keepTileSprite", out var keepTileSprite) && keepTileSprite is true)
-            {
-                TryKeepTileSprite(tileEntity, tile, tileMap);
-            }
-
-            LDtkFieldAssigner.Assign(tileEntity, entityFields, new()
-            {
-                GridSize = (int)tileMap.CellSize.x,
-            });
-
-            tileMap.AddChild(tileEntity);
-
-            if (tileEntity is Node2D entity2D)
-            {
-                entity2D.Position = tile.LayerPxCoords + tileMap.CellSize / 2;
-
-                var scale = Vector2.One;
-
-                if (tile.FlipX) scale.x *= -1;
-                if (tile.FlipY) scale.y *= -1;
-
-                entity2D.Scale = scale;
-            }
-        }
-
-        private static Dictionary<int, Dictionary<string, object>> GetTileEntities(WorldJson.TileSetDefinition tileSetDefinition)
-        {
-            var tileEntities = new Dictionary<int, Dictionary<string, object>>();
-
-            foreach (var customData in tileSetDefinition.CustomData)
-            {
-                var json = customData.AsJson<Dictionary<string, object>>();
-
-                if (json?.ContainsKey(TileEntityNameField) ?? false)
-                {
-                    tileEntities.Add(customData.TileId, json);
-                }
-            }
-
-            return tileEntities;
+            return tileSetDefinition.CustomData
+                .Select(customData => new { customData.TileId, Json = customData.AsJson<Dictionary<string, object>>() })
+                .Where(data => data.Json?.ContainsKey(TileEntityNameField) is true)
+                .ToDictionary(data => data.TileId, data => data.Json!);
         }
 
         private static string? GetTileSetPath(LevelImportContext context, LevelJson.LayerInstance layerJson)
@@ -150,26 +202,9 @@ namespace Picalines.Godot.LDtkImport.Importers
             var tileSetJson = context.WorldJson.Definitions.TileSets
                 .First(t => t.Uid == (layerJson.TileSetDefUid ?? 0));
 
-            if (tileSetJson.EmbedAtlas is not null)
-            {
-                return null;
-            }
-
-            return $"{context.ImportSettings.OutputDirectory}/tilesets/{tileSetJson.Identifier}.tres";
-        }
-
-        private static void TryKeepTileSprite(Node tileEntity, LevelJson.TileInstance tile, TileMap tileMap)
-        {
-            var firstSprite = GetFirstChildOfType<Sprite>(tileEntity);
-
-            if (firstSprite is null)
-            {
-                return;
-            }
-
-            firstSprite.Texture = tileMap.TileSet.TileGetTexture(0);
-            firstSprite.RegionEnabled = true;
-            firstSprite.RegionRect = new() { Position = tile.TileSetPxCoords, Size = tileMap.CellSize };
+            return tileSetJson.EmbedAtlas is null
+                ? $"{context.ImportSettings.OutputDirectory}/tilesets/{tileSetJson.Identifier}.tres"
+                : null;
         }
 
         private static T? GetFirstChildOfType<T>(Node node) where T : Node
