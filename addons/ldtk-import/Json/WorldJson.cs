@@ -207,6 +207,8 @@ namespace Picalines.Godot.LDtkImport.Json
 
             public sealed class TileCustomData
             {
+                private object? _Json = null;
+
                 private TileCustomData() { }
 
                 [JsonProperty("tileId")]
@@ -215,7 +217,7 @@ namespace Picalines.Godot.LDtkImport.Json
                 [JsonProperty("data")]
                 public string Data { get; private set; }
 
-                public T? AsJson<T>() => JsonConvert.DeserializeObject<T>(Data);
+                public T? AsJson<T>() where T : class => (_Json ??= JsonConvert.DeserializeObject<T>(Data)) as T;
             }
 
             public sealed class TileEnumTag
