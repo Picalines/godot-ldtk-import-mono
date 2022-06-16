@@ -22,7 +22,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
             else
             {
-                levelNode = new();
+                levelNode = new Node2D();
             }
 
             levelNode.Name = context.LevelJson.Identifier;
