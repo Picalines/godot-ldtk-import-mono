@@ -28,7 +28,7 @@ namespace Picalines.Godot.LDtkImport
 
             AddSettingsFileCreationPopup();
 
-            AddToolMenuItem(ImportToolMenuItemName, this, nameof(ImportToolMenuItemHandler), "");
+            AddToolMenuItem(ImportToolMenuItemName, this, nameof(ToolMenuItemCallback), "");
 
             AddInspectorPlugin(_InspectorPlugin = new() { EditorPlugin = this });
         }
@@ -43,6 +43,63 @@ namespace Picalines.Godot.LDtkImport
             {
                 RemoveInspectorPlugin(_InspectorPlugin);
             }
+        }
+
+        public Theme CurrentEditorTheme => GetEditorInterface().GetBaseControl().Theme;
+
+        public void ImportProject(string ldtkFile)
+        {
+            using var file = new File();
+
+            var settingsFilePath = ldtkFile + ImportSettingsFileExtension;
+
+            if (!file.FileExists(settingsFilePath))
+            {
+                file.Open(ImportSettingsTemplatePath, File.ModeFlags.Read);
+                var settingsTemplate = file.GetAsText();
+                file.Close();
+
+                file.Open(settingsFilePath, File.ModeFlags.Write);
+                file.StoreString(settingsTemplate);
+                file.Close();
+
+                GD.Print($"LDtk import settings file created at {settingsFilePath}");
+
+                _ImportSettingsFileCreationPopup.PopupCentered();
+                return;
+            }
+
+            try
+            {
+                LDtkImporter.Import(ldtkFile, settingsFilePath);
+            }
+            catch (LDtkImportException exception)
+            {
+                GD.PushError($"LDtk import error: {exception.Message}");
+                return;
+            }
+
+            GD.Print($"successfully imported LDtk project at {ldtkFile}");
+        }
+
+        public void OpenFileInExternalEditor(string filePath)
+        {
+            var editorSettings = GetEditorInterface().GetEditorSettings();
+
+            if (!(bool)editorSettings.GetSetting("text_editor/external/use_external_editor"))
+            {
+                return;
+            }
+
+            var importSettingsFilePath = ProjectSettings.GlobalizePath(filePath);
+
+            var externalEditorExecPath = (string)editorSettings.GetSetting("text_editor/external/exec_path");
+
+            var execFlags = (string)editorSettings.GetSetting("text_editor/external/exec_flags");
+
+            execFlags = execFlags.Replace("{file}", importSettingsFilePath);
+
+            OS.Execute(externalEditorExecPath, execFlags.Split(' '), false);
         }
 
         private void AddProjectFileOpenDialog()
@@ -80,67 +137,15 @@ namespace Picalines.Godot.LDtkImport
             _ImportSettingsFileCreationPopup.GetCancel().Text = "Hide dialog";
         }
 
-        private void ImportToolMenuItemHandler(string _)
+        private void ToolMenuItemCallback(string _)
         {
             _LDtkFileDialog.PopupCentered();
         }
 
-        public void ImportProject(string ldtkFile)
-        {
-            using var file = new File();
-
-            var settingsFilePath = ldtkFile + ImportSettingsFileExtension;
-
-            if (!file.FileExists(settingsFilePath))
-            {
-                file.Open(ImportSettingsTemplatePath, File.ModeFlags.Read);
-                var settingsTemplate = file.GetAsText();
-                file.Close();
-
-                file.Open(settingsFilePath, File.ModeFlags.Write);
-                file.StoreString(settingsTemplate);
-                file.Close();
-
-                GD.Print($"LDtk import settings file created at {settingsFilePath}");
-
-                _ImportSettingsFileCreationPopup.PopupCentered();
-                return;
-            }
-
-            try
-            {
-                LDtkImporter.Import(ldtkFile, settingsFilePath);
-            }
-            catch (LDtkImportException exception)
-            {
-                GD.PushError($"LDtk import error: {exception.Message}");
-                return;
-            }
-
-            GD.Print($"successfully imported LDtk project at {ldtkFile}");
-        }
-
         private void OpenSettingsInExternalEditor()
         {
-            var editorSettings = GetEditorInterface().GetEditorSettings();
-
-            if (!(bool)editorSettings.GetSetting("text_editor/external/use_external_editor"))
-            {
-                return;
-            }
-
-            var importSettingsFilePath = ProjectSettings.GlobalizePath(_LDtkFileDialog.CurrentPath + ImportSettingsFileExtension);
-
-            var externalEditorExecPath = (string)editorSettings.GetSetting("text_editor/external/exec_path");
-
-            var execFlags = (string)editorSettings.GetSetting("text_editor/external/exec_flags");
-
-            execFlags = execFlags.Replace("{file}", importSettingsFilePath);
-
-            OS.Execute(externalEditorExecPath, execFlags.Split(' '), false);
+            OpenFileInExternalEditor(_LDtkFileDialog.CurrentPath + ImportSettingsFileExtension);
         }
-
-        public Theme CurrentEditorTheme => GetEditorInterface().GetBaseControl().Theme;
     }
 }
 

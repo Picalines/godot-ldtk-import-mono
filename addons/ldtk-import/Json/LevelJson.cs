@@ -37,6 +37,9 @@ namespace Picalines.Godot.LDtkImport.Json
 
         public Vector2 WorldPos { get; private set; }
 
+        [JsonProperty("worldDepth")]
+        public int WorldDepth { get; private set; }
+
         [JsonProperty("pxWid")]
         public int PxWidth { get; private set; }
 

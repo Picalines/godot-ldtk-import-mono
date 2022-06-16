@@ -27,6 +27,12 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             levelNode.Name = context.LevelJson.Identifier;
             levelNode.AddToGroup(LDtkConstants.GroupNames.Levels, persistent: true);
+            levelNode.SetMeta(LDtkConstants.MetaKeys.ImportSettingsFilePath, context.ImportSettings.FilePath);
+
+            if (levelNode is Node2D levelNode2D)
+            {
+                levelNode2D.ZIndex = context.LevelJson.WorldDepth;
+            }
 
             AddBackground(context, levelNode);
 

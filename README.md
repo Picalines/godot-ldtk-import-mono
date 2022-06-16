@@ -48,6 +48,7 @@ From a special `json` config plugin will generate a Godot scene files (see [How 
  * To set tile collisions edit the auto generated `TileSet` resource
  * Background images and color are converted to `Sprite` and `ColorRect` nodes
  * Add `YSort` tag to Entity layer in LDtk to use `YSort` node
+ * The level depth value from LDtk is assigned to ZIndex property
 
 Example of tile custom data for entity:
 ```json5

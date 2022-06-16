@@ -23,7 +23,7 @@ namespace Picalines.Godot.LDtkImport
                 return false;
             }
 
-            return node.IsInGroup(LDtkConstants.GroupNames.Worlds);
+            return node.IsInGroup(LDtkConstants.GroupNames.Worlds) || node.IsInGroup(LDtkConstants.GroupNames.Levels);
         }
 
         public override void ParseBegin(Object @object)
@@ -32,15 +32,31 @@ namespace Picalines.Godot.LDtkImport
 
             _CurrentNode = @object as Node;
 
-            var reloadButton = new Button()
+            if (_CurrentNode?.IsInGroup(LDtkConstants.GroupNames.Worlds) ?? false)
             {
-                Text = "Reimport LDtk world",
-                Theme = EditorPlugin.CurrentEditorTheme,
-            };
+                var reloadButton = new Button()
+                {
+                    Text = "Reimport LDtk world",
+                    Theme = EditorPlugin.CurrentEditorTheme,
+                };
 
-            reloadButton.Connect("pressed", this, nameof(OnReloadButtonPressed));
+                reloadButton.Connect("pressed", this, nameof(OnReloadButtonPressed));
 
-            AddCustomControl(reloadButton);
+                AddCustomControl(reloadButton);
+            }
+
+            if (_CurrentNode?.GetMeta(LDtkConstants.MetaKeys.ImportSettingsFilePath) is string settingsFilePath)
+            {
+                var openSettingsButton = new Button()
+                {
+                    Text = "Open LDtk import settings file",
+                    Theme = EditorPlugin.CurrentEditorTheme,
+                };
+
+                openSettingsButton.Connect("pressed", EditorPlugin, nameof(LDtkEditorPlugin.OpenFileInExternalEditor), new() { settingsFilePath });
+
+                AddCustomControl(openSettingsButton);
+            }
         }
 
         private void OnReloadButtonPressed()

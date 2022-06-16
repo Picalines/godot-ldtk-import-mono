@@ -13,6 +13,8 @@ namespace Picalines.Godot.LDtkImport
 
         public static class MetaKeys
         {
+            public const string ImportSettingsFilePath = "LDtkImportSettinsFilePath";
+
             public const string ProjectFilePath = "LDtkProjectFilePath";
 
             public const string InstanceId = "LDtkInstanceId";

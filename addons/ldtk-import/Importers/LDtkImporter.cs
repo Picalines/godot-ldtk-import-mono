@@ -13,6 +13,8 @@ namespace Picalines.Godot.LDtkImport.Importers
             var worldJson = JsonFile.Parse<WorldJson>(ldtkFilePath);
             var settings = JsonFile.Parse<LDtkImportSettings>(settingsFilePath);
 
+            settings.FilePath = settingsFilePath;
+
             using var outputDir = new Directory();
             outputDir.ChangeDir(settings.OutputDirectory);
 

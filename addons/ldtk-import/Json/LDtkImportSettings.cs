@@ -11,6 +11,8 @@ namespace Picalines.Godot.LDtkImport.Json
     {
         private LDtkImportSettings() { }
 
+        public string? FilePath { get; set; }
+
         [JsonProperty("outputDir", Required = Required.Always)]
         public string OutputDirectory { get; private set; } = null!;
 
