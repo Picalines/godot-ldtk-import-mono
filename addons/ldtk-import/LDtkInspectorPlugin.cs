@@ -7,6 +7,8 @@ namespace Picalines.Godot.LDtkImport
     [Tool]
     internal sealed class LDtkInspectorPlugin : EditorInspectorPlugin
     {
+        private const string ReimportButtonText = "Reimport LDtk world";
+
         public LDtkEditorPlugin EditorPlugin { get; init; } = null!;
 
         private Node? _CurrentNode;
@@ -36,9 +38,13 @@ namespace Picalines.Godot.LDtkImport
             {
                 var reloadButton = new Button()
                 {
-                    Text = "Reimport LDtk world",
+                    Text = ReimportButtonText,
                     Theme = EditorPlugin.CurrentEditorTheme,
                 };
+
+                reloadButton.Connect("button_down", reloadButton, "set", new() { "text", "in progress..." });
+
+                reloadButton.Connect("button_up", reloadButton, "set", new() { "text", ReimportButtonText });
 
                 reloadButton.Connect("pressed", this, nameof(OnReloadButtonPressed));
 
@@ -65,6 +71,8 @@ namespace Picalines.Godot.LDtkImport
             {
                 return;
             }
+
+
 
             var editorInterface = EditorPlugin.GetEditorInterface();
 
