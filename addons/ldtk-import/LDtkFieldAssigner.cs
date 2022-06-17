@@ -1,7 +1,7 @@
 ﻿#if TOOLS
 
 using Godot;
-using Picalines.Godot.LDtkImport.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -80,7 +80,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                     MemberName = targetField.TargetMember.Name
                 };
 
-                if (!CheckFieldType(targetFieldType, ref fieldValue, checkContext))
+                if (!TryParseFieldValue(targetFieldType, ref fieldValue, checkContext))
                 {
                     continue;
                 }
@@ -89,17 +89,24 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
         }
 
-        public static void Assign(Node targetNode, IEnumerable<LevelJson.FieldInstance> fieldInstances, Context context)
-        {
-            Assign(targetNode, fieldInstances.ToDictionary(field => field.Identifier, field => field.Value), context);
-        }
-
-        private static bool CheckFieldType(Type targetType, ref object? fieldValue, CheckContext context)
+        private static bool TryParseFieldValue(Type targetType, ref object? fieldValue, CheckContext context)
         {
             switch (fieldValue)
             {
+                case JArray jArray:
+                {
+                    fieldValue = jArray.ToObject<object[]>();
+                    return TryParseFieldValue(targetType, ref fieldValue, context);
+                }
+
+                case JObject jObject:
+                {
+                    fieldValue = jObject.ToObject<Dictionary<string, object>>();
+                    return TryParseFieldValue(targetType, ref fieldValue, context);
+                }
+
                 case null when targetType.IsClass || Nullable.GetUnderlyingType(targetType) is not null:
-                case bool or string when targetType == fieldValue.GetType():
+                case { } when targetType == fieldValue.GetType():
                 case { } when _NumberTypes.Contains(fieldValue.GetType()) && _NumberTypes.Contains(targetType):
                     return true;
 
@@ -121,21 +128,6 @@ namespace Picalines.Godot.LDtkImport.Importers
                     return true;
                 }
 
-                case object?[] array when targetType.IsArray:
-                {
-                    var elementType = targetType.GetElementType();
-
-                    for (int i = 0; i < array.Length; i++)
-                    {
-                        if (!CheckFieldType(elementType, ref array[i], context with { ArrayIndex = i }))
-                        {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }
-
                 case object?[] array when targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(List<>):
                 {
                     var elementType = targetType.GenericTypeArguments[0];
@@ -144,7 +136,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                     for (int i = 0; i < array.Length; i++)
                     {
-                        if (!CheckFieldType(elementType, ref array[i], context with { ArrayIndex = i }))
+                        if (!TryParseFieldValue(elementType, ref array[i], context with { ArrayIndex = i }))
                         {
                             return false;
                         }
@@ -156,9 +148,35 @@ namespace Picalines.Godot.LDtkImport.Importers
                     return true;
                 }
 
+                case object?[] when targetType.IsArray:
+                {
+                    var elementType = targetType.GetElementType();
+
+                    var listType = typeof(List<>).MakeGenericType(elementType);
+
+                    if (!TryParseFieldValue(listType, ref fieldValue, context))
+                    {
+                        return false;
+                    }
+
+                    var toArrayListMethod = listType.GetMethod(nameof(List<object>.ToArray))!;
+
+                    fieldValue = toArrayListMethod.Invoke(fieldValue, Array.Empty<object>());
+
+                    return true;
+                }
+
                 case Dictionary<string, object> point when targetType == typeof(Vector2):
                 {
-                    var editorPoint = new Vector2() { x = Convert.ToSingle(point["cx"]), y = Convert.ToSingle(point["cy"]) };
+                    var x = point["cx"]!;
+                    var y = point["cy"]!;
+
+                    if (!(_NumberTypes.Contains(x.GetType()) && _NumberTypes.Contains(y.GetType())))
+                    {
+                        return false;
+                    }
+
+                    var editorPoint = new Vector2(Convert.ToSingle(x), Convert.ToSingle(y));
 
                     var gridSizeV = context.GridSize ?? Vector2.One;
                     editorPoint *= gridSizeV;
@@ -168,9 +186,18 @@ namespace Picalines.Godot.LDtkImport.Importers
                     return true;
                 }
 
-                case Vector2 vector2 when targetType == typeof(Vector2):
+                case object?[] coords when coords.Length == 2 && targetType == typeof(Vector2):
                 {
-                    fieldValue = vector2;
+                    var x = coords[0]!;
+                    var y = coords[1]!;
+
+                    if (!(_NumberTypes.Contains(x.GetType()) && _NumberTypes.Contains(y.GetType())))
+                    {
+                        return false;
+                    }
+
+                    fieldValue = new Vector2(Convert.ToSingle(x), Convert.ToSingle(y));
+
                     return true;
                 }
 
@@ -269,13 +296,15 @@ namespace Picalines.Godot.LDtkImport.Importers
             {
                 if (!(property is { CanRead: true, CanWrite: true } && property.GetGetMethod(nonPublic: true).IsDefined(typeof(CompilerGeneratedAttribute), inherit: true)))
                 {
-                    throw new InvalidOperationException($"{nameof(LDtkFieldAttribute)} can be used only on auto properties or fields ({member.DeclaringType}.{member.Name})");
+                    GD.PushError($"{nameof(LDtkFieldAttribute)} can be used only on auto properties or fields ({member.DeclaringType}.{member.Name})");
+                    return false;
                 }
             }
 
             if (!member.IsDefined(typeof(ExportAttribute)))
             {
-                throw new InvalidOperationException($"{nameof(ExportAttribute)} is required when {nameof(LDtkFieldAttribute)} is used");
+                GD.PushError($"{nameof(ExportAttribute)} is required when {nameof(LDtkFieldAttribute)} is used");
+                return false;
             }
 
             return true;
