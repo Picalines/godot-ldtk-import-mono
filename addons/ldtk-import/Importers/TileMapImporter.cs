@@ -12,8 +12,6 @@ namespace Picalines.Godot.LDtkImport.Importers
 {
     internal static class TileMapImporter
     {
-        private const string TileEntityNameField = "$entity";
-
         private const string StackLayerGroupName = "LDtkStackLayer";
 
         public static Node Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
@@ -123,7 +121,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             Vector2 cellSize,
             TileSet tileSet)
         {
-            var tileEntity = EntityLayerImporter.TryInstantiate(context, (string)tileCustomData[TileEntityNameField]);
+            var tileEntity = EntityLayerImporter.TryInstantiate(context, (string)tileCustomData[LDtkConstants.SpecialFieldNames.TileEntityName]);
 
             if (tileEntity is null)
             {
@@ -142,13 +140,13 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
 
             var entityFields = tileCustomData
-                .Where(pair => pair.Key != TileEntityNameField)
-                .Append(new("$tileId", tile.Id))
-                .Append(new("$tileSrc", tile.TileSetPxCoords))
-                .Append(new("$size", cellSize))
+                .Where(pair => pair.Key != LDtkConstants.SpecialFieldNames.TileEntityName)
+                .Append(new(LDtkConstants.SpecialFieldNames.TileId, tile.Id))
+                .Append(new(LDtkConstants.SpecialFieldNames.TileSource, tile.TileSetPxCoords))
+                .Append(new(LDtkConstants.SpecialFieldNames.Size, cellSize))
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            if (entityFields.TryGetValue("$keepTileSprite", out var keepTileSprite) && keepTileSprite is true)
+            if (entityFields.TryGetValue(LDtkConstants.SpecialFieldNames.KeepTileSprite, out var keepTileSprite) && keepTileSprite is true)
             {
                 var firstSprite = GetFirstChildOfType<Sprite>(tileEntity);
 
@@ -193,7 +191,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             return tileSetDefinition.CustomData
                 .Select(customData => new { customData.TileId, Json = customData.AsJson<Dictionary<string, object>>() })
-                .Where(data => data.Json?.ContainsKey(TileEntityNameField) is true)
+                .Where(data => data.Json?.ContainsKey(LDtkConstants.SpecialFieldNames.TileEntityName) is true)
                 .ToDictionary(data => data.TileId, data => data.Json!);
         }
 

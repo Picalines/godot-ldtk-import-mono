@@ -53,20 +53,29 @@ From a special `json` config plugin will generate a Godot scene files (see [How 
 Example of tile custom data for entity:
 ```json5
 {
-  "$entity": "Foliage",
-  "$keepTileSprite": true, // plugin will search for top Sprite node
+  "#entity": "Foliage",
+  "#keepTileSprite": true, // plugin will search for top Sprite node
                            // and set its texture and region automatically!
 
   // Rest of fields are treated just like other fields!
   "wave": 4,
   "base": "LeftWall"
+
+  // Special type examples:
+  // - "MemberA" for enum Members { MemberA, MemberB, ... }
+  // - "#FFCC00" for colors
+  // - [4, 5] for exact Vector2
+  // - { "cx": 4, "cy": 5 } for Vector2 where (4, 5) will be converted from cell coordinates to center of a level tile
+  // - entity refs are not supported :/
 }
 ```
 
 `LDtkFieldAttribute` also can accept special data from LDtk:
- * `$size` for entity, tile and level... well... *sizes*
- * `$tileId` for... `:)`
- * `$tileSrc` for position of tile in TileSet texture (like top left of a sprite region)
+ * `#size` for entity, tile and level... well... *sizes*
+ * `#tileId` for... `:)`
+ * `#tileSrc` for position of tile in TileSet texture (like top left of a sprite region)
+
+Note: you can find all "magic strings" (group names, meta keys and special field names) in `LDtkConstants` class
 
 ## How to use
 

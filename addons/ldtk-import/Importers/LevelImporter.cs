@@ -40,7 +40,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             var levelFields = context.LevelJson.FieldInstances
                 .Select(field => new KeyValuePair<string, object>(field.Identifier, field.Value))
-                .Append(new("$size", context.LevelJson.PxSize))
+                .Append(new(LDtkConstants.SpecialFieldNames.Size, context.LevelJson.PxSize))
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
             LDtkFieldAssigner.Assign(levelNode, levelFields, new());

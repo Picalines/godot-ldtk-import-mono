@@ -56,7 +56,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 {
                     var entityFields = entityInstance.FieldInstances
                         .Select(field => new KeyValuePair<string, object>(field.Identifier, field.Value))
-                        .Append(new("$size", entityInstance.Size))
+                        .Append(new(LDtkConstants.SpecialFieldNames.Size, entityInstance.Size))
                         .ToDictionary(pair => pair.Key, pair => pair.Value);
 
                     LDtkFieldAssigner.Assign(entityNode, entityFields, new()

@@ -21,5 +21,20 @@ namespace Picalines.Godot.LDtkImport
 
             public const string LevelScenePath = "LDtkLevelScenePath";
         }
+
+        public const string SpecialFieldPrefix = "#";
+
+        public static class SpecialFieldNames
+        {
+            public const string Size = $"{SpecialFieldPrefix}size";
+
+            public const string TileEntityName = $"{SpecialFieldPrefix}entity";
+
+            public const string TileId = $"{SpecialFieldPrefix}tileId";
+
+            public const string TileSource = $"{SpecialFieldPrefix}tileSrc";
+
+            public const string KeepTileSprite = $"{SpecialFieldPrefix}keepTileSprite";
+        }
     }
 }
