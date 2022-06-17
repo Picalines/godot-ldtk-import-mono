@@ -75,7 +75,7 @@ namespace Picalines.Godot.LDtkImport
             }
             catch (System.Exception exception)
             {
-                var errorMessage = "LDtk import error: " + exception switch
+                var errorMessage = exception switch
                 {
                     LDtkImportException => exception.Message,
                     _ => $"[PLUGIN BUG] {exception.Message}\n{exception.StackTrace}",

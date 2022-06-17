@@ -120,7 +120,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 {
                     if (!Enum.IsDefined(targetType, enumValueName))
                     {
-                        GD.PushError($"LDtk field error: value '{enumValueName}' is not defined in {targetType} enum (member {context.MemberName})");
+                        GD.PushError(LDtkImportMessage.EnumMemberIsNotDefined(enumValueName, targetType, context.MemberName!));
                         return false;
                     }
 
@@ -205,7 +205,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 {
                     if (context.ReferenceAssigner is not { } referenceAssigner)
                     {
-                        GD.PushError($"LDtk entity reference is ignored in tiles");
+                        GD.PushError(LDtkImportMessage.EntityReferencesInTilesAreNotSupported);
                         return false;
                     }
 
@@ -219,7 +219,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 default:
                 {
-                    GD.PushError($"LDtk field type error: C# script expected value of type {targetType} for member {context.MemberName}, but received {fieldValue?.GetType().ToString() ?? "null"}");
+                    GD.PushError(LDtkImportMessage.EntityFieldTypeError(targetType, context.MemberName!, fieldValue?.GetType()));
                     return false;
                 }
             }
@@ -296,14 +296,14 @@ namespace Picalines.Godot.LDtkImport.Importers
             {
                 if (!(property is { CanRead: true, CanWrite: true } && property.GetGetMethod(nonPublic: true).IsDefined(typeof(CompilerGeneratedAttribute), inherit: true)))
                 {
-                    GD.PushError($"{nameof(LDtkFieldAttribute)} can be used only on auto properties or fields ({member.DeclaringType}.{member.Name})");
+                    GD.PushError(LDtkImportMessage.FieldAttributeNonAutoPropertyError(member));
                     return false;
                 }
             }
 
             if (!member.IsDefined(typeof(ExportAttribute)))
             {
-                GD.PushError($"{nameof(ExportAttribute)} is required when {nameof(LDtkFieldAttribute)} is used");
+                GD.PushError(LDtkImportMessage.MissingExportAttributeError(member));
                 return false;
             }
 

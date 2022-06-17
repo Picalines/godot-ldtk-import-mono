@@ -17,14 +17,14 @@ namespace Picalines.Godot.LDtkImport.Json
 
                 if (openError is not Error.Ok)
                 {
-                    throw LDtkImportException.FailedToOpenFile(openError);
+                    throw new LDtkImportException(LDtkImportMessage.FailedToOpenFile(openError));
                 }
 
                 return JsonConvert.DeserializeObject<T>(file.GetAsText());
             }
             catch (JsonSerializationException exception)
             {
-                throw LDtkImportException.FailedToParseJsonFile(path, exception.Message);
+                throw new LDtkImportException(LDtkImportMessage.FailedToParseJsonFile(path, exception.Message));
             }
             finally
             {

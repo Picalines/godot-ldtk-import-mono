@@ -97,7 +97,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             if (ResourceSaver.Save(savePath, packedLevelScene) is not Error.Ok)
             {
-                throw LDtkImportException.FailedToImportWorld(ldtkFilePath);
+                throw new LDtkImportException(LDtkImportMessage.FailedToImportWorld(ldtkFilePath));
             }
         }
     }

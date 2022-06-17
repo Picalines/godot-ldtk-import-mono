@@ -19,7 +19,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             if (outputDir.MakeDirRecursive(settings.OutputDirectory) is (not Error.Ok) and var createOutputDirError)
             {
-                throw LDtkImportException.FailedToCreateDirectory(settings.OutputDirectory, createOutputDirError);
+                throw new LDtkImportException(LDtkImportMessage.FailedToCreateDirectory(settings.OutputDirectory, createOutputDirError));
             }
 
             outputDir.ChangeDir(settings.OutputDirectory);
@@ -31,7 +31,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             if (outputDir.MakeDirRecursive("tilesets") is (not Error.Ok) and var createTilesetsDirError)
             {
-                throw LDtkImportException.FailedToCreateDirectory($"{settings.OutputDirectory}/tilesets", createTilesetsDirError);
+                throw new LDtkImportException(LDtkImportMessage.FailedToCreateDirectory($"{settings.OutputDirectory}/tilesets", createTilesetsDirError));
             }
 
             ImportTileSets(ldtkFilePath, settings.OutputDirectory, worldJson);
@@ -85,7 +85,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 if (ResourceSaver.Save(savePath, tileSet) is not Error.Ok)
                 {
-                    throw LDtkImportException.FailedToImportTileSet(ldtkFilePath, tileSetJson.Identifier);
+                    throw new LDtkImportException(LDtkImportMessage.FailedToImportTileSet(ldtkFilePath, tileSetJson.Identifier));
                 }
             }
         }
