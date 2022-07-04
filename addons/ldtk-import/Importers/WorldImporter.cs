@@ -62,8 +62,13 @@ namespace Picalines.Godot.LDtkImport.Importers
                 return worldNode;
             }
 
-            var levelsParent = worldNode.GetNodeOrNull(levelsParentNodeName)
-                ?? new Node2D() { Name = levelsParentNodeName };
+            var levelsParent = worldNode.GetNodeOrNull(levelsParentNodeName);
+
+            if (levelsParent is null)
+            {
+                levelsParent = new Node2D() { Name = levelsParentNodeName };
+                worldNode.AddChild(levelsParent);
+            }
 
             levelsParent.Owner = worldNode;
 
