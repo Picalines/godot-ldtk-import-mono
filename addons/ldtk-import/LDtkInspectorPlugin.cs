@@ -72,8 +72,6 @@ namespace Picalines.Godot.LDtkImport
                 return;
             }
 
-
-
             var editorInterface = EditorPlugin.GetEditorInterface();
 
             EditorPlugin.ImportProject(ldtkFilePath);
