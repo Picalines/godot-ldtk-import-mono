@@ -2,7 +2,7 @@
 
 LDtk importer for Godot 3.4+ (specifically C# 10)
 
-[Newtonsoft.Json](https://www.newtonsoft.com/json) is used for JSON deserialization
+[Newtonsoft.Json](https://www.newtonsoft.com/json) **v11.0.2** is used for JSON deserialization
 
 ## How to install
 
@@ -40,14 +40,13 @@ Plugin will check types of fields and give an error messages. It supports almost
 
 The only unsupported type is `Tile` (because I don't know what type to use for such field `:/`)
 
-From a special `json` config plugin will generate a Godot scene files (see [How to use section](#how-to-use))
- * You can specify a base world and level scenes to include a special nodes
- * Entities are placed as scenes with assigned fields
+From a special `json` config plugin will generate a Godot scene files (see [how to use section](#how-to-use))
+ * You can specify a base world and level scenes to include a special nodes and test them before importing
+ * Entities are placed as scenes with assigned ldtk fields
  * Using `json` in tiles custom data you can place special nodes instead of tiles
  * Level fields are also supported!
  * To set tile collisions edit the auto generated `TileSet` resource
  * Background images and color are converted to `Sprite` and `ColorRect` nodes
- * Add `YSort` tag to Entity layer in LDtk to use `YSort` node
  * The level depth value from LDtk is assigned to ZIndex property
 
 Example of tile custom data for entity:
@@ -81,10 +80,10 @@ Note: you can find all "magic strings" (group names, meta keys and special field
 
 To import projects plugin needs a `.json` config. Create it by pressing `Project -> Tools -> Import LDtk project` in the top menu (you will need to select .ldtk file).
 
-Config will looks like this:
+Created config will look like this:
 ```json5
 {
-  // [!The only required setting!]
+  // [The only required setting]
   // Folder in which the plugin will place
   // the generated tilesets and scenes
   "outputDir": "res://worlds/Overworld/",
@@ -113,34 +112,53 @@ Config will looks like this:
   // plugin will generate a scene with all
   // level scenes at their positions
   "worldScene": {
-    // Use base to add additional nodes or script
+    // Use base to add additional nodes or script.
+    // Note that you must reimport after making a
+    // change in base World/Level scene. See
+    // https://github.com/godotengine/godot-proposals/issues/3907
     "base": "res://scenes/world.tscn",
 
-    // If present, plugin will make (or search in base)
+    // If present plugin will make (or search in base)
     // a seperate node for storing levels
     "levelsParent": "Levels",
 
-    // If true, plugin will place Position2D
+    // If true plugin will place Position2D
     // nodes with level names and their scene
     // paths in EditorDescription property
     "onlyMarkers": false
   },
 
   "levelScene": {
-    // same as worldScene.base
+    // Same as worldScene.base
     "base": "res://scenes/level.tscn",
 
-    // same as worldScene.levelsParent
+    // Same as worldScene.levelsParent.
+    // Plugin will create/find a node for layer
+    // and add generated children to it (entities or TileMaps)
+    // (for example you can prepare a YSort node for entity layer)
     "layersParent": "Layers",
 
-    // If present, plugin will make (or search in base)
+    // If true plugin will delete all (!) children of layer
+    // nodes in base scene. You can use this to test something
+    // in base scene without reimporting a world.
+    "removeBaseLayerChildren": false,
+
+    // If true plugin will set the 'use_parent_material'
+    // to true for all generated TileMaps except for IntGrid.
+    "tileMapUseParentMaterial": false,
+
+    // If present plugin will make (or search in base)
     // a seperate node for background (ColorRect and Sprite).
     // Else background will be placed before all other nodes
     "bgParent": "Background",
 
-    // If true, plugin will not include ColorRect node
+    // If true plugin will not include ColorRect node
     // for solid level background
-    "ignoreBgColor": false
+    "ignoreBgColor": false,
+
+    // If true plugin will set the 'use_parent_material'
+    // to true for background Sprite node
+    "bgSpriteUseParentMaterial": false
   }
 }
 ```

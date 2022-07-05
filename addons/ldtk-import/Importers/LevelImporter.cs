@@ -1,7 +1,6 @@
 ﻿#if TOOLS
 
 using Godot;
-using Picalines.Godot.LDtkImport.Json;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -64,15 +63,51 @@ namespace Picalines.Godot.LDtkImport.Importers
                 }
             }
 
-            foreach (var layer in context.LevelJson.LayerInstances!.Reverse())
+            foreach (var layerJson in context.LevelJson.LayerInstances!.Reverse())
             {
-                var layerNode = layer.Type switch
-                {
-                    LayerType.Entities => EntityLayerImporter.Import(context, layer),
-                    _ => TileMapImporter.Import(context, layer),
-                };
+                var layerNode = layersParent.GetNodeOrNull(layerJson.Identifier);
 
-                layersParent.AddChild(layerNode);
+                bool newChild = false;
+
+                if (layerNode is null)
+                {
+                    layerNode = new Node2D() { Name = layerJson.Identifier };
+                    newChild = true;
+                }
+
+                if (layerNode is Node2D layer2D)
+                {
+                    layer2D.Position = layerJson.PxTotalOffset;
+                    layer2D.Modulate = Colors.White with { a = layerJson.Opacity };
+                }
+
+                if (context.ImportSettings.LevelSceneSettings?.RemoveBaseLayerChildren is true)
+                {
+                    foreach (Node child in layerNode.GetChildren())
+                    {
+                        child.Free();
+                    }
+                }
+
+                switch (layerJson.Type)
+                {
+                    case Json.LayerType.Entities:
+                    {
+                        EntityLayerImporter.Import(context, layerJson, layerNode);
+                    }
+                    break;
+
+                    default:
+                    {
+                        TileMapImporter.Import(context, layerJson, layerNode);
+                    }
+                    break;
+                }
+
+                if (newChild)
+                {
+                    layersParent.AddChild(layerNode);
+                }
 
                 layerNode.Owner = levelNode;
                 foreach (Node child in layerNode.GetChildren())
@@ -131,7 +166,8 @@ namespace Picalines.Godot.LDtkImport.Importers
                     RegionEnabled = true,
                     RegionRect = bgPosition.CropRect,
                     Position = bgPosition.TopLeftPxCoords,
-                    Scale = bgPosition.Scale
+                    Scale = bgPosition.Scale,
+                    UseParentMaterial = context.ImportSettings.LevelSceneSettings?.UseParentMaterialForBackgroundSprite is true,
                 };
 
                 bgParent.AddChild(bgSprite);

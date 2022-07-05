@@ -79,11 +79,20 @@ namespace Picalines.Godot.LDtkImport.Json
         [JsonProperty("layersParent")]
         public string? LayersParentNodeName { get; private set; }
 
+        [JsonProperty("removeBaseLayerChildren")]
+        public bool RemoveBaseLayerChildren { get; private set; } = false;
+
+        [JsonProperty("tileMapUseParentMaterial")]
+        public bool UseParentMaterialForTileMaps { get; private set; } = false;
+
         [JsonProperty("bgParent")]
         public string? BackgroundParentNodeName { get; private set; }
 
         [JsonProperty("ignoreBgColor")]
         public bool IgnoreBackgroundColor { get; private set; } = false;
+
+        [JsonProperty("bgSpriteUseParentMaterial")]
+        public bool UseParentMaterialForBackgroundSprite { get; private set; } = false;
     }
 }
 

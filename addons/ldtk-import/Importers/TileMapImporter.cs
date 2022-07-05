@@ -14,10 +14,8 @@ namespace Picalines.Godot.LDtkImport.Importers
     {
         private const string StackLayerGroupName = "LDtkStackLayer";
 
-        public static Node Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
+        public static void Import(LevelImportContext context, LevelJson.LayerInstance layerJson, Node layerNode)
         {
-            Node2D layerNode;
-
             var tileSet = GetTileSetPath(context, layerJson) is string tileSetPath
                 ? GD.Load<TileSet>(tileSetPath)
                 : null;
@@ -32,52 +30,39 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             var tileStacks = tiles.GroupBy(tile => tile.LayerPxCoords);
 
-            TileMap CreateTileMap() => new()
+            var maxTileStackSize = tileStacks.Select(stack => stack.Count()).Max();
+
+            var layerTileMaps = new List<TileMap>(maxTileStackSize);
+
+            for (int i = 0; i < maxTileStackSize; i++)
             {
-                TileSet = tileSet,
-                CellSize = layerJson.GridSizeV,
-            };
-
-            if (tileStacks.Select(stack => stack.Count()).Max() is > 1 and var maxStackSize)
-            {
-                layerNode = new Node2D();
-
-                var layerTileMaps = new List<TileMap>();
-
-                for (int i = 0; i < maxStackSize; i++)
+                var stackTileMap = new TileMap()
                 {
-                    var stackTileMap = CreateTileMap();
-                    stackTileMap.AddToGroup(StackLayerGroupName, persistent: false);
-                    stackTileMap.Name = $"StackLayer_{i}";
+                    Name = maxTileStackSize == 1 ? "TileMap" : $"TileLayer_{i}",
+                    TileSet = tileSet,
+                    CellSize = layerJson.GridSizeV,
+                    UseParentMaterial = context.ImportSettings.LevelSceneSettings?.UseParentMaterialForTileMaps is true,
+                };
 
-                    layerTileMaps.Add(stackTileMap);
-                    layerNode.AddChild(stackTileMap);
-                }
+                stackTileMap.AddToGroup(StackLayerGroupName, persistent: false);
 
-                var tileLayers = tileStacks
-                    .SelectMany(stack => stack.Select((tile, index) => new { tile, layer = index }))
-                    .GroupBy(tile => tile.layer, elementSelector: tile => tile.tile);
-
-                foreach (var tileLayer in tileLayers)
-                {
-                    SetTilesOrEntities(context, layerTileMaps[tileLayer.Key], tileLayer, tileEntities);
-                }
-            }
-            else
-            {
-                SetTilesOrEntities(context, (TileMap)(layerNode = CreateTileMap()), tiles, tileEntities);
+                layerTileMaps.Add(stackTileMap);
+                layerNode.AddChild(stackTileMap);
             }
 
-            layerNode.Name = layerJson.Identifier;
-            layerNode.Position = layerJson.PxTotalOffset;
-            layerNode.Modulate = Colors.White with { a = layerJson.Opacity };
+            var tileLayers = tileStacks
+                .SelectMany(stack => stack.Select((tile, index) => new { tile, layer = index }))
+                .GroupBy(tile => tile.layer, elementSelector: tile => tile.tile);
+
+            foreach (var tileLayer in tileLayers)
+            {
+                SetTilesOrEntities(context, layerTileMaps[tileLayer.Key], tileLayer, tileEntities);
+            }
 
             if (layerJson.Type is LayerType.IntGrid)
             {
                 AddIntGrid(layerJson, layerNode);
             }
-
-            return layerNode;
         }
 
         private static void SetTilesOrEntities(
@@ -163,7 +148,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             return tileEntity;
         }
 
-        private static void AddIntGrid(LevelJson.LayerInstance layer, Node2D layerNode)
+        private static void AddIntGrid(LevelJson.LayerInstance layer, Node layerNode)
         {
             var intMap = new TileMap()
             {

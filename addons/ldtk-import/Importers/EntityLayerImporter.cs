@@ -11,33 +11,7 @@ namespace Picalines.Godot.LDtkImport.Importers
     {
         private static PackedScene? _ReferenceAssignerScene = null;
 
-        public static Node Import(LevelImportContext context, LevelJson.LayerInstance layerJson)
-        {
-            var layerNode = CreateEntityLayer(context, layerJson);
-
-            AddEntities(context, layerJson, layerNode);
-
-            return layerNode;
-        }
-
-        public static Node? TryInstantiate(LevelImportContext context, string entityName)
-        {
-            var possiblePaths = context.ImportSettings.GetPossibleEntityPaths(entityName);
-
-            var scenePath = possiblePaths.FirstOrDefault(path => ResourceLoader.Exists(path, nameof(PackedScene)));
-
-            if (scenePath is null)
-            {
-                return null;
-            }
-
-            var entityPackedScene = GD.Load<PackedScene>(scenePath);
-            var entityNode = entityPackedScene.Instance<Node>();
-
-            return entityNode;
-        }
-
-        private static void AddEntities(LevelImportContext context, LevelJson.LayerInstance layerJson, Node2D layerNode)
+        public static void Import(LevelImportContext context, LevelJson.LayerInstance layerJson, Node layerNode)
         {
             var referenceAssigner = CreateReferenceAssigner();
 
@@ -82,16 +56,21 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
         }
 
-        private static Node2D CreateEntityLayer(LevelImportContext context, LevelJson.LayerInstance layerJson)
+        public static Node? TryInstantiate(LevelImportContext context, string entityName)
         {
-            var layerDefinition = context.WorldJson.Definitions.Layers
-                .First(layer => layer.Uid == layerJson.LayerDefUid);
+            var possiblePaths = context.ImportSettings.GetPossibleEntityPaths(entityName);
 
-            var layerNode = layerDefinition.RequiredEntityTags!.Contains("YSort")
-                ? new YSort() : new Node2D();
+            var scenePath = possiblePaths.FirstOrDefault(path => ResourceLoader.Exists(path, nameof(PackedScene)));
 
-            layerNode.Name = layerJson.Identifier;
-            return layerNode;
+            if (scenePath is null)
+            {
+                return null;
+            }
+
+            var entityPackedScene = GD.Load<PackedScene>(scenePath);
+            var entityNode = entityPackedScene.Instance<Node>();
+
+            return entityNode;
         }
 
         private static LDtkEntityReferenceAssigner CreateReferenceAssigner()

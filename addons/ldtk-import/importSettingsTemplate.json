@@ -28,33 +28,52 @@
   // plugin will generate a scene with all
   // level scenes at their positions
   "worldScene": {
-    // Use base to add additional nodes or script
+    // Use base to add additional nodes or script.
+    // Note that you must reimport after making a
+    // change in base World/Level scene. See
+    // https://github.com/godotengine/godot-proposals/issues/3907
     "base": "res://scenes/world.tscn",
 
-    // If present, plugin will make (or search in base)
+    // If present plugin will make (or search in base)
     // a seperate node for storing levels
     "levelsParent": "Levels",
 
-    // If true, plugin will place Position2D
+    // If true plugin will place Position2D
     // nodes with level names and their scene
     // paths in EditorDescription property
     "onlyMarkers": false
   },
 
   "levelScene": {
-    // same as worldScene.base
+    // Same as worldScene.base
     "base": "res://scenes/level.tscn",
 
-    // same as worldScene.levelsParent
+    // Same as worldScene.levelsParent.
+    // Plugin will create/find a node for layer
+    // and add generated children to it (entities or TileMaps)
+    // (for example you can prepare a YSort node for entity layer)
     "layersParent": "Layers",
 
-    // If present, plugin will make (or search in base)
+    // If true plugin will delete all (!) children of layer
+    // nodes in base scene. You can use this to test something
+    // in base scene without reimporting a world.
+    "removeBaseLayerChildren": false,
+
+    // If true plugin will set the 'use_parent_material'
+    // to true for all generated TileMaps except for IntGrid.
+    "tileMapUseParentMaterial": false,
+
+    // If present plugin will make (or search in base)
     // a seperate node for background (ColorRect and Sprite).
     // Else background will be placed before all other nodes
     "bgParent": "Background",
 
-    // If true, plugin will not include ColorRect node
+    // If true plugin will not include ColorRect node
     // for solid level background
-    "ignoreBgColor": false
+    "ignoreBgColor": false,
+
+    // If true plugin will set the 'use_parent_material'
+    // to true for background Sprite node
+    "bgSpriteUseParentMaterial": false
   }
 }
