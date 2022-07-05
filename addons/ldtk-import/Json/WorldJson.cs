@@ -115,9 +115,6 @@ namespace Picalines.Godot.LDtkImport.Json
 
             public Vector2 GridSizeV { get; private set; }
 
-            [JsonProperty("displayOpacity")]
-            public int DisplayOpacity { get; private set; }
-
             [JsonProperty("pxOffsetX")]
             public int PxOffsetX { get; private set; }
 
