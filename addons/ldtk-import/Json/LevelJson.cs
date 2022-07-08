@@ -240,6 +240,9 @@ namespace Picalines.Godot.LDtkImport.Json
             [JsonProperty("__opacity")]
             public float Opacity { get; private set; }
 
+            [JsonProperty("visible")]
+            public bool Visible { get; private set; }
+
             [JsonProperty("__pxTotalOffsetX")]
             public int PxTotalOffsetX { get; private set; }
 

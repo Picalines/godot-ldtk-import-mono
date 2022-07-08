@@ -75,10 +75,15 @@ namespace Picalines.Godot.LDtkImport.Importers
                     newChild = true;
                 }
 
+                if (layerNode is CanvasItem canvasItem)
+                {
+                    canvasItem.Visible = layerJson.Visible;
+                    canvasItem.Modulate = Colors.White with { a = layerJson.Opacity };
+                }
+
                 if (layerNode is Node2D layer2D)
                 {
                     layer2D.Position = layerJson.PxTotalOffset;
-                    layer2D.Modulate = Colors.White with { a = layerJson.Opacity };
                 }
 
                 if (context.ImportSettings.LevelSceneSettings?.RemoveBaseLayerChildren is true)
