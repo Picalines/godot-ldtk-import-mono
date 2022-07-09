@@ -30,7 +30,10 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             var tileStacks = tiles.GroupBy(tile => tile.LayerPxCoords);
 
-            var maxTileStackSize = tileStacks.Select(stack => stack.Count()).Max();
+            var maxTileStackSize = tileStacks
+                .Select(stack => stack.Count())
+                .DefaultIfEmpty(0)
+                .Max();
 
             var layerTileMaps = new List<TileMap>(maxTileStackSize);
 
