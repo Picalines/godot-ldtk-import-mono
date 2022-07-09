@@ -282,7 +282,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 return new(infoAttribute.LDtkFieldName, member);
             }
 
-            _TargetFields[type] = members.Select(CreateFieldInfo).ToList();
+            _TargetFields[type] = members.Select(CreateFieldInfo).ToArray();
         }
 
         private static bool IsTargetMember(MemberInfo member)
