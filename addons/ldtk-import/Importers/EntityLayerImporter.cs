@@ -26,6 +26,8 @@ namespace Picalines.Godot.LDtkImport.Importers
                 entityNode.SetMeta(LDtkConstants.MetaKeys.InstanceId, entityInstance.Id);
                 entityNode.AddToGroup(LDtkConstants.GroupNames.Entities, persistent: true);
 
+                layerNode.AddChild(entityNode);
+
                 if (instantiated)
                 {
                     var entityFields = entityInstance.FieldInstances
@@ -45,8 +47,6 @@ namespace Picalines.Godot.LDtkImport.Importers
                     var pivotOffset = (Vector2.One / 2 - entityInstance.Pivot) * entityInstance.Size;
                     entity2D.Position = entityInstance.PxCoords + pivotOffset;
                 }
-
-                layerNode.AddChild(entityNode);
             }
 
             if (referenceAssigner.IsUsed)
