@@ -1,4 +1,6 @@
-﻿using Picalines.Godot.LDtkImport.Json;
+﻿#if TOOLS
+
+using Picalines.Godot.LDtkImport.Json;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
@@ -8,3 +10,5 @@ namespace Picalines.Godot.LDtkImport.Importers
         WorldJson WorldJson,
         LevelJson LevelJson);
 }
+
+#endif
