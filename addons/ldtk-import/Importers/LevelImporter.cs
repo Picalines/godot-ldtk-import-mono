@@ -10,19 +10,7 @@ namespace Picalines.Godot.LDtkImport.Importers
     {
         public static void Import(LevelImportContext context)
         {
-            Node levelNode;
-
-            if (context.ImportSettings.LevelSceneSettings?.BaseScenePath is string baseScenePath)
-            {
-                // NOTE: actual scene inheritance through code is impossible in Godot.
-                // https://github.com/godotengine/godot-proposals/issues/3907
-                var basePackedScene = GD.Load<PackedScene>(baseScenePath);
-                levelNode = basePackedScene.Instance<Node>();
-            }
-            else
-            {
-                levelNode = new Node2D();
-            }
+            Node levelNode = BaseSceneImporter.ImportOrCreate<Node2D>(context.ImportSettings.LevelSceneSettings);
 
             levelNode.Name = context.LevelJson.Identifier;
             levelNode.AddToGroup(LDtkConstants.GroupNames.Levels, persistent: true);
@@ -33,7 +21,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 levelNode2D.ZIndex = context.LevelJson.WorldDepth;
             }
 
-            AddBackground(context, levelNode);
+            BackgroundImporter.Import(context, levelNode);
 
             AddLayers(context, levelNode);
 
@@ -86,14 +74,6 @@ namespace Picalines.Godot.LDtkImport.Importers
                     layer2D.Position = layerJson.PxTotalOffset;
                 }
 
-                if (context.ImportSettings.LevelSceneSettings?.RemoveBaseLayerChildren is true)
-                {
-                    foreach (Node child in layerNode.GetChildren())
-                    {
-                        child.Free();
-                    }
-                }
-
                 switch (layerJson.Type)
                 {
                     case Json.LayerType.Entities:
@@ -119,65 +99,6 @@ namespace Picalines.Godot.LDtkImport.Importers
                 {
                     child.Owner = levelNode;
                 }
-            }
-        }
-
-        private static void AddBackground(LevelImportContext context, Node levelNode)
-        {
-            Node bgParent = levelNode;
-            bool seperateParent = false;
-
-            if (context.ImportSettings.LevelSceneSettings?.BackgroundParentNodeName is { } backgroundParentNodeName)
-            {
-                seperateParent = true;
-
-                bgParent = levelNode.GetNodeOrNull(backgroundParentNodeName)
-                    ?? new Node2D() { Name = backgroundParentNodeName };
-
-                if (bgParent.Owner is null)
-                {
-                    levelNode.AddChild(bgParent);
-                    levelNode.MoveChild(bgParent, 0);
-                    bgParent.Owner = levelNode;
-                }
-            }
-
-            bool hasBgColor = false;
-
-            if (context.ImportSettings.LevelSceneSettings?.IgnoreBackgroundColor is false)
-            {
-                hasBgColor = true;
-                var colorRect = new ColorRect()
-                {
-                    Name = $"{(seperateParent ? "Background" : "")}{nameof(ColorRect)}",
-                    Color = context.LevelJson.BgColor,
-                    RectSize = context.LevelJson.PxSize
-                };
-
-                bgParent.AddChild(colorRect);
-                bgParent.MoveChild(colorRect, 0);
-                colorRect.Owner = levelNode;
-            }
-
-            if (context.LevelJson is { BgRelPath: { } bgRelPath, BgPosition: { } bgPosition })
-            {
-                var bgTexture = GD.Load<Texture>($"{context.LDtkFilePath.GetBaseDir()}/{bgRelPath}");
-
-                var bgSprite = new Sprite()
-                {
-                    Name = $"{(seperateParent ? "Background" : "")}{nameof(Sprite)}",
-                    Texture = bgTexture,
-                    Centered = false,
-                    RegionEnabled = true,
-                    RegionRect = bgPosition.CropRect,
-                    Position = bgPosition.TopLeftPxCoords,
-                    Scale = bgPosition.Scale,
-                    UseParentMaterial = context.ImportSettings.LevelSceneSettings?.UseParentMaterialForBackgroundSprite is true,
-                };
-
-                bgParent.AddChild(bgSprite);
-                bgParent.MoveChild(bgSprite, hasBgColor ? 1 : 0);
-                bgSprite.Owner = levelNode;
             }
         }
 

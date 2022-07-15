@@ -19,7 +19,7 @@ namespace Picalines.Godot.LDtkImport
 
             public const string InstanceId = "LDtkInstanceId";
 
-            public const string LevelScenePath = "LDtkLevelScenePath";
+            public const string BaseScenePath = "LDtkBaseScenePath";
         }
 
         public const string SpecialFieldPrefix = "#";

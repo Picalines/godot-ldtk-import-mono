@@ -36,6 +36,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             ImportTileSets(ldtkFilePath, settings.OutputDirectory, worldJson);
 
+            BaseSceneImporter.Initialize();
             LDtkFieldAssigner.Initialize();
 
             ImportLevels(ldtkFilePath, settings, worldJson);

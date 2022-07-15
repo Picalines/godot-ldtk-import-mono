@@ -37,21 +37,26 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             var layerTileMaps = new List<TileMap>(maxTileStackSize);
 
+            var baseTileMap = BaseSceneImporter.FindOrCreateBaseNode<TileMap>(layerNode);
+
+            baseTileMap.Clear();
+
+            baseTileMap.TileSet = tileSet;
+            baseTileMap.CellSize = layerJson.GridSizeV;
+
             for (int i = 0; i < maxTileStackSize; i++)
             {
-                var stackTileMap = new TileMap()
-                {
-                    Name = maxTileStackSize == 1 ? "TileMap" : $"TileLayer_{i}",
-                    TileSet = tileSet,
-                    CellSize = layerJson.GridSizeV,
-                    UseParentMaterial = context.ImportSettings.LevelSceneSettings?.UseParentMaterialForTileMaps is true,
-                };
+                var stackTileMap = (baseTileMap.Duplicate() as TileMap)!;
 
+                stackTileMap.Name = maxTileStackSize == 1 ? "TileMap" : $"TileLayer_{i}";
                 stackTileMap.AddToGroup(StackLayerGroupName, persistent: false);
 
                 layerTileMaps.Add(stackTileMap);
                 layerNode.AddChild(stackTileMap);
             }
+
+            baseTileMap.Free();
+            baseTileMap = null;
 
             var tileLayers = tileStacks
                 .SelectMany(stack => stack.Select((tile, index) => new { tile, layer = index }))

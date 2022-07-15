@@ -9,8 +9,9 @@ namespace Picalines.Godot.LDtkImport.Importers
     {
         public static void Import(string ldtkFilePath, LDtkImportSettings settings, WorldJson worldJson)
         {
-            var worldNode = CreateWorldNode(ldtkFilePath, settings);
+            var worldNode = BaseSceneImporter.ImportOrCreate<Node2D>(settings.WorldSceneSettings);
 
+            worldNode.Name = ldtkFilePath.GetFile().BaseName();
             worldNode.AddToGroup(LDtkConstants.GroupNames.Worlds, persistent: true);
             worldNode.SetMeta(LDtkConstants.MetaKeys.ProjectFilePath, ldtkFilePath);
             worldNode.SetMeta(LDtkConstants.MetaKeys.ImportSettingsFilePath, settings.FilePath);
@@ -44,8 +45,6 @@ namespace Picalines.Godot.LDtkImport.Importers
                     levelScene = levelPackedScene.Instance<Node>();
                 }
 
-                levelScene.SetMeta(LDtkConstants.MetaKeys.LevelScenePath, levelScenePath);
-
                 levelsParent.AddChild(levelScene);
 
                 if (levelScene is Node2D level2D)
@@ -75,24 +74,6 @@ namespace Picalines.Godot.LDtkImport.Importers
             levelsParent.Owner = worldNode;
 
             return levelsParent;
-        }
-
-        private static Node CreateWorldNode(string ldtkFilePath, LDtkImportSettings settings)
-        {
-            Node worldNode;
-
-            if (settings.WorldSceneSettings!.BaseScenePath is string baseScenePath)
-            {
-                var basePackedScene = GD.Load<PackedScene>(baseScenePath);
-                worldNode = basePackedScene.Instance<Node>();
-            }
-            else
-            {
-                worldNode = new Node2D();
-            }
-
-            worldNode.Name = ldtkFilePath.GetFile().BaseName();
-            return worldNode;
         }
 
         private static void SaveScene(string ldtkFilePath, LDtkImportSettings settings, Node worldNode)

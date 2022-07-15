@@ -59,6 +59,9 @@ namespace Picalines.Godot.LDtkImport.Json
     {
         [JsonProperty("base")]
         public string? BaseScenePath { get; private set; }
+
+        [JsonProperty("baseIgnoreMask")]
+        public string? BaseIgnoreMask { get; private set; }
     }
 
     internal sealed class WorldSceneImportSettings : SceneImportSettings
@@ -76,23 +79,17 @@ namespace Picalines.Godot.LDtkImport.Json
     {
         private LevelSceneImportSettings() { }
 
+        [JsonProperty("baseNodeMask")]
+        public string? BaseNodeMask { get; private set; }
+
         [JsonProperty("layersParent")]
         public string? LayersParentNodeName { get; private set; }
-
-        [JsonProperty("removeBaseLayerChildren")]
-        public bool RemoveBaseLayerChildren { get; private set; } = false;
-
-        [JsonProperty("tileMapUseParentMaterial")]
-        public bool UseParentMaterialForTileMaps { get; private set; } = false;
 
         [JsonProperty("bgParent")]
         public string? BackgroundParentNodeName { get; private set; }
 
         [JsonProperty("ignoreBgColor")]
         public bool IgnoreBackgroundColor { get; private set; } = false;
-
-        [JsonProperty("bgSpriteUseParentMaterial")]
-        public bool UseParentMaterialForBackgroundSprite { get; private set; } = false;
     }
 }
 

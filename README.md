@@ -80,7 +80,7 @@ Note: you can find all "magic strings" (group names, meta keys and special field
 
 To import projects plugin needs a `.json` config. Create it by pressing `Project -> Tools -> Import LDtk project` in the top menu (you will need to select .ldtk file).
 
-Created config will look like this:
+Here's what the config template looks like:
 ```json5
 {
   // [The only required setting]
@@ -118,6 +118,12 @@ Created config will look like this:
     // https://github.com/godotengine/godot-proposals/issues/3907
     "base": "res://scenes/world.tscn",
 
+    // If base scene is used plugin will remove all
+    // children whose names matches a mask as in
+    // String.Match (case sensitive!).
+    // Use this to test something before importing
+    "baseIgnoreMask": "_*",
+
     // If present plugin will make (or search in base)
     // a seperate node for storing levels
     "levelsParent": "Levels",
@@ -132,20 +138,25 @@ Created config will look like this:
     // Same as worldScene.base
     "base": "res://scenes/level.tscn",
 
+    // Same as worldScene.baseIgnoreMask.
+    // Has a higher priority than baseNodeMask!
+    "baseIgnoreMask": "_*",
+
+    // If base scene is used plugin will search for
+    // children whose name matches baseNodeMask as in
+    // String.Match (case sensitive!). Instead of creating
+    // a new nodes plugin will use these children as a template.
+    // Use this for custom materials, collision layers and etc.
+    // Here's the list of nodes that the plugin will look for:
+    // - TileMap in tile layer (clears existing tiles)
+    // - Sprite and ColorRect for background
+    "baseNodeMask": "Base*",
+
     // Same as worldScene.levelsParent.
     // Plugin will create/find a node for layer
     // and add generated children to it (entities or TileMaps)
     // (for example you can prepare a YSort node for entity layer)
     "layersParent": "Layers",
-
-    // If true plugin will delete all (!) children of layer
-    // nodes in base scene. You can use this to test something
-    // in base scene without reimporting a world.
-    "removeBaseLayerChildren": false,
-
-    // If true plugin will set the 'use_parent_material'
-    // to true for all generated TileMaps except for IntGrid.
-    "tileMapUseParentMaterial": false,
 
     // If present plugin will make (or search in base)
     // a seperate node for background (ColorRect and Sprite).
@@ -154,11 +165,7 @@ Created config will look like this:
 
     // If true plugin will not include ColorRect node
     // for solid level background
-    "ignoreBgColor": false,
-
-    // If true plugin will set the 'use_parent_material'
-    // to true for background Sprite node
-    "bgSpriteUseParentMaterial": false
+    "ignoreBgColor": false
   }
 }
 ```
