@@ -33,7 +33,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             {
                 var bgTexture = GD.Load<Texture>($"{context.LDtkFilePath.GetBaseDir()}/{bgRelPath}");
 
-                bgSprite.Name = $"{(seperateParent ? "Background" : "")}{nameof(Sprite)}";
+                bgSprite.Name = $"{(seperateParent ? "" : "Background")}{nameof(Sprite)}";
                 bgSprite.Texture = bgTexture;
                 bgSprite.Centered = false;
                 bgSprite.RegionEnabled = true;
@@ -56,7 +56,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             if (context.ImportSettings.LevelSceneSettings?.IgnoreBackgroundColor is false or null)
             {
-                bgColorRect.Name = $"{(seperateParent ? "Background" : "")}{nameof(ColorRect)}";
+                bgColorRect.Name = $"{(seperateParent ? "" : "Background")}{nameof(ColorRect)}";
                 bgColorRect.Color = context.LevelJson.BgColor;
                 bgColorRect.RectSize = context.LevelJson.PxSize;
 
