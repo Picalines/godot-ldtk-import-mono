@@ -20,8 +20,6 @@ namespace Picalines.Godot.LDtkImport.Importers
                 ? GD.Load<TileSet>(tileSetPath)
                 : null;
 
-            var tileEntities = GetTileEntities(context, layerJson);
-
             var tiles = layerJson.Type switch
             {
                 LayerType.Tiles => layerJson.GridTiles,
@@ -62,6 +60,8 @@ namespace Picalines.Godot.LDtkImport.Importers
                 .SelectMany(stack => stack.Select((tile, index) => new { tile, layer = index }))
                 .GroupBy(tile => tile.layer, elementSelector: tile => tile.tile);
 
+            var tileEntities = GetTileEntities(context, layerJson);
+
             foreach (var tileLayer in tileLayers)
             {
                 SetTilesOrEntities(context, layerTileMaps[tileLayer.Key], tileLayer, tileEntities);
@@ -77,11 +77,11 @@ namespace Picalines.Godot.LDtkImport.Importers
             LevelImportContext context,
             TileMap tileMap,
             IEnumerable<LevelJson.TileInstance> tiles,
-            TileEntityDictionary tileEntities)
+            TileEntityDictionary? tileEntities)
         {
             foreach (var tile in tiles)
             {
-                if (tileEntities.TryGetValue(tile.Id, out var tileCustomData))
+                if (tileEntities?.TryGetValue(tile.Id, out var tileCustomData) is true)
                 {
                     var entity = TryCreateTileEntity(context, tileCustomData, tile, tileMap.CellSize, tileMap.TileSet);
 
@@ -177,8 +177,13 @@ namespace Picalines.Godot.LDtkImport.Importers
             layerNode.AddChild(intMap);
         }
 
-        private static TileEntityDictionary GetTileEntities(LevelImportContext context, LevelJson.LayerInstance layerJson)
+        private static TileEntityDictionary? GetTileEntities(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
+            if (layerJson.TileSetDefUid is null)
+            {
+                return null;
+            }
+
             var tileSetDefinition = context.WorldJson.Definitions.TileSets
                 .First(tileSetDef => tileSetDef.Uid == layerJson.TileSetDefUid);
 
@@ -190,8 +195,13 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         private static string? GetTileSetPath(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
+            if (layerJson.TileSetDefUid is null)
+            {
+                return null;
+            }
+
             var tileSetJson = context.WorldJson.Definitions.TileSets
-                .First(t => t.Uid == (layerJson.TileSetDefUid ?? 0));
+                .First(t => t.Uid == layerJson.TileSetDefUid);
 
             return tileSetJson.EmbedAtlas is null
                 ? $"{context.ImportSettings.OutputDirectory}/tilesets/{tileSetJson.Identifier}.tres"
