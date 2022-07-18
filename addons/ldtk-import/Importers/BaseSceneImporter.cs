@@ -57,14 +57,14 @@ namespace Picalines.Godot.LDtkImport.Importers
         {
             TNode? baseNode = null;
 
-            var baseScenePath = parent.Owner.HasMeta(LDtkConstants.MetaKeys.BaseScenePath)
+            var baseScenePath = parent.Owner?.HasMeta(LDtkConstants.MetaKeys.BaseScenePath) is true
                 ? parent.Owner.GetMeta(LDtkConstants.MetaKeys.BaseScenePath) as string
                 : null;
 
             if (baseScenePath is not null && _BaseSceneInfoCache.TryGetValue(baseScenePath, out var baseSceneInfo))
             {
                 baseNode = baseSceneInfo.BaseNodePaths
-                    .Select(nodePath => parent.Owner.GetNode(nodePath))
+                    .Select(nodePath => parent.Owner!.GetNode(nodePath))
                     .OfType<TNode>()
                     .FirstOrDefault(node => node.GetParent() == parent);
             }
