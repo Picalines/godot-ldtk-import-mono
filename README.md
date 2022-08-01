@@ -23,7 +23,7 @@ public class Player : Node
                                   // "hp" is a field name from LDtk.
     [Export, LDtkField("hp")]     // Export is needed so that the field
     private readonly int _health; // is serialized into a scene file.
-                                  // Auto properties are supported as well!
+                                  // Properties are supported as well!
 
     public override void _Ready()
     {

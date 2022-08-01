@@ -292,18 +292,15 @@ namespace Picalines.Godot.LDtkImport.Importers
                 return false;
             }
 
-            if (member is PropertyInfo property)
-            {
-                if (!(property is { CanRead: true, CanWrite: true } && property.GetGetMethod(nonPublic: true).IsDefined(typeof(CompilerGeneratedAttribute), inherit: true)))
-                {
-                    GD.PushError(LDtkImportMessage.FieldAttributeNonAutoPropertyError(member));
-                    return false;
-                }
-            }
-
             if (!member.IsDefined(typeof(ExportAttribute)))
             {
                 GD.PushError(LDtkImportMessage.MissingExportAttributeError(member));
+                return false;
+            }
+
+            if (member is PropertyInfo property && property is not { CanRead: true, CanWrite: true })
+            {
+                // Godot will push "Cannot export a property without a getter/setter" error
                 return false;
             }
 

@@ -34,9 +34,6 @@ namespace Picalines.Godot.LDtkImport
         public static string EntityFieldTypeError(Type targetType, string memberName, Type? fieldValueType) =>
             $"LDtk field type error: C# script expected value of type {targetType} for member {memberName}, but received {fieldValueType?.ToString() ?? "null"}";
 
-        public static string FieldAttributeNonAutoPropertyError(MemberInfo member) =>
-            $"{nameof(LDtkFieldAttribute)} can be used only on auto properties or fields ({member.DeclaringType}.{member.Name})";
-
         public static string MissingExportAttributeError(MemberInfo member) =>
             $"{nameof(ExportAttribute)} is required when {nameof(LDtkFieldAttribute)} is used ({member.DeclaringType}.{member.Name})";
     }
