@@ -48,7 +48,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             ScanAssemblyForTargetFields();
         }
 
-        public static void Assign(Node node, IReadOnlyDictionary<string, object> values, Context context)
+        public static void Assign(Node node, IReadOnlyDictionary<string, object?> values, Context context)
         {
             var nodeScriptType = GetNodeScriptType(node);
 

@@ -143,7 +143,7 @@ namespace Picalines.Godot.LDtkImport.Json
             public string Identifier { get; private set; }
 
             [JsonProperty("__value")]
-            public object Value { get; private set; }
+            public object? Value { get; private set; }
 
             [JsonProperty("__type")]
             public string Type { get; private set; }

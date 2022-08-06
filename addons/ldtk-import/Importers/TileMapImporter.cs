@@ -6,8 +6,6 @@ using Picalines.Godot.LDtkImport.Utils;
 using System.Collections.Generic;
 using System.Linq;
 
-using TileEntityDictionary = System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<string, object>>;
-
 namespace Picalines.Godot.LDtkImport.Importers
 {
     internal static class TileMapImporter
@@ -77,27 +75,20 @@ namespace Picalines.Godot.LDtkImport.Importers
             LevelImportContext context,
             TileMap tileMap,
             IEnumerable<LevelJson.TileInstance> tiles,
-            TileEntityDictionary? tileEntities)
+            Dictionary<int, TileEntityCustomData>? tileEntities)
         {
+            Node entityParent = tileMap.IsInGroup(StackLayerGroupName) ? tileMap.GetParent() : tileMap;
+
             foreach (var tile in tiles)
             {
                 if (tileEntities?.TryGetValue(tile.Id, out var tileCustomData) is true)
                 {
-                    var entity = TryCreateTileEntity(context, tileCustomData, tile, tileMap.CellSize, tileMap.TileSet);
+                    var entity = TryCreateTileEntity(context, tileCustomData, tileMap, tile);
 
-                    if (entity is null)
+                    if (entity is not null)
                     {
-                        continue;
+                        entityParent.AddChild(entity);
                     }
-
-                    Node entityParent = tileMap;
-
-                    if (tileMap.IsInGroup(StackLayerGroupName))
-                    {
-                        entityParent = tileMap.GetParent();
-                    }
-
-                    entityParent.AddChild(entity);
                 }
                 else
                 {
@@ -109,12 +100,11 @@ namespace Picalines.Godot.LDtkImport.Importers
 
         private static Node? TryCreateTileEntity(
             LevelImportContext context,
-            Dictionary<string, object> tileCustomData,
-            LevelJson.TileInstance tile,
-            Vector2 cellSize,
-            TileSet tileSet)
+            TileEntityCustomData tileEntityData,
+            TileMap tileMap,
+            LevelJson.TileInstance tile)
         {
-            var tileEntity = EntityLayerImporter.TryInstantiate(context, (string)tileCustomData[LDtkConstants.SpecialFieldNames.TileEntityName]);
+            var tileEntity = EntityLayerImporter.TryInstantiateEntity(context, tileEntityData.EntityName);
 
             if (tileEntity is null)
             {
@@ -123,7 +113,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             if (tileEntity is Node2D entity2D)
             {
-                entity2D.Position = tile.LayerPxCoords + cellSize / 2;
+                entity2D.Position = tile.LayerPxCoords + tileMap.CellSize / 2;
 
                 entity2D.Scale = new Vector2()
                 {
@@ -132,26 +122,24 @@ namespace Picalines.Godot.LDtkImport.Importers
                 };
             }
 
-            var entityFields = tileCustomData
-                .Where(pair => pair.Key != LDtkConstants.SpecialFieldNames.TileEntityName)
-                .Append(new(LDtkConstants.SpecialFieldNames.TileId, tile.Id))
-                .Append(new(LDtkConstants.SpecialFieldNames.TileSource, tile.TileSetPxCoords))
-                .Append(new(LDtkConstants.SpecialFieldNames.Size, cellSize))
-                .ToDictionary(pair => pair.Key, pair => pair.Value);
+            var entityFields = tileEntityData.EntityFields.ToDictionary(pair => pair.Key, pair => pair.Value);
+            entityFields[LDtkConstants.SpecialFieldNames.TileId] = tile.Id;
+            entityFields[LDtkConstants.SpecialFieldNames.TileSource] = tile.TileSetPxCoords;
+            entityFields[LDtkConstants.SpecialFieldNames.Size] = tileMap.CellSize;
 
-            if (entityFields.TryGetValue(LDtkConstants.SpecialFieldNames.KeepTileSprite, out var keepTileSprite) && keepTileSprite is true)
+            if (tileEntityData.KeepTileSprite is true)
             {
                 var firstSprite = GetFirstChildOfType<Sprite>(tileEntity);
 
                 if (firstSprite is not null)
                 {
-                    firstSprite.Texture = tileSet.TileGetTexture(0);
+                    firstSprite.Texture = tileMap.TileSet.TileGetTexture(0);
                     firstSprite.RegionEnabled = true;
-                    firstSprite.RegionRect = new() { Position = tile.TileSetPxCoords, Size = cellSize };
+                    firstSprite.RegionRect = new() { Position = tile.TileSetPxCoords, Size = tileMap.CellSize };
                 }
             }
 
-            LDtkFieldAssigner.Assign(tileEntity, entityFields, new() { GridSize = cellSize });
+            LDtkFieldAssigner.Assign(tileEntity, entityFields, new() { GridSize = tileMap.CellSize });
 
             return tileEntity;
         }
@@ -177,7 +165,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             layerNode.AddChild(intMap);
         }
 
-        private static TileEntityDictionary? GetTileEntities(LevelImportContext context, LevelJson.LayerInstance layerJson)
+        private static Dictionary<int, TileEntityCustomData>? GetTileEntities(LevelImportContext context, LevelJson.LayerInstance layerJson)
         {
             if (layerJson.TileSetDefUid is null)
             {
@@ -188,8 +176,8 @@ namespace Picalines.Godot.LDtkImport.Importers
                 .First(tileSetDef => tileSetDef.Uid == layerJson.TileSetDefUid);
 
             return tileSetDefinition.CustomData
-                .Select(customData => new { customData.TileId, Json = customData.AsJson<Dictionary<string, object>>() })
-                .Where(data => data.Json?.ContainsKey(LDtkConstants.SpecialFieldNames.TileEntityName) is true)
+                .Select(customData => new { customData.TileId, Json = customData.AsEntityData() })
+                .Where(data => data.Json is not null)
                 .ToDictionary(data => data.TileId, data => data.Json!);
         }
 

@@ -2,7 +2,6 @@
 
 using Godot;
 using Picalines.Godot.LDtkImport.Json;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Picalines.Godot.LDtkImport.Importers
@@ -17,7 +16,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             foreach (var entityInstance in layerJson.EntityInstances)
             {
-                var entityNode = TryInstantiate(context, entityInstance.Identifier);
+                var entityNode = TryInstantiateEntity(context, entityInstance.Identifier);
 
                 bool instantiated = entityNode is not null;
 
@@ -30,10 +29,8 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 if (instantiated)
                 {
-                    var entityFields = entityInstance.FieldInstances
-                        .Select(field => new KeyValuePair<string, object>(field.Identifier, field.Value))
-                        .Append(new(LDtkConstants.SpecialFieldNames.Size, entityInstance.Size))
-                        .ToDictionary(pair => pair.Key, pair => pair.Value);
+                    var entityFields = entityInstance.FieldInstances.ToDictionary(field => field.Identifier, field => field.Value);
+                    entityFields[LDtkConstants.SpecialFieldNames.Size] = entityInstance.Size;
 
                     LDtkFieldAssigner.Assign(entityNode, entityFields, new()
                     {
@@ -56,7 +53,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
         }
 
-        public static Node? TryInstantiate(LevelImportContext context, string entityName)
+        public static Node? TryInstantiateEntity(LevelImportContext context, string entityName)
         {
             var possiblePaths = context.ImportSettings.GetPossibleEntityPaths(entityName);
 

@@ -22,7 +22,7 @@ namespace Picalines.Godot.LDtkImport.Json
 
                 return JsonConvert.DeserializeObject<T>(file.GetAsText());
             }
-            catch (JsonSerializationException exception)
+            catch (JsonException exception)
             {
                 throw new LDtkImportException(LDtkImportMessage.FailedToParseJsonFile(path, exception.Message));
             }

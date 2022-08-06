@@ -1,7 +1,6 @@
 ﻿#if TOOLS
 
 using Godot;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Picalines.Godot.LDtkImport.Importers
@@ -25,10 +24,8 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             AddLayers(context, levelNode);
 
-            var levelFields = context.LevelJson.FieldInstances
-                .Select(field => new KeyValuePair<string, object>(field.Identifier, field.Value))
-                .Append(new(LDtkConstants.SpecialFieldNames.Size, context.LevelJson.PxSize))
-                .ToDictionary(pair => pair.Key, pair => pair.Value);
+            var levelFields = context.LevelJson.FieldInstances.ToDictionary(field => field.Identifier, field => field.Value);
+            levelFields[LDtkConstants.SpecialFieldNames.Size] = context.LevelJson.PxSize;
 
             LDtkFieldAssigner.Assign(levelNode, levelFields, new());
 
