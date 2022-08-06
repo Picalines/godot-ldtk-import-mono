@@ -1,6 +1,7 @@
 ﻿#if TOOLS
 
 using Godot;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Picalines.Godot.LDtkImport.Importers
@@ -92,9 +93,9 @@ namespace Picalines.Godot.LDtkImport.Importers
                 }
 
                 layerNode.Owner = levelNode;
-                foreach (Node child in layerNode.GetChildren())
+                foreach (var layerOwnedNode in GetOwned(layerNode, layerNode))
                 {
-                    child.Owner = levelNode;
+                    layerOwnedNode.Owner = levelNode;
                 }
             }
         }
@@ -109,6 +110,23 @@ namespace Picalines.Godot.LDtkImport.Importers
             if (ResourceSaver.Save(savePath, packedLevelScene) is not Error.Ok)
             {
                 throw new LDtkImportException(LDtkImportMessage.FailedToImportLevel(context.LDtkFilePath, context.LevelJson.Identifier));
+            }
+        }
+
+        private static IEnumerable<Node> GetOwned(Node currentNode, Node owner)
+        {
+            var ownedChildren = currentNode.GetChildren()
+                .OfType<Node>()
+                .Where(child => child.Owner == owner);
+
+            foreach (Node child in ownedChildren)
+            {
+                yield return child;
+
+                foreach (Node grandChild in GetOwned(child, owner))
+                {
+                    yield return grandChild;
+                }
             }
         }
     }

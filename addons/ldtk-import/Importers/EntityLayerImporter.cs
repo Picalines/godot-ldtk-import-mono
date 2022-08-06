@@ -26,6 +26,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                 entityNode.AddToGroup(LDtkConstants.GroupNames.Entities, persistent: true);
 
                 layerNode.AddChild(entityNode);
+                entityNode.Owner = layerNode;
 
                 if (instantiated)
                 {
@@ -50,6 +51,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             {
                 layerNode.AddChild(referenceAssigner);
                 layerNode.MoveChild(referenceAssigner, 0);
+                referenceAssigner.Owner = layerNode;
             }
         }
 
