@@ -7,7 +7,7 @@ LDtk importer for Godot 3.4+ (specifically C# 10)
 ## State of project
 
 I'm waiting for the release of Godot 4, who would have thought. The reasons are as follows:
- - .NET 7 support, which, to my understanding, will give the access to `System.Text.Json`. To be honest, that's why I'm not motivated to fix various `Newtonsoft.Json` vulnerabilities.
+ - .NET 6 support, which, to my understanding, will give the access to `System.Text.Json`. To be honest, that's why I'm not motivated to fix various `Newtonsoft.Json` vulnerabilities.
  - Better support of custom importers. I hope I can finally do a normal import of ldtk files without my json config.
  - New tilemaps will hopefully fix many problems (layers and entities)
 
