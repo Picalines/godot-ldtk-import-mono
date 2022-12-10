@@ -4,6 +4,17 @@ LDtk importer for Godot 3.4+ (specifically C# 10)
 
 [Newtonsoft.Json](https://www.newtonsoft.com/json) **v11.0.2** is used for JSON deserialization
 
+## State of project
+
+I'm waiting for the release of Godot 4, who would have thought. The reasons are as follows:
+ - .NET 7 support, which, to my understanding, will give the access to `System.Text.Json`. To be honest, that's why I'm not motivated to fix various `Newtonsoft.Json` vulnerabilities.
+ - Better support of custom importers. I hope I can finally do a normal import of ldtk files without my json config.
+ - New tilemaps will hopefully fix many problems (layers and entities)
+
+In other words, I will need to rewrite a lot of things, and it will take quite a lot of time.
+
+There *are* bugs in the project now, see issues tab.
+
 ## How to install
 
 1. Add `addons/ldtk-import` to your Godot project
@@ -192,4 +203,4 @@ To comfortably build the C# solution you will need to set `LangVersion` to `10.0
 
 Almost all plugin related classes are included only in editor builds (`#if TOOLS`)
 
-Internal plugin classes are marked as... well... *`internal`*. Don't use them for your game logic (because it won't compile the release build `D:`) (they have a different icon in your IDE!).
+Internal plugin classes are marked as... well... *`internal`*. Don't use them for your game logic (because it won't compile the release build D:) (they have a different icon in your IDE!).
